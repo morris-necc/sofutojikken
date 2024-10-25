@@ -81,7 +81,7 @@ boot:
 	******************************
 
 	move.b #0x40, IVR | Set the user interrupt vector| number to 0x40+level.
-	move.l #0x00ff3ffb, IMR |Mask all interrupts.
+	move.l #0x00ff3ffb, IMR | Permit transmitter and receiver interrupt
 
 	******************************
 	**Initialization of the interrupt vector
@@ -116,22 +116,28 @@ boot:
 UART1_INTERRUPT:
 	movem.l	%d0, -(%sp)
 
-	move.w	URX1, %d0
-	adda.w	#0x0800, %d0
-	move.w	%d0, UTX1
+	/* Step 2*/
+	# move.w	URX1, %d0 /* Received data in register URX1 moved to d0*/
+	# adda.w	#0x0800 + 'a', %d0 /* When copying, it is necessary to add a header of the upper 8 bits*/
+	# move.w	%d0, UTX1 /* This data is then moved to UTX1*/
 	
+	/* Step 3 */
+	move.w #0x0800 + 'a', UTX1
+	
+
 	movem.l	(%sp)+, %d0
 	rte
 
 
 *****************************************************************
-% Write in ‘a’ in the transmitter register UTX1 to confirm the normal initialization routine
-% operation at the present step. When ‘a’ is outputted, it’s OK.
+** % Write in ‘a’ in the transmitter register UTX1 to confirm the normal initialization routine
+** % operation at the present step. When ‘a’ is outputted, it’s OK.
 *****************************************************************
 
 .section .text
 .even
 MAIN :
-	move.w #0x0800+’a’, UTX1 |Refer to Appendix for the reason to add 0x0800
+	move.b #'a', LED0 /* Debug */
+	move.w #0x0800+'a', UTX1 |Refer to Appendix for the reason to add 0x0800
 LOOP :
 	bra LOOP
