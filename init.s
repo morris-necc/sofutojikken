@@ -73,7 +73,7 @@ SYS_STK_TOP: | End of the system stack region
 .even
 boot:
 	* Prohibit an interrupt into the supervisor and during performing various settings.
-	move.w #0x2700, %SR
+	move.w #0x2000, %SR /*Start at level 0 */
 	lea.l SYS_STK_TOP, %SP |Set SSP
 
 	******************************
@@ -81,8 +81,14 @@ boot:
 	******************************
 
 	move.b #0x40, IVR | Set the user interrupt vector| number to 0x40+level.
-	move.l #0x00ffffff, IMR |Mask all interrupts.
-	move.l #UART1_INTERRUPT, 0x110 /* (64 * 4) */
+	move.l #0x00ff3ffb, IMR |Mask all interrupts.
+
+	******************************
+	**Initialization of the interrupt vector
+	******************************
+
+	move.l #UART1_INTERRUPT, 0x110 /* Level 4 user interrupt */
+	move.l #TIMER1_INTERRUPT, 0x118 /* Level 6 user interrupt */
 
 	******************************
 	** Initialization related to the transmitter and the receiver (UART1)
@@ -90,7 +96,7 @@ boot:
 	******************************
 
 	move.w #0x0000, USTCNT1 | Reset
-	move.w #0xe100, USTCNT1 |Transmission and reception possible |no parity, 1 stop, 8 bit|prohibit the UART1 interrupt
+	move.w #0xe108, USTCNT1 |Transmission and reception possible |no parity, 1 stop, 8 bit| Only allow receiver interrupts
 	move.w #0x0038, UBAUD1 |baud rate = 230400 bps
 
 	*************************
@@ -107,7 +113,7 @@ boot:
 ** Interrupt Controller
 ****************************************************************
 
-RECEIVER_INTERRUPT:
+UART1_INTERRUPT:
 	movem.l	%d0, -(%sp)
 
 	move.w	URX1, %d0
@@ -115,13 +121,7 @@ RECEIVER_INTERRUPT:
 	move.w	%d0, UTX1
 	
 	movem.l	(%sp)+, %d0
-	/* A routine head address to be jumped to when an interrupt A occurs is set to the vector corresponding to the interrupt head*/
-
-	/* Make the interrup A 'valid' setting an internal device register of the interrupt A*/
-
-	/* 'Permit' the interrupt A controlling the interrupt mask register (IMR, B.3.1.2)*/
-
-	/* Set the running levelk to 0*/
+	rte
 
 
 *****************************************************************
