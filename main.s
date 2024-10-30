@@ -73,7 +73,7 @@ SYS_STK_TOP: | End of the system stack region
 .even
 boot:
 	* Prohibit an interrupt into the supervisor and during performing various settings.
-	move.w #0x2000, %SR /*Start at level 0 */
+	move.w #0x2700, %SR
 	lea.l SYS_STK_TOP, %SP |Set SSP
 
 	******************************
@@ -81,14 +81,13 @@ boot:
 	******************************
 
 	move.b #0x40, IVR | Set the user interrupt vector| number to 0x40+level.
-	move.l #0x00ff3ffb, IMR | Permit transmitter and receiver interrupt
+	move.l #0x00ff3ffb, IMR |Mask all interrupts, except UART1.
 
 	******************************
 	**Initialization of the interrupt vector
 	******************************
-
-	move.l #UART1_INTERRUPT, 0x110 /* Level 4 user interrupt */
-	move.l #TIMER1_INTERRUPT, 0x118 /* Level 6 user interrupt */
+	move.l #INTERFACEU, 0x110 	/* Level 4 user interrupt */
+	** move.l #TIMER1_INTERRUPT, 0x118 /* Level 6 user interrupt*/
 
 	******************************
 	** Initialization related to the transmitter and the receiver (UART1)
@@ -96,7 +95,7 @@ boot:
 	******************************
 
 	move.w #0x0000, USTCNT1 | Reset
-	move.w #0xe108, USTCNT1 |Transmission and reception possible |no parity, 1 stop, 8 bit| Only allow receiver interrupts
+	move.w #0xe107, USTCNT1 |Transmission and reception possible |no parity, 1 stop, 8 bit|prohibit the UART1 interrupt
 	move.w #0x0038, UBAUD1 |baud rate = 230400 bps
 
 	*************************
@@ -105,29 +104,114 @@ boot:
 
 	move.w #0x0004, TCTL1 | Restart, an interrupt impossible|Count the time with the 1/16 of the system clock|as a unit|Stop the timer use
 
-	
-	
 	bra MAIN
 
 ****************************************************************
 ** Interrupt Controller
 ****************************************************************
-
-UART1_INTERRUPT:
-	movem.l	%d0, -(%sp)
-
-	/* Step 2*/
-	# move.w	URX1, %d0 /* Received data in register URX1 moved to d0*/
-	# adda.w	#0x0800 + 'a', %d0 /* When copying, it is necessary to add a header of the upper 8 bits*/
-	# move.w	%d0, UTX1 /* This data is then moved to UTX1*/
 	
-	/* Step 3 */
-	move.w #0x0800 + 'a', UTX1
+INTERFACE:
+	movem.l	%d0-%d3,-(%sp)
 	
+	/* Transmitter Interrupt */
+	move.l	UTX1,	%d0
+	btst.b	#15, %d0	/* Transmitter FIFO empty? 1 = empty, 0 = not empty*/
+	bne	CALL_INTERPUT	/* not equal to 1*/
+	
+	/* Receiver Interrupt */
+	move.w	URX1, %d3	/* Copy register URX1 to %d3.w*/
+	move.b	%d3, %d2	/* Copy lower 8 bits (data part) of %d3.w to %d2.b*/
+	btst.b	#13, %d3 	/* Receiver FIFO? 1 = not empty, 0 = empty, yes it's confusing*/ 
+	beq	CALL_INTERGET	/* Basically, this checks if it is a receiver interupt*/
+	
+INTERFACE_END:	
+	movem.l	(%sp)+, %d0-%d3
+	rte
+	
+CALL_INTERPUT:
+	move.l	#0, %d1
+	jsr	INTERPUT
+	jmp	INTERFACE_END
 
-	movem.l	(%sp)+, %d0
+CALL_INTERGET:
+	move.l	#0, %d1
+	jsr	INTERGET
+	jmp	INTERFACE_END
+
+	
+INTERPUT:
+	/* Input: Channel ch -> %d1 */
+	/* d0 = UTX1 at the end, we need %d0 to compare when we return to INTERFACE*/
+	/* No return value */
+	movem.l	%d2,-(%sp)
+	move.l	%SR, %d2	/* Save running level */
+	move.l	#0x2700, %SR	/* Set running level to 7 */
+
+	cmp	#0, %d1		/* Return without doing anything if ch=/=0*/
+	bne	INTERPUT_END
+
+	move.l	#1, %d0		/* Queue #1 */
+	jsr	OUTQ		/* Substitute it for data?? */
+				/* d1 is data */
+
+	cmp	#0, %d0 	/* OUTQ failure? */
+	beq	MASK_TRANSMITTER_INTERRUPT
+	
+	add.l	#0x0800, %d0
+	move.w 	%d0, UTX1	/* Substitute the data for the transmitter register UTX1 */
+				/* And transmit it??? */
+MASK_TRANSMITTER_INTERRUPT:
+	andi 	#0xfff8, USTCNT1 /* Mask the transmitter interrupt */
+INTERPUT_END:
+	move.l	%d2, %SR	/* Restore running level */
+	movem.l	(%sp)+, %d2
+	rts
+
+INTERGET:
+	/* Input: Channel ch -> %d1, received data -> %d2 */
+	/* No return value */
+	/* Do we have to save running level??? */
+	cmp	#0, %d1
+	bne	INTERGET_END
+
+	
+	move.l	#0, %d0		/* Queue #0 */
+	move.b	%d2, %d1 	/* move data to d1*/
+	jsr	INQ		/* Do we have to do something for INQ failure?? */
+INTERGET_END:
+	rts
+
+	
+****************************************************************
+** Timer
+****************************************************************
+
+TIMER_INTERRUPT:
+	movem.l	%a0, -(%sp)		/* Evacuate registers */
+	btst	#0, TSTAT1		/* Checks 0th bit of TSTAT1 */
+	beq	TIMER_INTERRUPT_END
+	move.w	#0x0000, TSTAT1		/* Reset TSTAT1 to 0 */
+	jsr	CALL_RP
+TIMER_INTERRUPT_END:
+	movem.l	(%sp)+, %a0
 	rte
 
+RESET_TIMER:
+	move.w 	#0x0004, TCTL1		/* Restart, an interrupt impossible, input is SYSCLK/16, prohibit timer */
+	rts
+SET_TIMER:
+	/* D1.W = t (timer interrupt cycle, every 0.t msec) */
+	/* D2.L = p (head address of the routine to be called at the interrupt occurrence) */
+	/* STILL NEED TO DEFINE GLOBAL VARIABLE TASK_P IN THE .BSS SECTION */
+	move.l	%d2, task_p		/* Substitute p for the global variable task_p*/
+	move.w	#0x00CE, TPRER1 	/* Let counter increment by 1 every 0.1 msec*/
+	move.w	%d1, TCMP1		/* Substitute t for the TCMP1 */
+	move.w	#0x0015, TCTL1		/* Restart, enable compare interrupt, input is SYSCLK/16, permit timer */
+	rts
+CALL_RP:
+	move.l	(task_p), %a0
+	jsr	(%a0)
+	rts
 
 *****************************************************************
 ** % Write in ‘a’ in the transmitter register UTX1 to confirm the normal initialization routine
@@ -137,7 +221,14 @@ UART1_INTERRUPT:
 .section .text
 .even
 MAIN :
-	move.b #'a', LED0 /* Debug */
+	/* move.b #'1', LED1 */
 	move.w #0x0800+'a', UTX1 |Refer to Appendix for the reason to add 0x0800
 LOOP :
 	bra LOOP
+
+*****************************************************************
+** Data section for testing
+*****************************************************************
+.section .bss
+.even
+WORK:	.ds.b	256
