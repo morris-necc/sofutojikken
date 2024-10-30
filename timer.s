@@ -24,3 +24,33 @@ CALL_RP:
 	move.l	(task_p), %a0
 	jsr	(%a0)
 	rts
+
+/* another version*/
+
+TIMER_INTERRUPT:
+    btst    #0, TSTAT1          /* Check 0th bit of TSTAT1 for interrupt */
+    beq     TIMER_INTERRUPT_END /* If not set, skip interrupt handling */
+    
+    movem.l %a0, -(%sp)         /* Save register %a0 */
+    clr.w   TSTAT1              /* Clear TSTAT1 (reset interrupt flag) */
+    jsr     CALL_RP             /* Call interrupt routine at task_p */
+    movem.l (%sp)+, %a0         /* Restore register %a0 */
+    
+TIMER_INTERRUPT_END:
+    rte                          /* Return from exception */
+
+RESET_TIMER:
+    move.w  #0x0004, TCTL1      /* Restart with no interrupts, SYSCLK/16 */
+    rts
+
+SET_TIMER:
+    move.l  %d2, task_p         /* Store address of routine to task_p */
+    move.w  #0x00CE, TPRER1     /* Set TPRER1 for 0.1 ms per count */
+    move.w  %d1, TCMP1          /* Set compare value from %d1 */
+    move.w  #0x0015, TCTL1      /* Enable timer with compare interrupt */
+    rts
+
+CALL_RP:
+    move.l  (task_p), %a0       /* Load task address from task_p */
+    jsr     (%a0)               /* Jump to task routine */
+    rts
