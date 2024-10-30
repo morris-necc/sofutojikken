@@ -18,7 +18,7 @@ INTERGET:
 	
 	/* step (1) */
 	cmp	#0, %d1			/* Return without doing anything if ch=/=0*/
-	bne	INTERPUT_END
+	bne	INTERGET_END
 	
 	/* step (2) */
 	move.l	#0, %d0			/* set to Queue #0 */
@@ -26,5 +26,6 @@ INTERGET:
 	jsr	INQ			/* go to queue input function */
 	
 	movem.l	(%sp)+, %d0-%d2		/* de-evacuate */
-	
+
+INTERGET_END:
 	rts
