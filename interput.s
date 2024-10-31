@@ -16,8 +16,8 @@ INTERPUT:
 	cmp	#0, %d0 	/* OUTQ failure? */
 	beq	MASK_TRANSMITTER_INTERRUPT
 	
-	add.l	#0x0800, %d0
-	move.w 	%d0, UTX1	/* Substitute the data for the transmitter register UTX1 */
+	add.l	#0x0800, %d1
+	move.w 	%d1, UTX1	/* Substitute the data for the transmitter register UTX1 */
 				/* And transmit it??? */
 MASK_TRANSMITTER_INTERRUPT:
 	andi 	#0xfff8, USTCNT1 /* Mask the transmitter interrupt */
