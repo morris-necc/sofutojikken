@@ -4,7 +4,7 @@ INTERFACE:
 	/* Transmitter Interrupt */
 	move.l	UTX1,	%d0
 	btst.b	#15, %d0	/* Transmitter FIFO empty? 1 = empty, 0 = not empty*/
-	bne	CALL_INTERPUT	/* not equal to 1*/
+	beq	CALL_INTERPUT	/* not equal to 1*/
 	
 	/* Receiver Interrupt */
 	move.w	URX1, %d3	/* Copy register URX1 to %d3.w*/
