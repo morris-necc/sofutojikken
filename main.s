@@ -125,7 +125,7 @@ INTERFACE:
 	/* Transmitter Interrupt */
 	move.l	UTX1,	%d0
 	btst.b	#15, %d0	/* Transmitter FIFO empty? 1 = empty, 0 = not empty*/
-	bne	CALL_INTERPUT	/* not equal to 1*/
+	beq	CALL_INTERPUT	/* not equal to 1*/
 	
 	/* Receiver Interrupt */
 	move.w	URX1, %d3	/* Copy register URX1 to %d3.w*/
@@ -166,8 +166,8 @@ INTERPUT:
 	cmp	#0, %d0 	/* OUTQ failure? */
 	beq	MASK_TRANSMITTER_INTERRUPT
 	
-	add.l	#0x0800, %d0
-	move.w 	%d0, UTX1	/* Substitute the data for the transmitter register UTX1 */
+	add.l	#0x0800, %d1
+	move.w 	%d1, UTX1	/* Substitute the data for the transmitter register UTX1 */
 				/* And transmit it??? */
 MASK_TRANSMITTER_INTERRUPT:
 	andi 	#0xfff8, USTCNT1 /* Mask the transmitter interrupt */
