@@ -5,6 +5,15 @@
 /* Things to do: Interrupt vector setup, queue initializing routine */
 
 *******************************
+** System call numbers 
+*******************************
+
+.equ SYSCALL_NUM_GETSTRING, 1 
+.equ SYSCALL_NUM_PUTSTRING, 2 
+.equ SYSCALL_NUM_RESET_TIMER, 3 
+.equ SYSCALL_NUM_SET_TIMER, 4 
+
+*******************************
 ** Head of the Register Group
 *******************************
 	
