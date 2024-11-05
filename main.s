@@ -83,35 +83,36 @@ SYS_STK_TOP: | End of the system stack region
 boot:
 	* Prohibit an interrupt into the supervisor and during performing various settings.
 	move.w #0x2700, %SR
-	lea.l SYS_STK_TOP, %SP |Set SSP
+	lea.l SYS_STK_TOP, %SP 		|Set SSP
 
 	******************************
 	**Initialization of the interrupt controller
 	******************************
 
-	move.b #0x40, IVR | Set the user interrupt vector| number to 0x40+level.
-	move.l #0x00ff3ffb, IMR |Mask all interrupts, except UART1.
+	move.b #0x40, IVR 		| Set the user interrupt vector| number to 0x40+level.
+	move.l #0x00ff3ffb, IMR 	| Mask all interrupts, except UART1.
+ 	move.l  #SYSCALL, 0x080 	| Set the interrupt for system call TRAP #0
 
 	******************************
 	**Initialization of the interrupt vector
 	******************************
-	move.l #INTERFACEU, 0x110 	/* Level 4 user interrupt */
-	** move.l #TIMER1_INTERRUPT, 0x118 /* Level 6 user interrupt*/
+	move.l #INTERFACEU, 0x110 		/* Level 4 user interrupt */
+	** move.l #TIMER1_INTERRUPT, 0x118 	/* Level 6 user interrupt*/
 
 	******************************
 	** Initialization related to the transmitter and the receiver (UART1)
 	** (The interrupt level has been fixed to 4.)
 	******************************
 
-	move.w #0x0000, USTCNT1 | Reset
-	move.w #0xe107, USTCNT1 |Transmission and reception possible |no parity, 1 stop, 8 bit|prohibit the UART1 interrupt
-	move.w #0x0038, UBAUD1 |baud rate = 230400 bps
+	move.w #0x0000, USTCNT1 	| Reset
+	move.w #0xe107, USTCNT1 	| Transmission and reception possible |no parity, 1 stop, 8 bit|prohibit the UART1 interrupt
+	move.w #0x0038, UBAUD1 		| baud rate = 230400 bps
 
 	*************************
 	** Initialization related to the timer (The interrupt level has been fixed to 6.)
 	*************************
 
-	move.w #0x0004, TCTL1 | Restart, an interrupt impossible|Count the time with the 1/16 of the system clock|as a unit|Stop the timer use
+	move.w #0x0004, TCTL1 		| Restart, an interrupt impossible|Count the time with the 1/16 of the system clock|as a unit|Stop the timer use
 
 	bra MAIN
 
