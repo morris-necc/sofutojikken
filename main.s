@@ -2,8 +2,6 @@
 ** Various Register Definition
 ****************************************************************
 
-/* Things to do: Interrupt vector setup, queue initializing routine */
-
 *******************************
 ** System call numbers 
 *******************************
@@ -12,7 +10,7 @@
 .equ SYSCALL_NUM_PUTSTRING, 2 
 .equ SYSCALL_NUM_RESET_TIMER, 3 
 .equ SYSCALL_NUM_SET_TIMER, 4 
-
+	
 *******************************
 ** Head of the Register Group
 *******************************
@@ -83,39 +81,37 @@ SYS_STK_TOP: | End of the system stack region
 boot:
 	* Prohibit an interrupt into the supervisor and during performing various settings.
 	move.w #0x2700, %SR
-	lea.l SYS_STK_TOP, %SP 		|Set SSP
+	lea.l SYS_STK_TOP, %SP |Set SSP
 
 	******************************
 	**Initialization of the interrupt controller
 	******************************
 
-	move.b #0x40, IVR 		| Set the user interrupt vector| number to 0x40+level.
-	move.l #0x00ff3ffb, IMR 	| Mask all interrupts, except UART1.
- 	move.l  #SYSCALL, 0x080 	| Set the interrupt for system call TRAP #0
+	move.b #0x40, IVR | Set the user interrupt vector| number to 0x40+level.
+	move.l #0x00ff3ffb, IMR |Mask all interrupts, except UART1.
 
 	******************************
 	**Initialization of the interrupt vector
 	******************************
-	move.l #INTERFACEU, 0x110 		/* Level 4 user interrupt */
-	** move.l #TIMER1_INTERRUPT, 0x118 	/* Level 6 user interrupt*/
+	move.l #INTERFACE, 0x110 	/* Level 4 user interrupt */
+	move.l #TIMER_INTERRUPT, 0x118 /* Level 6 user interrupt*/
 
 	******************************
 	** Initialization related to the transmitter and the receiver (UART1)
 	** (The interrupt level has been fixed to 4.)
 	******************************
 
-	move.w #0x0000, USTCNT1 	| Reset
-	move.w #0xe107, USTCNT1 	| Transmission and reception possible |no parity, 1 stop, 8 bit|prohibit the UART1 interrupt
-	move.w #0x0038, UBAUD1 		| baud rate = 230400 bps
+	move.w #0x0000, USTCNT1 | Reset
+	move.w #0xe138, USTCNT1 |Transmission and reception possible |no parity, 1 stop, 8 bit|prohibit the UART1 interrupt
+	move.w #0x0038, UBAUD1 |baud rate = 230400 bps
 
 	*************************
 	** Initialization related to the timer (The interrupt level has been fixed to 6.)
 	*************************
 
-	move.w #0x0004, TCTL1 		| Restart, an interrupt impossible|Count the time with the 1/16 of the system clock|as a unit|Stop the timer use
+	move.w #0x0004, TCTL1 | Restart, an interrupt impossible|Count the time with the 1/16 of the system clock|as a unit|Stop the timer use
 
 	bra MAIN
-
 
 *************************************
 ** SYSTEM CALL INTERFACE
@@ -159,7 +155,7 @@ INTERFACE:
 	movem.l	%d0-%d3,-(%sp)
 	
 	/* Transmitter Interrupt */
-	move.l	UTX1,	%d0
+	move.l	UTX1, %d0
 	btst.b	#15, %d0	/* Transmitter FIFO empty? 1 = empty, 0 = not empty*/
 	beq	CALL_INTERPUT	/* not equal to 1*/
 	
@@ -188,10 +184,10 @@ INTERPUT:
 	/* Input: Channel ch -> %d1 */
 	/* d0 = UTX1 at the end, we need %d0 to compare when we return to INTERFACE*/
 	/* No return value */
+	
 	movem.l	%d2,-(%sp)
-	move.l	%SR, %d2	/* Save running level */
-	move.l	#0x2700, %SR	/* Set running level to 7 */
-
+	move.w	%SR, %d2	/* Save running level */
+	move.w	#0x2700, %SR	/* Set running level to 7 */
 	cmp	#0, %d1		/* Return without doing anything if ch=/=0*/
 	bne	INTERPUT_END
 
@@ -208,7 +204,7 @@ INTERPUT:
 MASK_TRANSMITTER_INTERRUPT:
 	andi 	#0xfff8, USTCNT1 /* Mask the transmitter interrupt */
 INTERPUT_END:
-	move.l	%d2, %SR	/* Restore running level */
+	move.w	%d2, %SR	/* Restore running level */
 	movem.l	(%sp)+, %d2
 	rts
 
@@ -257,7 +253,56 @@ CALL_RP:
 	move.l	(task_p), %a0
 	jsr	(%a0)
 	rts
- 
+
+****************************************************************
+** Getstring
+****************************************************************
+
+/* Read out data of size bytes from the receiver queue of the channel ch */
+/* And copy them to address p and after */
+/* Return value d0 (readout data size) */
+/* When the receiver queue becomes empty, the data aren't read out anymore */
+/* That is, the data as many as a readable number o pieces lte size are read out */
+/* Implement so as not to execute anything when the channel ch is not 0 */
+
+GETSTRING:
+	/* Input: ch -> d1, head address of destination p -> d2, no. of data to be read -> d3 */
+	/* no. of data actually read out -> d0 */
+	movem.l	%d4-%d5, -(%sp)
+
+	
+	move.l	#0, %d4		/* d4 = sz */
+	move.l	%d2, %d5	/* d5 = i */
+	
+	cmp	#0, %d1
+	bne	GETSTRING_END	/* If ch =/= 0, end */
+
+
+GETSTRING_LOOP:
+	cmp	%d4, %d3
+	beq	GETSTRING_END
+
+	move.l	#0, %d0		/* specify queue 0 */
+	jsr	OUTQ		/* Call OUTQ */
+
+	cmp	#0, %d0		/* If failure */
+	beq	GETSTRING_END	/* End GETSTRING */
+
+	move.l	%d1, (%d5)	/* Copy the data to address i */
+				/* is this allowed?? */
+	
+	addq	#1, %d4		/* Increment sz and i */
+	addq	#1, %d5
+	jmp	GETSTRING_LOOP
+	
+	
+GETSTRING_END:
+	move.l	%d4, %d0	/* %d0 <- sz */
+	movem.l	(%sp)+, %d4-%d5
+	rts
+	
+
+	
 ****************************************************************
 ** Queue
 ****************************************************************
@@ -283,7 +328,10 @@ INIT_Q:
 	rts
 
 INQ:
+	/* Input: Queue no. -> %d0, Data -> %d1 */
+	/* Output: Success/fail -> %d0 */
 	movem.l	%d2-%d5/%a1-%a5,-(%sp)    /* Save registers */
+
 	jsr	Q_START
 	lea.l 	inp, %a2		/* inp -> a2 */
 	adda.l  %d2, %a2    /* add offset */
@@ -304,9 +352,10 @@ INQ_SUCC:
 	jmp     Q_SUCC
 
 OUTQ:
+	/* Input: Queue no. -> %d0 */
+	/* Output: Success/fail -> %d0, Data -> %d1 */
 	movem.l	%d2-%d5/%a1-%a5,-(%sp)    /* Save registers */
 	jsr     Q_START
-
 	lea.l 	outp, %a2		/* outp -> a2 */
 	adda.l  %d2, %a2    /* add offset */
 	move.l  (%a2), %a1  /* a1 = out pointer */
@@ -381,10 +430,56 @@ Q_FINISH:
 .section .text
 .even
 MAIN :
-	/* move.b #'1', LED1 */
-	move.w #0x0800+'a', UTX1 |Refer to Appendix for the reason to add 0x0800
+	/* INTERPUT test*/
+	move.w	#0x2700, %SR
+	move.b	#'M', LED3
+	move.b	#'a', LED2
+	move.b	#'i', LED1
+	move.b	#'n', LED0
+	
+	jsr	INIT_Q 		/* Initialize Queue */
+	jsr	ENTERDATA
+	bra	LOOP
+
+ENTERDATA:
+	movem.l	%d0-%d4, -(%sp)
+	move.b	#0x61, %d1	/* Data */
+	move.l	#0, %d2		/* Loop Counter */
+	move.l	#0, %d3		/* ASCII Counter*/
+INP_LOOP:
+	move.l	#0, %d4
+	move.b	%d1, %d4
+	add.w	#0x0800, %d4
+	move.w	%d4, UTX1
+
+	addq	#1, %d2
+	addq	#1, %d3
+
+	move.l	#1, %d0	/* Queue 1 (Transmitter Queue?) */
+	jsr	INQ
+
+	cmp	#16, %d3
+	bne	INC
+	move.l	#0, %d3
+	addq	#1, %d1
+INC:	
+	cmp	#256, %d2
+	ble	INP_LOOP
+	movem.l	(%sp)+, %d0-%d4
+	rts
+
+	
 LOOP :
-	bra LOOP
+	move.l	#0, %d1 /* Channel 0*/
+	
+	/* endless loop setting the running level to 0 */
+	move.w	#0x2000, %SR
+	/* and permitting the transmitter interrupt (manipulating USTCNT1)*/
+	ori 	#0x0007, USTCNT1
+	bra 	LOOP
+
+task_p:
+	bra 	MAIN
 
 *****************************************************************
 ** Data section for testing
@@ -398,4 +493,5 @@ top:		.ds.b	SIZE_of_QUEUE*2
 inp:		.ds.l	2
 outp:		.ds.l	2
 s:		.ds.w	2
+
 WORK:	.ds.b	256
