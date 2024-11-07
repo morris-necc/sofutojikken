@@ -232,7 +232,7 @@ TIMER_INTERRUPT:
 	movem.l	%a0, -(%sp)		/* Evacuate registers */
 	btst	#0, TSTAT1		/* Checks 0th bit of TSTAT1 */
 	beq	TIMER_INTERRUPT_END
-	move.w	#0x0000, TSTAT1		/* Reset TSTAT1 to 0 */
+	clr.w	TSTAT1			/* Reset TSTAT1 to 0 */
 	jsr	CALL_RP
 TIMER_INTERRUPT_END:
 	movem.l	(%sp)+, %a0
