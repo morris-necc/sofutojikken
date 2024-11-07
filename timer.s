@@ -2,7 +2,7 @@ TIMER_INTERRUPT:
 	movem.l	%a0, -(%sp)	/* Evacuate registers */
 	btst	#0, TSTAT1	/* Checks 0th bit of TSTAT1 */
 	beq	TIMER_INTERRUPT_END
-	move.w	#0x0000, TSTAT1	/* Reset TSTAT1 to 0 */
+	clr.w   TSTAT1		/* Reset TSTAT1 to 0 */
 	jsr	CALL_RP
 TIMER_INTERRUPT_END:
 	movem.l	(%sp)+, %a0
@@ -30,7 +30,6 @@ CALL_RP:
 TIMER_INTERRUPT:
     btst    #0, TSTAT1          /* Check 0th bit of TSTAT1 for interrupt */
     beq     TIMER_INTERRUPT_END /* If not set, skip interrupt handling */
-    
     movem.l %a0, -(%sp)         /* Save register %a0 */
     clr.w   TSTAT1              /* Clear TSTAT1 (reset interrupt flag) */
     jsr     CALL_RP             /* Call interrupt routine at task_p */
