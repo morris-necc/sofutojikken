@@ -426,11 +426,10 @@ Q_FINISH:
 ** % Write in ‘a’ in the transmitter register UTX1 to confirm the normal initialization routine
 ** % operation at the present step. When ‘a’ is outputted, it’s OK.
 *****************************************************************
-
 .section .text
 .even
 MAIN :
-	/* INTERPUT test*/
+	/* PUTSTRING test*/
 	move.w	#0x2700, %SR
 	move.b	#'M', LED3
 	move.b	#'a', LED2
@@ -438,44 +437,26 @@ MAIN :
 	move.b	#'n', LED0
 	
 	jsr	INIT_Q 		/* Initialize Queue */
-	jsr	ENTERDATA
+
+	move.w	#0x2000, %SR /* Set running level to 0*/
+
+	move.l	#0, %d1		/* Channel 0? */
+	lea.l	TDATA1, %a1
+	move.l	%a1, %d2	/* Idk if this works */
+	move.l	#16, %d3
+	jsr	PUTSTRING
+	
 	bra	LOOP
-
-ENTERDATA:
-	movem.l	%d0-%d4, -(%sp)
-	move.b	#0x61, %d1	/* Data */
-	move.l	#0, %d2		/* Loop Counter */
-	move.l	#0, %d3		/* ASCII Counter*/
-INP_LOOP:
-	move.l	#0, %d4
-	move.b	%d1, %d4
-	add.w	#0x0800, %d4
-	move.w	%d4, UTX1
-
-	addq	#1, %d2
-	addq	#1, %d3
-
-	move.l	#1, %d0	/* Queue 1 (Transmitter Queue?) */
-	jsr	INQ
-
-	cmp	#16, %d3
-	bne	INC
-	move.l	#0, %d3
-	addq	#1, %d1
-INC:	
-	cmp	#256, %d2
-	ble	INP_LOOP
-	movem.l	(%sp)+, %d0-%d4
-	rts
-
 	
 LOOP :
-	move.l	#0, %d1 /* Channel 0*/
+	move.w	#0x2000, %SR /* Set running level to 0*/
+
+	move.l	#0, %d1		/* Channel 0? */
+	lea.l	TDATA2, %a2
+	move.l	%a2, %d2	/* Idk if this works */
+	move.l	#16, %d3	/* Reset Counter */
+	jsr	PUTSTRING
 	
-	/* endless loop setting the running level to 0 */
-	move.w	#0x2000, %SR
-	/* and permitting the transmitter interrupt (manipulating USTCNT1)*/
-	ori 	#0x0007, USTCNT1
 	bra 	LOOP
 
 task_p:
