@@ -87,14 +87,15 @@ boot:
 	**Initialization of the interrupt controller
 	******************************
 
-	move.b #0x40, IVR | Set the user interrupt vector| number to 0x40+level.
-	move.l #0x00ff3ffb, IMR |Mask all interrupts, except UART1.
+	move.b #0x40, IVR 		| Set the user interrupt vector number to 0x40+level.
+	move.l #0x00ff3ffb, IMR 	| Mask all interrupts, except UART1.
 
 	******************************
 	**Initialization of the interrupt vector
 	******************************
+ 	move.l #SYSCALL, 0x080		/* TRAP #0 interrupt */
 	move.l #INTERFACE, 0x110 	/* Level 4 user interrupt */
-	move.l #TIMER_INTERRUPT, 0x118 /* Level 6 user interrupt*/
+	move.l #TIMER_INTERRUPT, 0x118 	/* Level 6 user interrupt*/
 
 	******************************
 	** Initialization related to the transmitter and the receiver (UART1)
