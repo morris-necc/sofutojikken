@@ -180,6 +180,9 @@ CALL_INTERGET:
 	jsr	INTERGET
 	jmp	INTERFACE_END
 
+	*****************
+	***INTERPUT
+	*****************
 	
 INTERPUT:
 	/* Input: Channel ch -> %d1 */
@@ -268,16 +271,15 @@ CALL_RP:
 
 GETSTRING:
 	/* Input: ch -> d1, head address of destination p -> d2, no. of data to be read -> d3 */
-	/* no. of data actually read out -> d0 */
-	movem.l	%d4-%d5, -(%sp)
+	/* Output: no. of data actually read out -> d0 */
+	movem.l	%d4-%d5/%a0, -(%sp)
 
-	
-	move.l	#0, %d4		/* d4 = sz */
-	move.l	%d2, %d5	/* d5 = i */
-	
 	cmp	#0, %d1
 	bne	GETSTRING_END	/* If ch =/= 0, end */
 
+	move.l	#0, %d4		/* d4 = sz */
+	move.l	%d2, %d5	/* d5 = i */
+	
 
 GETSTRING_LOOP:
 	cmp	%d4, %d3
@@ -286,24 +288,74 @@ GETSTRING_LOOP:
 	move.l	#0, %d0		/* specify queue 0 */
 	jsr	OUTQ		/* Call OUTQ */
 
-	cmp	#0, %d0		/* If failure */
-	beq	GETSTRING_END	/* End GETSTRING */
+	cmp	#0, %d0			/* If failure */
+	beq	GETSTRING_UPD_SZ	/* End GETSTRING */
 
-	move.l	%d1, (%d5)	/* Copy the data to address i */
-				/* is this allowed?? */
+	move.l	%d5, %a0
+	move.l	%d1, (%a0)	/* Copy the data to address i */
 	
 	addq	#1, %d4		/* Increment sz and i */
 	addq	#1, %d5
 	jmp	GETSTRING_LOOP
-	
+
+GETSTRING_UPD_SZ:	
+	move.l	%d4, %d0	/* %d0 <- sz */
 	
 GETSTRING_END:
-	move.l	%d4, %d0	/* %d0 <- sz */
-	movem.l	(%sp)+, %d4-%d5
+	movem.l	(%sp)+, %d4-%d5/%a0
+	rts
+	
+****************************************************************
+****PUTSTRING
+****************************************************************
+	
+PUTSTRING:
+	cmpi.l	#0, %d1 /* if ch!=0 -> no exec*/
+	beq PUTSTRING_INIT 
 	rts
 	
 
-	
+PUTSTRING_INIT:
+	/* sz<- 0, i<-p*/
+	move.l #0, size_put/*size of data put to the Q*/
+	move.l size_put,%d0/*D0.l:= number of data sz actually sent*/
+	move.l %d2, ptr_put /*start address of data to be transmitted (in receiver Q)*/
+	cmp #0,%d3 /*number of data to be sent: receiverQ size?*/
+	beq PUT_STOP
+
+PUTSTRING_DO:
+	movem.l %d0-%d1/%a1,-(%sp)
+	cmp size_put, %d3
+	beq PUT_UNMASK
+
+PUT_DATA:
+
+	move.l ptr_put,%a1/*d1:= pointer in receiver Q to get data*/
+	moveq.l #1, %d0 /*choose trans. queue*/
+	move.b (%a1)+, %d1 /* moves content in addr. p to d1 AND i++*/
+	jsr INQ
+	cmp #0, %d0
+	beq PUT_UNMASK
+	move.l %a1, ptr_put /*update the pointer*/
+	jsr UPDATE_SZ
+	bra PUTSTRING_DO
+PUT_UNMASK:
+	movem.l (%sp)+, %d0-%d1/%a1
+	ori.w #0x0007, USTCNT1
+	bra PUT_STOP
+PUT_STOP:
+	move.l size_put, %d0
+	rts
+
+
+UPDATE_SZ:
+	move.l %d2,-(%sp)
+	move.l size_put, %d2
+	addq #1, %d2
+	move.l %d2, size_put
+	move.l (%sp)+, %d2
+	rts
+
 ****************************************************************
 ** Queue
 ****************************************************************
@@ -423,6 +475,8 @@ Q_FINISH:
 	movem.l	(%sp)+,%d2-%d5/%a1-%a5  /* restore registers */
 	rts
 
+	*****************************************************************
+	
 *****************************************************************
 ** % Write in ‘a’ in the transmitter register UTX1 to confirm the normal initialization routine
 ** % operation at the present step. When ‘a’ is outputted, it’s OK.
@@ -468,6 +522,9 @@ task_p:
 *****************************************************************
 .section .data
 	.equ	SIZE_of_QUEUE,	256
+
+TDATA1: .ascii "0123456789ABCDEF"
+TDATA2: .ascii "klmnopqrstuvwxyz"
  
 .section .bss
 .even
@@ -475,5 +532,8 @@ top:		.ds.b	SIZE_of_QUEUE*2
 inp:		.ds.l	2
 outp:		.ds.l	2
 s:		.ds.w	2
-
+	/*for putstring:*/
+size_put:	.ds.l 1
+ptr_put:	.ds.l 1
+	/***/
 WORK:	.ds.b	256
