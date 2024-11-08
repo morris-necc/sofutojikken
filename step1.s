@@ -19,19 +19,19 @@
 *******************************
 ** Registers Related to the Timer
 *******************************
-.equ TCTL1, REGBASE+0x600 |Timer1 Control Register
-.equ TPRER1, REGBASE+0x602 |Timer1 Prescaler Register
-.equ TCMP1, REGBASE+0x604 |Timer1 Compare Register
-.equ TCN1, REGBASE+0x608 |Timer1 Counter Register
-.equ TSTAT1, REGBASE+0x60a |Timer1 Status Register
+.equ TCTL1,  REGBASE+0x600 | Timer1 Control Register
+.equ TPRER1, REGBASE+0x602 | Timer1 Prescaler Register
+.equ TCMP1,  REGBASE+0x604 | Timer1 Compare Register
+.equ TCN1,   REGBASE+0x608 | Timer1 Counter Register
+.equ TSTAT1, REGBASE+0x60a | Timer1 Status Register
 
 *******************************
 ** Registers Related to UART1 (Transmitter and Receiver)
 *******************************
-.equ USTCNT1, REGBASE+0x900 |UART1 Status / Control Register
-.equ UBAUD1, REGBASE+0x902 | UART 1 Baud Control Register
-.equ URX1, REGBASE+0x904 | UART 1 Receiver register
-.equ UTX1, REGBASE+0x906 | UART 1 Transmitter Register
+.equ USTCNT1, REGBASE+0x900  | UART1 Status / Control Register
+.equ UBAUD1,  REGBASE+0x902  | UART 1 Baud Control Register
+.equ URX1,    REGBASE+0x904  | UART 1 Receiver register
+.equ UTX1,    REGBASE+0x906  | UART 1 Transmitter Register
 
 *******************************
 ** LED
@@ -51,9 +51,9 @@
 .section .bss
 .even
 SYS_STK:
-.ds.b 0x4000 | System stack region
-.even
-SYS_STK_TOP: | End of the system stack region
+    .ds.b 0x4000 | System stack region
+    .even
+SYS_STK_TOP:     | End of the system stack region
 
 ****************************************************************
 ** Initialization
@@ -63,35 +63,35 @@ SYS_STK_TOP: | End of the system stack region
 .section .text
 .even
 boot:
-* Prohibit an interrupt into the supervisor and during performing various settings.
-move.w #0x2700, %SR
-lea.l SYS_STK_TOP, %SP |Set SSP
+    * Prohibit an interrupt into the supervisor and during performing various settings.
+    move.w #0x2700, %SR
+    lea.l SYS_STK_TOP, %SP |Set SSP
 
-******************************
-**Initialization of the interrupt controller
-******************************
-move.b #0x40, IVR | Set the user interrupt vector
-| number to 0x40+level.
-move.l #0x00ffffff, IMR |Mask all interrupts.
+    ******************************
+    **Initialization of the interrupt controller
+    ******************************
+    move.b #0x40, IVR       | Set the user interrupt vector
+                            | number to 0x40+level.
+    move.l #0x00ffffff, IMR | Mask all interrupts.
 
-******************************
-** Initialization related to the transmitter and the receiver (UART1)
-** (The interrupt level has been fixed to 4.)
-******************************
-move.w #0x0000, USTCNT1 | Reset
-move.w #0xe100, USTCNT1 |Transmission and reception possible
-|no parity, 1 stop, 8 bit
-|prohibit the UART1 interrupt
-move.w #0x0038, UBAUD1 |baud rate = 230400 bps
+    ******************************
+    ** Initialization related to the transmitter and the receiver (UART1)
+    ** (The interrupt level has been fixed to 4.)
+    ******************************
+    move.w #0x0000, USTCNT1 | Reset
+    move.w #0xe100, USTCNT1 | Transmission and reception possible
+                            | no parity, 1 stop, 8 bit
+                            | prohibit the UART1 interrupt
+    move.w #0x0038, UBAUD1  | baud rate = 230400 bps
 
-*************************
-** Initialization related to the timer (The interrupt level has been fixed to 6.)
-*************************
-move.w #0x0004, TCTL1 | Restart, an interrupt impossible
-|Count the time with the 1/16 of the system clock
-|as a unit
-|Stop the timer use
-bra MAIN
+    *************************
+    ** Initialization related to the timer (The interrupt level has been fixed to 6.)
+    *************************
+    move.w #0x0004, TCTL1   | Restart, an interrupt impossible
+                            | Count the time with the 1/16 of the system clock
+                            | as a unit
+                            | Stop the timer use
+    bra MAIN
 
 *****************************************************************
 % Write in ‘a’ in the transmitter register UTX1 to confirm the normal initialization routine
@@ -100,6 +100,6 @@ bra MAIN
 .section .text
 .even
 MAIN :
-move.w #0x0800+’a’, UTX1 |Refer to Appendix for the reason to add 0x0800
+    move.w #0x0800+’a’, UTX1 |Refer to Appendix for the reason to add 0x0800
 LOOP :
-bra LOOP
+    bra LOOP
