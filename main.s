@@ -204,7 +204,8 @@ INTERPUT:
 	
 	add.l	#0x0800, %d1
 	move.w 	%d1, UTX1	/* Substitute the data for the transmitter register UTX1 */
-				/* And transmit it??? */
+	/* And transmit it??? */
+	bra INTERPUT_END
 MASK_TRANSMITTER_INTERRUPT:
 	andi 	#0xfff8, USTCNT1 /* Mask the transmitter interrupt */
 INTERPUT_END:
@@ -311,7 +312,8 @@ GETSTRING_END:
 	
 PUTSTRING:
 	cmpi.l	#0, %d1 /* if ch!=0 -> no exec*/
-	beq PUTSTRING_INIT 
+	beq PUTSTRING_INIT
+	move.l #0,%d0
 	rts
 	
 
@@ -323,9 +325,10 @@ PUTSTRING_INIT:
 	cmp #0,%d3 /*number of data to be sent: receiverQ size?*/
 	beq PUT_STOP
 
-PUTSTRING_DO:
+
 	movem.l %d0-%d1/%a1,-(%sp)
-	cmp size_put, %d3
+PUTSTRING_DO:
+	cmp.l size_put, %d3
 	beq PUT_UNMASK
 
 PUT_DATA:
@@ -334,14 +337,14 @@ PUT_DATA:
 	moveq.l #1, %d0 /*choose trans. queue*/
 	move.b (%a1)+, %d1 /* moves content in addr. p to d1 AND i++*/
 	jsr INQ
-	cmp #0, %d0
+	cmp.l #0, %d0
 	beq PUT_UNMASK
 	move.l %a1, ptr_put /*update the pointer*/
 	jsr UPDATE_SZ
 	bra PUTSTRING_DO
 PUT_UNMASK:
 	movem.l (%sp)+, %d0-%d1/%a1
-	ori.w #0x0007, USTCNT1
+	move.w #0xe10c, USTCNT1
 	bra PUT_STOP
 PUT_STOP:
 	move.l size_put, %d0
@@ -501,15 +504,11 @@ MAIN :
 	move.l	#16, %d3
 	jsr	PUTSTRING
 	
-	bra	LOOP
-	
-LOOP :
-	move.w	#0x2000, %SR /* Set running level to 0*/
-
 	move.l	#0, %d1		/* Channel 0? */
 	lea.l	TDATA2, %a2
 	move.l	%a2, %d2	/* Idk if this works */
 	move.l	#16, %d3	/* Reset Counter */
+LOOP :
 	jsr	PUTSTRING
 	
 	bra 	LOOP
