@@ -2,6 +2,11 @@
 ** Various Register Definition
 ****************************************************************
 
+/* Echo back process */
+/* Data inputted from keyboard -> Receiver Interrupt -> INTERGET*/
+/* -> GETSTRING -> PUTSTRING -> Transmitter Interrupt ->  INTERPUT */
+/* -> Output to display */
+
 *******************************
 ** System call numbers 
 *******************************
@@ -88,7 +93,7 @@ boot:
 	******************************
 
 	move.b #0x40, IVR | Set the user interrupt vector| number to 0x40+level.
-	move.l #0x00fffff9, IMR |Mask all interrupts, except UART1.
+	move.l #0x00ff3ff9, IMR |Mask all interrupts, except UART1.
 
 	******************************
 	**Initialization of the interrupt vector
@@ -102,7 +107,7 @@ boot:
 	******************************
 
 	move.w #0x0000, USTCNT1 | Reset
-	move.w #0xe100, USTCNT1 |Transmission and reception possible |no parity, 1 stop, 8 bit|prohibit the UART1 interrupt
+	move.w #0xe13f, USTCNT1 |Transmission and reception possible |no parity, 1 stop, 8 bit|enable the UART1 interrupt
 	move.w #0x0038, UBAUD1 |baud rate = 230400 bps
 
 	*************************
@@ -156,7 +161,6 @@ CALL_SET_TIMER:
 	
 INTERFACE:
 	movem.l	%d0-%d3,-(%sp)
-
 	
 	move.b	#'4', LED3
 	
@@ -164,11 +168,11 @@ INTERFACE:
 	move.l	UTX1, %d0
 	/* btst.b	#15, %d0 */	/* Transmitter FIFO empty? 1 = empty, 0 = not empty*/
 	andi.l	#0x8000, %d0
-	beq	INTERGET_TEST	/* not equal to 1*/
+	beq	RECEIVER_TEST	/* not equal to 1*/
 	jmp	CALL_INTERPUT
 	
-
-INTERGET_TEST:	
+	
+RECEIVER_TEST:	
 	move.b	#'3', LED2
 	
 	/* Receiver Interrupt */
@@ -217,7 +221,6 @@ INTERPUT:
 	
 	add.l	#0x0800, %d1
 	move.w 	%d1, UTX1	/* Substitute the data for the transmitter register UTX1 */
-	/* And transmit it??? */
 	bra INTERPUT_END
 	
 MASK_TRANSMITTER_INTERRUPT:
@@ -233,7 +236,7 @@ INTERGET:
 	/* Do we have to save running level??? */
 	movem.l	%d0, -(%sp)
 	
-	cmp.l	#0, %d1
+	cmpi.l	#0, %d1
 	bne	INTERGET_END
 	
 	move.l	#0, %d0		/* Queue #0 */
@@ -272,7 +275,7 @@ SET_TIMER:
 	rts
 CALL_RP:
 	lea.l	task_p, %a0
-	jsr	(%a0)
+	jsr		(%a0)
 	rts
 
 ****************************************************************
@@ -341,7 +344,7 @@ GETSTRING:
 	
 
 GETSTRING_LOOP:
-	cmp	%d4, %d3	/* is sz == size? */
+	cmp.l	%d4, %d3	/* is sz == size? */
 	beq	GETSTRING_UPD_SZ
 
 	move.l	#0, %d0		/* specify queue 0 */
@@ -350,10 +353,9 @@ GETSTRING_LOOP:
 	cmpi.l	#0, %d0			/* If failure */
 	beq	GETSTRING_UPD_SZ	/* End GETSTRING */
 
-	move.b	%d1, (%a0)	/* Copy the data to address i */
+	move.b	%d1, (%a0)+	/* Copy the data to address i */
 	
 	addq	#1, %d4		/* Increment sz and i */
-	addq	#1, %a0
 	jmp	GETSTRING_LOOP
 
 GETSTRING_UPD_SZ:	
@@ -497,6 +499,7 @@ MAIN :
 	
 	move.b  #'8', LED6
 		
+RESET_TIMER:
 	move.l	#0x100000, %d5
 	move.l	#0, %d4
 
@@ -512,23 +515,26 @@ TIMER:
 
 	
 LOOP :
-	move.w	#0x2000, %SR /* Set running level to 0*/
-
 	move.b	#'1', LED0
 
 	move.l	#0, %d1		/* Channel 0? */
 	lea.l	WORK, %a1
-	move.l	%a1, %d2	/* Idk if this works */
+	move.l	%a1, %d2	
 	move.l	#256, %d3
 	jsr	GETSTRING
 	
 	
-	
 	move.l	#0, %d1		/* Channel 0? */
+	move.l	%a1, %d2	/* PLEASSEEEE LET THIS BE THE CASE */
+				/* d2 is changed in the interface */
+				/* which is why you have to reset it */
+				/* and that's why you get weird characters showing up */
+				/* PUTSTRING works, but it's got the head address wrong*/
+				/* But this doesn't solve getting stuck before the timer*/
 	move.l	#16, %d3	/* size = 16? */
 	jsr	PUTSTRING
 	
-	bra 	TIMER
+	bra 	RESET_TIMER
 
 task_p:
 	bra 	MAIN
