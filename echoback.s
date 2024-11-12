@@ -486,12 +486,12 @@ Q_SUCC:
 	lea.l   top, %a4  /* a4 = head of queue area */
 	adda.l  %d4, %a4  /* adds offset */
 	move.l  %a4, %a5  /* a5 = bottom of queue area */
-	adda.l  #SIZE_of_QUEUE, %a5  /* the bottom is 256 from the top */
+	adda.l  #255, %a5  /* the bottom is 255 from the top */
 
 	move.l  #1, %d0     /* success flag raised */
 
-	cmp	%a1, %a5
-	beq	Q_BACK		/*reach the bottom*/
+	cmp	%a1, %a5	/* compare inp/outp with bottom*/
+	beq	Q_BACK		/* reach the bottom */
 	bra	Q_NEXT
 
 Q_NEXT:
