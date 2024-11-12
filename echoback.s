@@ -94,7 +94,7 @@ boot:
 	******************************
 
 	move.b #0x40, IVR | Set the user interrupt vector| number to 0x40+level.
-	move.l #0x00ff3ffb, IMR |Mask all interrupts, except UART1.
+	move.l #0x00ff3ff9, IMR |Mask all interrupts, except UART1.
 
 	******************************
 	**Initialization of the interrupt vector
@@ -584,8 +584,6 @@ USR_STK_TOP : |The end of the user stack region
 *****************************************************************
 .section .data
 	.equ	SIZE_of_QUEUE,	256
-TDATA1:	.ascii	"0123456789ABCDEF"
-TDATA2:	.ascii	"klmnopqrstuvwxyz"
  
 .section .bss
 .even
@@ -594,5 +592,3 @@ inp:		.ds.l	2
 outp:		.ds.l	2
 s:		.ds.w	2
 task_p:		.ds.l	1
-
-WORK:	.ds.b	256
