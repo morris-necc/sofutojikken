@@ -98,8 +98,9 @@ boot:
 	******************************
 	**Initialization of the interrupt vector
 	******************************
+ 	move.l #SYSCALL, 0x080		/* Trap #0 interrupt */
 	move.l #INTERFACE, 0x110 	/* Level 4 user interrupt */
-	move.l #TIMER_INTERRUPT, 0x118 /* Level 6 user interrupt*/
+	move.l #TIMER_INTERRUPT, 0x118 	/* Level 6 user interrupt*/
 
 	******************************
 	** Initialization related to the transmitter and the receiver (UART1)
