@@ -154,7 +154,7 @@ TTEND:
 
 ****************************************************************
 **  System Call Interface:
-**	Maker: Sihanern Thitisan
+**	Maker: Morris Kim, Rafii Hakim
 **  Reviewer: Loa Champ, Nimrawee Nattapat
 ****************************************************************
         
@@ -186,7 +186,7 @@ CALL_SET_TIMER:
 ****************************************************************
 **	Timer interrupt
 **	Maker: Nimrawee Nattapat, Loa Champ
-**  Reviewer: Sihanern Thitisan, Nam Non
+**  Reviewer: Morris Kim, Rafii Hakim
 ****************************************************************
 TIMER_INTERRUPT:
 	movem.l	%a0, -(%sp)		/* Evacuate registers */
@@ -218,8 +218,8 @@ CALL_RP:
 
 	
 ****************************************************************
-**	UART1 Interrupt
-**	Maker: Sihanern Thitisan, Lee Jiseok
+**	UART1 Interrupt Interface
+**	Maker: Morris Kim, Rafii Hakim
 **  Reviewer: Loa Champ, Nimrawee Nattapat
 ****************************************************************
 INTERFACE:
