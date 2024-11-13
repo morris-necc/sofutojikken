@@ -155,7 +155,7 @@ TTEND:
 ****************************************************************
 **  System Call Interface:
 **	Maker: Morris Kim, Rafii Hakim
-**  Reviewer: Lim Liang Sun
+**  Reviewer: Lim Liang Sun, Napat Limsuwan
 ****************************************************************
         
 SYSCALL:
@@ -185,7 +185,7 @@ CALL_SET_TIMER:
 
 ****************************************************************
 **	Timer interrupt
-**	Maker: Lim Liang Sun
+**	Maker: Lim Liang Sun, Napat Limsuwan
 **  Reviewer: Morris Kim, Rafii Hakim
 ****************************************************************
 TIMER_INTERRUPT:
@@ -220,7 +220,7 @@ CALL_RP:
 ****************************************************************
 **	UART1 Interrupt Interface
 **	Maker: Morris Kim, Rafii Hakim
-**  Reviewer: Lim Liang Sun
+**  Reviewer: Lim Liang Sun, Napat Limsuwan
 ****************************************************************
 INTERFACE:
 	movem.l	%d0-%d3,-(%sp)
