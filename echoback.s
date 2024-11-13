@@ -185,7 +185,7 @@ CALL_SET_TIMER:
 
 ****************************************************************
 **	Timer interrupt
-**	Maker: Nimrawee Nattapat, Loa Champ
+**	Maker: Lim Liang Sun
 **  Reviewer: Morris Kim, Rafii Hakim
 ****************************************************************
 TIMER_INTERRUPT:
