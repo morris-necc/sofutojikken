@@ -254,8 +254,8 @@ CALL_INTERGET:
 
 ****************************************************************
 **	INTERGET
-**	Maker: Liu Yiluo, Nam Non
-**  Reviewer: Lee Jiseok
+**	Maker: Zelal Denis Yildiz
+**  Reviewer: Amira Ben Youssef
 ****************************************************************	
 INTERGET:
 	/* Input: Channel ch -> %d1, received data -> %d2 */
@@ -354,8 +354,8 @@ PUTSTRING_END:
 
 ****************************************************************
 **  GETSTRING
-**	Maker: Liu Yiluo
-**  Reviewer: Lee Jiseok
+**	Maker: Zelal Denis Yildiz
+**  Reviewer: Amira Ben Youssef
 ****************************************************************
 GETSTRING:
 	/* Input: ch -> d1, head address of destination p -> d2, no. of data to be read -> d3 */
