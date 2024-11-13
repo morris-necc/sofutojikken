@@ -155,7 +155,7 @@ TTEND:
 ****************************************************************
 **  System Call Interface:
 **	Maker: Morris Kim, Rafii Hakim
-**  Reviewer: Loa Champ, Nimrawee Nattapat
+**  Reviewer: Lim Liang Sun
 ****************************************************************
         
 SYSCALL:
@@ -220,7 +220,7 @@ CALL_RP:
 ****************************************************************
 **	UART1 Interrupt Interface
 **	Maker: Morris Kim, Rafii Hakim
-**  Reviewer: Loa Champ, Nimrawee Nattapat
+**  Reviewer: Lim Liang Sun
 ****************************************************************
 INTERFACE:
 	movem.l	%d0-%d3,-(%sp)
