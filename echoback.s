@@ -277,8 +277,8 @@ INTERGET_END:
         
 ****************************************************************
 **  INTERPUT
-**	Maker: Lee Jiseok
-**  Reviewer: Liu Yiluo
+**	Maker: Amira Ben Youssef
+**  Reviewer: Zelal Denis Yildiz
 ****************************************************************	
 INTERPUT:
 	/* Input: Channel ch -> %d1 */
@@ -311,8 +311,8 @@ INTERPUT_END:
         
 ****************************************************************
 **  PUTSTRING
-**	Maker: Liu Yiluo, Champ Loa, Nimrawee Nattapat
-**  Reviewer: Lee Jiseok
+**	Maker: Amira Ben Youssef
+**  Reviewer:  Zelal Denis Yildiz
 ****************************************************************
 PUTSTRING:
 	/* Input: Channel ch -> d1, Head address p -> d2, No. of data -> d3 */
@@ -393,8 +393,8 @@ GETSTRING_END:
 
 *****************************************************************
 ** Queues
-**	Maker: Liu Yiluo, Lee Jiseok
-**  Reviewer: Lee Jiseok, Liu Yiluo
+**	Maker: Amira Ben youssef, Zelal Denis Yildiz
+**  Reviewer: Moris Kim
 *****************************************************************
 INIT_Q:
 	movem.l	%a1-%a4, -(%sp)
