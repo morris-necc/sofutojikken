@@ -93,22 +93,23 @@ boot:
 **    Program region
 ****************************************************************
 MAIN:
-	** Set the running mode and the level (The process to move to 'the user mode')
-    move.b	#'1', LED1
+    ** Set the running mode and the level (The process to move to 'the user mode')
     move.w	#0x0000, %SR		/*USER MODE, LEVEL 0*/
-
     lea.l	USR_STK_TOP, %SP	/*set user stack*/
     
     ** Start up RESET_TIMER by the system call
     move.l	#SYSCALL_NUM_RESET_TIMER, %d0
     
     trap	#0
-    ** Start up SET_TIMER by the system call
+    ** Start up SET_TIMER by the system call	
     move.l	#SYSCALL_NUM_SET_TIMER, %d0
     move.w	#50000, %d1
     move.l	#TT, %d2
     trap	#0
-    move.b	#'2', LED2
+	
+
+
+
 
 ************************************* 
 *    Test of sys_GETSTRING and sys_PUTSTRING 
@@ -126,7 +127,6 @@ LOOP:
     move.l	#0, %d1			/*ch = 0*/
     move.l	#BUF, %d2		/*p = #BUF*/
     trap	#0
-    move.b	#'3', LED3
     bra		LOOP		
 
 **************************************       
@@ -138,42 +138,48 @@ LOOP:
 TT:
     movem.l	%d0-%d7/%a0-%a6, -(%sp)
 
-    move.l	#SYSCALL_NUM_PUTSTRING, %d0
-    move.l	#0, %d1			/*ch = 0*/
-    move.l	#TMSG, %d2		/*p = #TMSG*/
-    move.l	#8, %d3			/*size = 8*/
-    trap	#0
-
 GET_MAX:
-	move	LETTERS, %d4		/* d4 = number of possibilities */
-	move	#0, %d5			/* d5 = max frequency */
-	lea.l	counters, %a1		/* a1 = head address of counter */
-CMP:
-	subq	#1, %d4			/* finish comparisons when all possibilities are done */
-	blt	DISPLAY_MAX				
-	cmp.b	(%a1), %d5		/* compare current max to current*/
-	bhi	NO_UPDATE_MAX
-	move	(%a1), %d5		/* d5 = new max */
-	move	%a1, %a0		/* a0 = head address of max freq */
-NO_UPDATE_MAX:
-	addq	#1, %a1
-	bra	CMP
+	lea.l	counters, %a0	/* load head address of counters*/
+	lea.l	counters, %a1
+	adda	#0x61,	%a1	/* start checking from 'a' */
+	move	#0, %d5
+	move	#0, %d4		/* i = 0 */
+	move	#0, %d6
+COMPARE:
+	addq 	#1, %d4
+	cmp	#26, %d4
+	bhi	DONE
+	cmp.b	(%a1), %d5
+	bhs	SKIP
+	move.b	(%a1), %d5	/* !!!! d5 = Freq Max */
+	lea.l	(%a1), %a2	/* a2 = address containing max */
+	
+SKIP:
+	adda	#1, %a1		/* increment address */
+	bra 	COMPARE
+DONE:
+	move.w	%a2, %d6	/* get ascii code of max */
+	sub.w	%a0, %d6	/* !!!! d6 = Max ASCII */
 
-DISPLAY_MAX:
+PRINT:
+	lea.l	letter, %a3
+	move.b	%d6, (%a3)
 	move.l	#SYSCALL_NUM_PUTSTRING, %d0
-	move.l	#0, %d1			/*ch = 0*/
-	move.l	(%a0), %d2		/*p = #TMSG*/
-	move.l	#8, %d3			/*size = 8*/
-	trap	#0
-
-TTKILL:
-    move.l	#SYSCALL_NUM_RESET_TIMER, %d0
+    move.l	#0, %d1			/*ch = 0*/
+    move.l	#letter, %d2		/*p = #TMSG*/
+    move.l	#1, %d3
     trap	#0
+	
+TTKILL:
+	move.l	#SYSCALL_NUM_RESET_TIMER, %d0
+	trap	#0
     
 TTEND:
     movem.l	(%sp)+, %d0-%d7/%a0-%a6
     rts
 
+
+	
 ****************************************************************
 **  System Call Interface:
 **	Maker: Morris Kim, Rafii Hakim
@@ -276,8 +282,8 @@ CALL_INTERGET:
 
 ****************************************************************
 **	INTERGET
-**	Maker: Liu Yiluo, Nam Non
-**  Reviewer: Lee Jiseok
+**	Maker: Zelal Denis Yildiz
+**  Reviewer: Amira Ben Youssef
 ****************************************************************	
 INTERGET:
 	/* Input: Channel ch -> %d1, received data -> %d2 */
@@ -290,10 +296,8 @@ INTERGET:
 	
 	move.l	#0, %d0		/* Queue #0 */
 	move.b	%d2, %d1 	/* move data to d1*/
-	
 	jsr	INQ		/* Do we have to do something for INQ failure?? */
 
-	move.b	#'a', LED0
 INTERGET_END:
 	movem.l	(%sp)+, %d0
 	rts
@@ -308,7 +312,7 @@ INTERPUT:
 	/* d0 = UTX1 at the end, we need %d0 to compare when we return to INTERFACE*/
 	/* No return value */
 	
-	movem.l	%a1/%d2-%d5,-(%sp)
+	movem.l	%d2/%a1,-(%sp)
 	move.w	%SR, %d2	/* Save running level */
 	move.w	#0x2700, %SR	/* Set running level to 7 */
 	cmp.l	#0, %d1		/* Return without doing anything if ch=/=0*/
@@ -318,30 +322,17 @@ INTERPUT:
 	jsr	OUTQ		/* Substitute it for data?? */
 				/* d1 is data */
 
+	lea.l	counters, %a1
+	
+	adda	%d1, %a1
+	addi.b	#1, (%a1)
+
+	move.b	#'A', LED0
+
+	
 	cmp.l	#0, %d0 	/* OUTQ failure? */
 	beq	MASK_TRANSMITTER_INTERRUPT
-
 	
-	move.b  #'a', %d4	/* d4 = ASCII a */
-	move.b	%d1, %d3	/* d3 = data */
-	lea.l	counters, %a1	/* a1 = head address of counters */
-	move	#0, %d5
-	
-COMPARE:	
-	cmp	LETTERS, %d5
-	beq	CONTINUE
-	addq	#1, %d5
-	cmp.b 	%d4, %d3
-	beq	SAME
-DIFF:
-	addq	#1, %a1		/* increment counter address */
-	addq	#1, %d4		/* increment ASCII */
-	bra	COMPARE
-SAME:
-	addq	#1, (%a1)
-	
-
-CONTINUE:	
 	add.l	#0x0800, %d1
 	move.w 	%d1, UTX1	/* Substitute the data for the transmitter register UTX1 */
 	bra INTERPUT_END
@@ -350,7 +341,7 @@ MASK_TRANSMITTER_INTERRUPT:
 	andi 	#0xfff8, USTCNT1 /* Mask the transmitter interrupt */
 INTERPUT_END:
 	move.w	%d2, %SR	/* Restore running level */
-	movem.l	(%sp)+, %a1/%d2-%d5
+	movem.l	(%sp)+, %d2/%a1
 	rts
         
 ****************************************************************
@@ -398,8 +389,8 @@ PUTSTRING_END:
 
 ****************************************************************
 **  GETSTRING
-**	Maker: Liu Yiluo
-**  Reviewer: Lee Jiseok
+**	Maker: Zelal Denis Yildiz
+**  Reviewer: Amira Ben Youssef
 ****************************************************************
 GETSTRING:
 	/* Input: ch -> d1, head address of destination p -> d2, no. of data to be read -> d3 */
@@ -556,28 +547,16 @@ Q_FINISH:
 	movem.l	(%sp)+,%d2-%d5/%a1-%a5  /* restore registers */
 	rts
 
-.section .data
-	.equ	SIZE_of_QUEUE,	256
-	.equ	LETTERS,	3
-
-.section .bss
-.even
-top:		.ds.b	SIZE_of_QUEUE*2
-inp:		.ds.l	2
-outp:		.ds.l	2
-s:		.ds.w	2
-task_p:		.ds.l	1
-
-        .even
-
 
 ****************************************************************
 **	Data region with an initial value
 ****************************************************************
 .section .data
+	.equ	SIZE_of_QUEUE,	256
+	
 TMSG:		.ascii	"******\r\n"
             .even
-TTC:		.dc.w	0
+TTC:		.ascii	"######\r\n"	
             .even
 
 ****************************************************************
@@ -590,6 +569,14 @@ USR_STK:
             .ds.b	0x4000
             .even
 USR_STK_TOP:
-	
-counters:	.ds.b	3	/* abc */
-	.even
+.even
+top:		.ds.b	SIZE_of_QUEUE*2
+inp:		.ds.l	2
+outp:		.ds.l	2
+s:		.ds.w	2
+task_p:		.ds.l	1
+max_freq:	.ds.b	1
+letter:		.ds.b	1
+counters:	.ds.b	26
+            .even
+
