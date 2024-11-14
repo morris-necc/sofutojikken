@@ -158,13 +158,13 @@ SKIP:
 	adda	#1, %a1		/* increment address */
 	bra 	COMPARE
 DONE:
-	move.w	%a2, %d6	/* get ascii code of max */
-	sub.w	%a0, %d6	/* !!!! d6 = Max ASCII */
+	move.l	%a2, %d6	/* get ascii code of max */
+	sub.l	%a0, %d6	/* !!!! d6 = Max ASCII */
 
 PRINT:
 	lea.l	letter, %a3
 	move.b	%d6, (%a3)
-	move.l	#SYSCALL_NUM_PUTSTRING, %d0
+    move.l	#SYSCALL_NUM_PUTSTRING, %d0
     move.l	#0, %d1			/*ch = 0*/
     move.l	#letter, %d2		/*p = #TMSG*/
     move.l	#1, %d3
