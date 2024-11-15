@@ -88,7 +88,8 @@ boot:
                             | as a unit
                             | Stop the timer use
     jsr		INIT_Q
-    bra     MAIN
+bra     MAIN
+	
 ****************************************************************
 **    Program region
 ****************************************************************
@@ -99,16 +100,17 @@ MAIN:
     
     ** Start up RESET_TIMER by the system call
     move.l	#SYSCALL_NUM_RESET_TIMER, %d0
-    
     trap	#0
+	
     ** Start up SET_TIMER by the system call	
     move.l	#SYSCALL_NUM_SET_TIMER, %d0
     move.w	#50000, %d1
     move.l	#TT, %d2
-    trap	#0
+	trap	#0
+
+	lea.l	BUF, %a2
+	move.l	#0, %d4
 	
-
-
 
 
 ************************************* 
@@ -119,27 +121,34 @@ MAIN:
 LOOP:
     move.l	#SYSCALL_NUM_GETSTRING, %d0
     move.l	#0, %d1			/*ch = 0*/
-    move.l	#BUF, %d2		/*p = #BUF*/
-    move.l	#256, %d3		/*size = 256*/
+    move.l	%a2, %d2		/*p = #BUF*/
+    move.l	#1, %d3		/*size = 256*/
     trap	#0
 
-	lea.l	BUF, %a2
+	cmpi.l	#0, %d0
+	beq	LOOP
+	
+	move.b	#'1', LED1
+	
 	move.b	(%a2), %d4
-	cmpi.b	#97, %d4
+	cmpi.b	#97, %d4		/* ascii for a*/
 	blt	Next
-	cmpi.b	#122, %d4
+	cmpi.b	#122, %d4		/* ascii for z */
 	bgt	Next
 
 	lea.l	counters, %a1
 	add.l	%d4, %a1
-	addq.b	#1, (%a1)
+	addq	#1, (%a1)
+
+	move.b	#'0', LED0
 	
 Next:	
-    move.l	%d0, %d3		/*size = %d0 (The length of a given string)*/
     move.l	#SYSCALL_NUM_PUTSTRING, %d0
     move.l	#0, %d1			/*ch = 0*/
     move.l	#BUF, %d2		/*p = #BUF*/
-    trap	#0
+    move.l	#1, %d3
+	trap	#0
+	move.b	#'2', LED2
     bra		LOOP		
 
 **************************************       
@@ -149,27 +158,34 @@ Next:
 **************************************   
 
 TT:
-    movem.l	%d0-%d7/%a0-%a6, -(%sp)
+	/* this subroutine happens at the end*/
+	movem.l	%d0-%d7/%a0-%a6, -(%sp)
 
 GET_MAX:
 	lea.l	counters, %a0	/* load head address of counters*/
 	lea.l	counters, %a1
-	adda	#97,	%a1	/* start checking from 'a' */
-	move	#0, %d5
-	move	#0, %d4		/* i = 0 */
-	move	#0, %d6
+	
+	add.l	#97, %a1	/* start checking from 'a' */
+	
+	move.l	#0, %d5		/* d5 = max freq. (no.) */
+	move.l	#0, %d4		/* i = 0 */
+	move.l	#0, %d6		/* d6 = max ascii (ascii) */
+	
 COMPARE:
-	addq.b 	#1, %d4
-	cmp	#26, %d4
-	bhi	DONE
-	cmp.b	(%a1), %d5
-	bhs	SKIP
+	addq 	#1, %d4		/* increment counter */
+	cmp	#26, %d4	/* if counter > 26, leave */
+	bgt	DONE
+	
+	cmp.b	(%a1), %d5	/* is current character the highest freq? */
+	bgt	SKIP
+	
 	move.b	(%a1), %d5	/* !!!! d5 = Freq Max */
-	lea.l	(%a1), %a2	/* a2 = address containing max */
+	move.l	%a1, %a2	/* a2 = address containing max */
 	
 SKIP:
 	addq	#1, %a1		/* increment address */
 	bra 	COMPARE
+
 DONE:
 	move.l	%a2, %d6	/* get ascii code of max */
 	sub.l	%a0, %d6	/* !!!! d6 = Max ASCII */
@@ -584,4 +600,3 @@ max_freq:	.ds.b	1
 letter:		.ds.b	1
 counters:	.ds.b	26
             .even
-
