@@ -1,24 +1,11 @@
 ************************************* 
 ** Typing Practice
-** Display character string on screen		**DONE, needs fixing**
-** Let user input the character screen		**DOING, needs fixing**
-** Don't output a failed input to screen	**DONE, needs testing & fixing **
-** Change time limit depending on the length of a character string	** NOT done, just needs copas tbh**
-** Count the numbers of correct & failed inputs and display each 	** DONE, needs testing **
-** Calculate the typing speed (characters per minute) & display it	** DONE, needs testing **
-************************************* 
-
-************************************* 
-** Current Bugs
-** 1. "ara" is printed before every line after every print is called
-** 		This could be either before/after the prints
-** 		Check the emulator
-** 2. Subroutine WAIT does not work
-** 		It printed both the texts from INTRO and GAMEMODE
-** 		Either there's something wrong with PUTSTRING outputting way more than it needs to
-** 		Or WAIT somehow going back to both subroutines??? (this makes no sense)
-** 		Anyways, try bugtesting without WAIT to see if this is a result of PRINT
-** 		Oh, and WAIT isn't actually waiting it seems
+** Display character string on screen		** DONE **
+** Let user input the character screen		** DONE **
+** Don't output a failed input to screen	** DONE **
+** Change time limit depending on the length of a character string	** DONE**
+** Count the numbers of correct & failed inputs and display each 	** DONE **
+** Calculate the typing speed (characters per minute) & display it	** DONE **
 ************************************* 
 
 
@@ -234,7 +221,6 @@ INTERGET:
 	move.b	%d2, %d1 	/* move data to d1*/
 	jsr	INQ		/* Do we have to do something for INQ failure?? */
 
-	move.b	#'a', LED0
 INTERGET_END:
 	movem.l	(%sp)+, %d0
 	rts
@@ -494,6 +480,7 @@ MAIN:
 	move.l	#0, %d4
 	move.w 	#0, CORRECT
 	move.w 	#0, MISTAKES
+	
 
 INTRO_LOOP:
 	jsr	INTRO
@@ -508,21 +495,28 @@ PICKGAMEMODE_LOOP:
 	
 	/* Check user input*/
 	cmpi.b	#49, %d5	/* Easy mode */
-	jsr	GAME1
+	beq	GAME1_RUN
 
 	cmpi.b	#50, %d5	/* Normal mode */
-	jsr	GAME2
-
-	cmpi.b	#51, %d5	/* Hard mode */
-	jsr	GAME3
+	beq	GAME2_RUN
 
 	cmpi.l	#0, %d4 	/* Has a game been played? */
 	bne	RESULTS
 
 	/* Input is Invalid*/
 	lea.l	INVALIDTEXT, %a5
-	jsr		PRINT
+	jsr	PRINT
 	bra	PICKGAMEMODE_LOOP
+
+GAME1_RUN:
+	jsr	GAME1
+	cmpi.l	#0, %d4 	/* Has a game been played? */
+	bne	RESULTS
+
+GAME2_RUN:
+	jsr	GAME2
+	cmpi.l	#0, %d4 	/* Has a game been played? */
+	bne	RESULTS
 
 RESULTS:
 	/* here d4 is used for typing speed*/
@@ -547,7 +541,7 @@ RESULTS:
 	move.l	#SYSCALL_NUM_PUTSTRING, %d0
 	move.l	#0, %d1				/*ch = 0*/
 	move.l	#RESULTS2, %d2		/*p = #PRINT_BUFFER*/
-	move.l	#61, %d3			/* d3 = size*/
+	move.l	#35, %d3			/* d3 = size*/
 	trap	#0
 	jsr	DUMB_PRINT
 	lea.l 	ENDLINE, %a5
@@ -559,7 +553,7 @@ RESULTS:
 	move.l	#RESULTS3, %d2		/*p = #PRINT_BUFFER*/
 	move.l	#9, %d3				/* d3 = size*/
 	trap	#0
-	clr		%d4					/* just in case */
+	clr.l	%d4					/* just in case */
 	move.w	CORRECT, %d4
 	jsr	DUMB_PRINT
 	lea.l 	ENDLINE, %a5
@@ -568,60 +562,57 @@ RESULTS:
 	/* Mistakes */	
 	move.l	#SYSCALL_NUM_PUTSTRING, %d0
 	move.l	#0, %d1				/*ch = 0*/
-	move.l	#RESULTS4, %d2		/*p = #PRINT_BUFFER*/
+	move.l	#RESULTS4, %d2			/*p = #PRINT_BUFFER*/
 	move.l	#10, %d3			/* d3 = size*/
 	trap	#0
-	clr		%d4				/* just in case */
+	clr.l	%d4				/* just in case */
 	move.w	MISTAKES, %d4
 	jsr	DUMB_PRINT
 	lea.l 	ENDLINE, %a5
 	jsr	PRINT	
-
-	/* Accuracy */	
-	move.l	#SYSCALL_NUM_PUTSTRING, %d0
-	move.l	#0, %d1				/*ch = 0*/
-	move.l	#RESULTS5, %d2		/*p = #PRINT_BUFFER*/
-	move.l	#48, %d3			/* d3 = size*/
-	trap	#0
-	move.l	%d5, %d4
-	jsr DUMB_PRINT
-	lea.l 	ENDLINE, %a5
-	jsr	PRINT
 	
 	lea.l 	ENDING, %a5
 	jsr	PRINT
 
+	jsr	WAIT
+
+	jmp	MAIN
+
+	
+
 CALCULATE_RESULTS:
-	/* Outputs: d4 <- typing speed, %d5 <- accuracy*/
+	/* Outputs: d4 <- typing speed */
 	/* Calculates typing speed and accuracy */
-	movem.l 	%d0-%d3, -(%sp)
-	move.w 	CORRECT, %d4	/* d4 = correct */
+	movem.l %d0-%d3, -(%sp)
+	move.w 	CORRECT, %d4		/* d4 = correct */
 	move.w 	TIME_ELAPSED_TOTAL, %d1	/* d1 = total time elapsed */
-	divu.l	%d1, %d4		/* d4 <- correct/time */
-	mulu	#60, %d4		/* d4 <- characters per minute*/
+	divu.w	%d1, %d4		/* d4 <- correct/time */
+	move.l	%d4, %d3
+	andi.l	#0x0000ffff, %d4
+	mulu	#60, %d4		/* d4 <- characters per minute */
+	swap	%d3
+	andi.l	#0x0000ffff, %d3	/* d3 = remainder */
+	add.w	%d3, %d4
+	
 
-	move.w	CORRECT, %d5
-	move.w 	%d5, %d0
-	add.w	MISTAKES, %d0	/* d0 <- total */
-	divu.l	%d0, %d5		/* d5 <- correct/total, might need a size*/
-	mulu	#100, %d5		/* Accuracy (%)*/
-
-	movem.l 	(%sp)+ ,%d0-%d3
+	movem.l (%sp)+ ,%d0-%d3
 	rts
 
 DUMB_PRINT:
-	/* can't think anymore, here's what my demented brain came up with */
-	/* convert binary to printable ascii */
+	/* convert number to ascii then print */
 	/* input: d4*/
-	movem.l 	%d0-%d3, -(%sp)
+	movem.l %d0-%d3, -(%sp)
 
 DIGIT1:
+	cmpi.w	#100, %d4
+	blt	DIGIT2_NOSWAP
+	
 	move.w 	%d4, %d0
-	divu.l	#100, %d0
+	divu.w	#100, %d0
 	move.l	%d0, %d4		/* looks stupid, i know. this saves the divided answer*/
 
 	cmpi.b	#0, %d0			/* might cause problems? we're putting word into d0 and only testing byte*/
-	beq		DIGIT2			/* if d0<100, skip this digit*/
+	beq	DIGIT2			/* if d0<100, skip this digit*/
 	addi.b	#0x30, %d0		
 	move.b	%d0, PRINT_BUFFER
 	
@@ -632,9 +623,15 @@ DIGIT1:
 	trap	#0
 
 DIGIT2:
-	swap	%d4			/* swapped so we get the remainder */	
+	andi.l	#0xffff0000, %d4
+	swap	%d4			/* swapped so we get the remainder */
+	
+DIGIT2_NOSWAP:	
+	cmpi.w	#10, %d4	/* Skip if lower than 10 */
+	blt	DIGIT3_NOSWAP
+	
 	move.w	%d4, %d0	
-	divu.l	#10, %d0
+	divu.w	#10, %d0
 	move.l	%d0, %d4	/* again, saves the divided answer*/
 
 	/* No need to skip if 0, because what are the chances your cpm & acc < 10?? */
@@ -648,9 +645,11 @@ DIGIT2:
 	trap	#0
 
 DIGIT3:
+	andi.l	#0xffff0000, %d4
 	swap	%d4
-	move.w	%d4, %d0	
 
+DIGIT3_NOSWAP:	
+	move.w	%d4, %d0	
 	addi.b	#0x30, %d0
 	move.b	%d0, PRINT_BUFFER
 
@@ -690,20 +689,6 @@ PICKGAMEMODE:
 	lea.l	MODEASK2, %a5
 	jsr	PRINT
 
-	lea.l	MODEASK3, %a5
-	jsr	PRINT
-
-START_TIMER:	
-	** Start up RESET_TIMER by the system call
-	move.l	#SYSCALL_NUM_RESET_TIMER, %d0
-	trap	#0
-	
-	** Start up SET_TIMER by the system call
-	move.l	#SYSCALL_NUM_SET_TIMER, %d0
-	move.w	#50000, %d1				/* 5 seconds */
-	move.l	#TT, %d2
-	trap	#0
-
 	rts
 
 ************************************* 
@@ -718,7 +703,7 @@ PRINT:
 	move.w	#0x2700, %SR
 	
 	lea.l	PRINT_BUFFER, %a1
-	move.w	#0, %d3		/* d3 = size counter*/
+	move.l	#0, %d3		/* d3 = size counter*/
 	
 INSERT_BUFFER_LOOP:
 	/* Put the text in BUFFER */
@@ -726,12 +711,12 @@ INSERT_BUFFER_LOOP:
 	beq	INSERT_BUFFER_END
 	
 	move.b	(%a5)+, (%a1)+	/* Move into buffer*/
-	addi.w	#1, %d3		/* Increment Size*/
+	addq	#1, %d3		/* Increment Size*/
 
 	bra	INSERT_BUFFER_LOOP
 	
 INSERT_BUFFER_END:
-	addi.w	#1, %d3		/* Include \n */
+	addq	#1, %d3		/* Include \n */
 	move.b	#0x0a, (%a1)
 	
 	/* PUTSTRING  all the text*/
@@ -750,72 +735,90 @@ INSERT_BUFFER_END:
 *    Easy Typing Test
 *************************************
 GAME1:
+	movem.l	%d0-%d3/%a0-%a5, -(%sp)
 	lea.l 	MODECHOSEN1, %a5
-	jsr		PRINT
+	jsr	PRINT
 
-	lea.l   CONFIRMATION, %a5
-	jsr		PRINT
-
-	jsr		WAIT
 
 GAME1_START:
+	lea.l	TEXT1, %a0
+	lea.l	BUF, %a1
+	
 	/* Prints Text */
-	lea.l	TEXT1, %a5
 	move.l	#SYSCALL_NUM_PUTSTRING, %d0
 	move.l	#0, %d1			/*ch = 0*/
-	move.l	#TEXT1, %d2		/*p = #BUF*/
+	move.l	%a0, %d2		/*p = TEXT1*/
 	move.l	#258, %d3		/*size of text + 2*/
 	trap	#0
+
+	lea.l	ENDLINE, %a5		/* Give space */
 	jsr	PRINT
 
 	/* Configures timer to run for 60 seconds */
 	move.b 	#0, TIME_ELAPSED_TOTAL
 	move.b 	#6, TIME_ELAPSED2
 	move.b 	#0, TIME_ELAPSED1
+	move.b	#0, TIMER_FLAG
 
 	jsr 	GAME_TIMER_LED
+	
+	lea.l   CONFIRMATION, %a5
+	jsr	PRINT
+
+	jsr	WAIT
 
 	/* Reset Timer */
-	move.l #SYSCALL_NUM_RESET_TIMER,%d0
-	trap   #0
+	move.l 	#SYSCALL_NUM_RESET_TIMER,%d0
+	trap   	#0
 
 	/* Set Timer to run GAME_TIMER every second */
-	move.l #SYSCALL_NUM_SET_TIMER, %d0
-	move.w #10000, %d1
-	move.l #GAME_TIMER, %d2
-	trap #0
+	move.l 	#SYSCALL_NUM_SET_TIMER, %d0
+	move.w 	#10000, %d1
+	move.l 	#GAME_TIMER, %d2
+	trap  	#0
 
 GAME1_LOOP:
 	move.l	#SYSCALL_NUM_GETSTRING, %d0
 	move.l	#0, %d1			/*ch = 0*/
-	move.l	#BUF, %d2		/*p = #BUF*/
-	move.l	#256, %d3		/*size = 256*/
+	move.l	%a1, %d2		/*p = #BUF*/
+	move.l	#1, %d3			/*size = 256*/
 	trap	#0
+
+	cmpi.l	#0, %d0			/* d0 = no. of things read out by GETSTRING*/
+	beq	GAME1_LOOP		/* Only check if something is input */
 
 	/* Check whether what is written is correct */
 	/* if not, do not getstring? or if already getstring take it out of the queue */
-	cmp.b	BUF, (%a5)		/* I'm trying to compare first element of BUF */
-							/* same = correct, else mistake*/
-	beq GAME1_CORRECT
-	addi.w 	#1, MISTAKES
+	move.b	(%a1), %d0		
+	cmp.b	(%a0), %d0		/* I'm trying to compare first element of BUF */
+					/* same = correct, else mistake*/
+	beq 	GAME1_CORRECT
+	addi.w 	#1, MISTAKES		/* ONLY CHECK MISTAKES IF A CHARACTER IS INPUT*/
 	bra	GAME1_CHECKTIMER
 	
 GAME1_CORRECT:
-	addi.l	#1, %a5			/* a5 incremented */
+	addq	#1, %a0			/* a5 incremented */
 	addi.w 	#1, CORRECT		/* CORRECT incremented*/
 
-	move.l	%d0, %d3		/*size = %d0 (The length of a given string)*/
 	move.l	#SYSCALL_NUM_PUTSTRING, %d0
 	move.l	#0, %d1			/*ch = 0*/
 	move.l	#BUF, %d2		/*p = #BUF*/
+	move.l	#1, %d3
 	trap	#0
 
-	cmpi.w 	#256, CORRECT
-	beq 	GAME1_END
+	cmpi.w 	#256, CORRECT		/* Adjust based on size of text*/
+	beq 	GAME1_FINISH
 	
 GAME1_CHECKTIMER:
 	cmpi.b 	#0, TIMER_FLAG
-	beq		GAME1_LOOP
+	beq	GAME1_LOOP
+
+GAME1_FINISH:
+	lea.l	ENDLINE, %a5
+	jsr	PRINT
+	
+	lea.l	FINISH, %a5
+	jsr	PRINT
 
 GAME1_END:
 	/* Reset Timer */
@@ -823,6 +826,8 @@ GAME1_END:
 	trap   #0
 
 	move.l	#1, %d4			/* Game done flag */
+
+	movem.l	(%sp)+, %d0-%d3/%a0-%a5
 	rts
 	
 ************************************* 
@@ -830,35 +835,105 @@ GAME1_END:
 *    Normal Typing Test
 *************************************
 GAME2:
+	movem.l	%d0-%d3/%a0-%a5, -(%sp)
 	lea.l 	MODECHOSEN2, %a5
-	jsr		PRINT
-
-	lea.l   CONFIRMATION, %a5
-	jsr		PRINT
-
-	jsr		WAIT
-
-	rts
+	jsr	PRINT
 	
-GAME2_START:	
-	rts
-
-************************************* 
-*    GAMEMODE 3
-*    Hard Typing Test
-*************************************
-GAME3:
-	lea.l 	MODECHOSEN3, %a5
-	jsr		PRINT
-
-	lea.l   CONFIRMATION, %a5
-	jsr		PRINT
-
-	jsr		WAIT
-
-	rts
+GAME2_START:
+	lea.l	TEXT2, %a0
+	lea.l	BUF, %a1
 	
-GAME3_START:	
+	/* Prints Text */
+	move.l	#SYSCALL_NUM_PUTSTRING, %d0
+	move.l	#0, %d1			/*ch = 0*/
+	move.l	%a0, %d2		/*p = TEXT1*/
+	move.l	#256, %d3		/*size of text + 2*/
+	trap	#0
+
+	move.l	#SYSCALL_NUM_PUTSTRING, %d0
+	move.l	#0, %d1			/*ch = 0*/
+	move.l	#TEXT3, %d2		/*p = TEXT1*/
+	move.l	#256, %d3		/*size of text + 2*/
+	trap	#0
+	
+
+	lea.l	ENDLINE, %a5		/* Give space */
+	jsr	PRINT
+
+	/* Configures timer to run for 75 seconds */
+	move.b 	#0, TIME_ELAPSED_TOTAL
+	move.b 	#7, TIME_ELAPSED2
+	move.b 	#5, TIME_ELAPSED1
+	move.b	#0, TIMER_FLAG
+
+	jsr 	GAME_TIMER_LED
+	
+	lea.l   CONFIRMATION, %a5
+	jsr	PRINT
+
+	jsr	WAIT
+
+	/* Reset Timer */
+	move.l 	#SYSCALL_NUM_RESET_TIMER,%d0
+	trap   	#0
+
+	/* Set Timer to run GAME_TIMER every second */
+	move.l 	#SYSCALL_NUM_SET_TIMER, %d0
+	move.w 	#10000, %d1
+	move.l 	#GAME_TIMER, %d2
+	trap  	#0
+
+GAME2_LOOP:
+	move.l	#SYSCALL_NUM_GETSTRING, %d0
+	move.l	#0, %d1			/*ch = 0*/
+	move.l	%a1, %d2		/*p = #BUF*/
+	move.l	#1, %d3			/*size = 256*/
+	trap	#0
+
+	cmpi.l	#0, %d0			/* d0 = no. of things read out by GETSTRING*/
+	beq	GAME2_LOOP		/* Only check if something is input */
+
+	/* Check whether what is written is correct */
+	/* if not, do not getstring? or if already getstring take it out of the queue */
+	move.b	(%a1), %d0		
+	cmp.b	(%a0), %d0		/* I'm trying to compare first element of BUF */
+					/* same = correct, else mistake*/
+	beq 	GAME2_CORRECT
+	addi.w 	#1, MISTAKES		/* ONLY CHECK MISTAKES IF A CHARACTER IS INPUT*/
+	bra	GAME2_CHECKTIMER
+	
+GAME2_CORRECT:
+	addq	#1, %a0			/* a5 incremented */
+	addi.w 	#1, CORRECT		/* CORRECT incremented*/
+
+	move.l	#SYSCALL_NUM_PUTSTRING, %d0
+	move.l	#0, %d1			/*ch = 0*/
+	move.l	#BUF, %d2		/*p = #BUF*/
+	move.l	#1, %d3
+	trap	#0
+
+	cmpi.w 	#512, CORRECT		/* Adjust based on size of text*/
+	beq 	GAME2_FINISH
+	
+GAME2_CHECKTIMER:
+	cmpi.b 	#0, TIMER_FLAG
+	beq	GAME2_LOOP
+
+GAME2_FINISH:
+	lea.l	ENDLINE, %a5
+	jsr	PRINT
+	
+	lea.l	FINISH, %a5
+	jsr	PRINT
+
+GAME2_END:
+	/* Reset Timer */
+	move.l #SYSCALL_NUM_RESET_TIMER,%d0
+	trap   #0
+
+	move.l	#1, %d4			/* Game done flag */
+
+	movem.l	(%sp)+, %d0-%d3/%a0-%a5
 	rts
 
 **************************************       
@@ -870,14 +945,7 @@ WAIT:
 	/* We might have to clear buffer */
 	/* Output: %d5 <- User Input */
 	movem.l	%d0-%d3, -(%sp)
-	move.l	#SYSCALL_NUM_RESET_TIMER, %d0
-	trap	#0
 	
-	move.l	#SYSCALL_NUM_SET_TIMER, %d0
-	move.l	#600000, %d1			/* 60 seconds */
-	move.l	#WAIT_END, %d2			/* Finish waiting when timer ends */	
-	trap	#0
-
 	/* Clear Confirmation Buffer*/
 	move.b	#0, CONFIRMATION_BUFFER
 WAIT_LOOP:
@@ -887,18 +955,17 @@ WAIT_LOOP:
 	move.l	#0, %d1				/*ch = 0*/
 	move.l	#CONFIRMATION_BUFFER, %d2	/*p = #BUF*/
 	move.l	#1, %d3				/*size = 1*/
-	trap	#0	
-	
+	trap	#0
+
 	cmpi.b	#0, %d0				/* d0 = no. of things read out by GETSTRING*/
 	beq	WAIT_LOOP
 
-	move.w	CONFIRMATION_BUFFER, %d5
-	
-WAIT_END:
-	move.l	#SYSCALL_NUM_RESET_TIMER, %d0
-	trap	#0
+	lea.l	CONFIRMATION_BUFFER, %a5
+	move.b	(%a5), %d5
+
 	movem.l	(%sp)+, %d0-%d3
 	rts
+	
 
 **************************************       
 **  Game Timer
@@ -906,53 +973,67 @@ WAIT_END:
 **************************************   
 
 GAME_TIMER:
-    movem.l	%d0-%d7/%a0-%a6, -(%sp)
-    cmpi.w	#0, TIME_ELAPSED2		/*Count with the counter TTC whether five times of the execution have been performed*/
-    bne		GAME_TIMER_LED			/*Skip check if >10s left*/
+	movem.l	%d0-%d7/%a0-%a6, -(%sp)
+	cmpi.b	#0, TIME_ELAPSED2		/* check 2nd digit */
+	bne	GAME_TIMERSKIP		/*Skip check if >10s left*/
 
-	cmpi.w	#0, TIME_ELAPSED1		/* If 0s, kill timer*/
+	cmpi.b	#0, TIME_ELAPSED1		/* If 0s, kill timer*/
 	beq	GAME_TIMERKILL
 
+GAME_TIMERSKIP:	
 	/* Decrement Timer digits */
-	cmpi.w 	#0, TIME_ELAPSED1
+	cmpi.b 	#0, TIME_ELAPSED1
 	beq	GAME_TIMERDECREMENT
 
-	subi.w 	#1, TIME_ELAPSED1
-	bra		GAME_TIMEREND
+	subi.b 	#1, TIME_ELAPSED1
+	bra	GAME_TIMEREND
 
 GAME_TIMERDECREMENT:
-	move.w	#9, TIME_ELAPSED1
-    subi.w	#1, TIME_ELAPSED2			/* Decrement 2nd digit by 1 and return */
-    bra		GAME_TIMEREND
+	move.b	#9, TIME_ELAPSED1
+	subi.b	#1, TIME_ELAPSED2			/* Decrement 2nd digit by 1 and return */
+	
+	bra	GAME_TIMEREND
 
 GAME_TIMERKILL:
-    move.l	#SYSCALL_NUM_RESET_TIMER, %d0
-    trap	#0
+	move.b	#1, TIMER_FLAG			/* 1 = Timer done*/
+	move.l	#SYSCALL_NUM_RESET_TIMER, %d0
+	trap	#0
     
 GAME_TIMEREND:
+	jsr	GAME_TIMER_LED
 	addi.w	#1, TIME_ELAPSED_TOTAL
-    movem.l	(%sp)+, %d0-%d7/%a0-%a6
-    rts
+	movem.l	(%sp)+, %d0-%d7/%a0-%a6
+	rts
 
 GAME_TIMER_LED:
 	/* Output time left on LED */
-    movem.l	%d1-%d2, -(%sp)
-	move.b  #"T", LED7
-	move.b  #"i", LED6
-	move.b  #"m", LED5
-	move.b  #"e", LED4
+	movem.l	%d1-%d2, -(%sp)
+	move.b  #'T', LED7
+	move.b  #'i', LED6
+	move.b  #'m', LED5
+	move.b  #'e', LED4
 
 	move.b  #0x30, %d1  	/* d1 = 0 */
 	move.b	%d1, %d2
 	add.b  	TIME_ELAPSED1, %d1
 	add.b  	TIME_ELAPSED2, %d2
 
-	move.b	#":", LED3
-	move.b  %d1, LED2
-	move.b  %d2, LED1
-	move.b  #"s", LED0
-    movem.l	(%sp)+, %d1-%d2
-    rts
+	move.b	#':', LED3
+	move.b  %d2, LED2
+	move.b  %d1, LED1
+	move.b  #'s', LED0
+	
+	movem.l	(%sp)+, %d1-%d2
+	rts
+
+BUGTEST:
+	movem.l	%a5, -(%sp)
+
+	lea.l	BUGTESTTEXT, %a5
+	jsr	PRINT
+
+	movem.l	(%sp)+, %a5
+	rts
 
 ****************************************************************
 **	Data for Queues
@@ -977,9 +1058,9 @@ task_p:		.ds.l	1
 .section .data
 TMSG:	.ascii	"******\r\n"
             .even
-TIME_ELAPSED1:	.dc.w	0		/* why is this length 0 */
+TIME_ELAPSED1:	.dc.b	0		/* why is this length 0 */
         .even
-TIME_ELAPSED2:	.dc.w	0
+TIME_ELAPSED2:	.dc.b	0
         .even
 TIME_ELAPSED_TOTAL:	.dc.w 	0
 		.even
@@ -991,35 +1072,36 @@ CONFIRMATION:	.ascii	"Press any key to continue...\r\n"
 	.even
 GAMEMODEASK:	.ascii	"Pick a gamemode!\r\n"
 	.even
-MODEASK1:	.ascii	"1 - Easy Mode (256 characters, 30s)\r\n"
+MODEASK1:	.ascii	"1 - Normal Mode (256 characters, 60s)\r\n"
 	.even
-MODEASK2:	.ascii	"2 - Normal Mode (512 characters, 45s)\r\n"
-	.even
-MODEASK3:	.ascii	"3 - Hard Mode (1024 characters, 60s)\r\n"
+MODEASK2:	.ascii	"2 - Hard Mode (512 characters, 75s)\r\n"
 	.even
 INVALIDTEXT:	.ascii	"Invalid Input! Try again\r\n"
 	.even
-MODECHOSEN1:	.ascii	"Word Mode Chosen!\r\n"
+MODECHOSEN1:	.ascii	"Normal Mode Chosen!\r\n"
 	.even
-MODECHOSEN2:	.ascii	"Paragraph Mode Chosen!\r\n"
+MODECHOSEN2:	.ascii	"Hard Mode Chosen!\r\n"
 	.even
 RESULTS1:	.ascii	"***                       Your Results                      ***\r\n"
 	.even
-RESULTS2:	.ascii	"Characters Per Minute (Rounded to the nearest whole number): "
+RESULTS2:	.ascii	"Characters Per Minute (Estimated): "
 RESULTS3:	.ascii	"Correct: "
 RESULTS4:	.ascii	"Mistakes: "
-RESULTS5:	.ascii	"Accuracy (Rounded to the nearest whole number): "
+RESULTS5:	.ascii	"Accuracy (Estimated): "
 ENDLINE:	.ascii	"\r\n"
+BUGTESTTEXT:	.ascii	"This is for testing\r\n"
 	.even
 CORRECT:	.dc.w 	1
 MISTAKES:	.dc.w	1
 TIMER_FLAG:	.dc.b	1
 
+FINISH:	.ascii	"******       Congratulations! You reached the end!        *****\r\n"
+	.even
 ENDING:	.ascii	"Play again?\r\n"
 
-TEXT1:	.ascii	"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ornare est vel arcu venenatis fringilla. Maecenas at bibendum velit. Nunc eget metus metus. Pellentesque iaculis mauris lobortis ante semper vestibulum. Morbi et aliquete nunc. Donec porttitor.\r\n"
-TEXT2:	.ascii	"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla in massa lorem. Nulla lacinia a lectus vel tristique. Duis blandit justo non hendrerit accumsan. Vivamus ut laoreet eros. Suspendisse potent. Aliquam efficitur nunc sapien, ac ultrices odio hendrerit id. Nam sit amet diam mattis, volutpat leo et, pulvinar justo. Nam non lacinia orci. Donec condimentum nibh ex, sed accumsan lorem efficitur ut. Quisque tincidunt suscipit urna at placerat. Vivamus ultricies, nunc porttitor pulvinar dignissim vivam.\r\n"
-TEXT3:	.ascii	"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vitae justo vel justo dapibus iaculis convallis non magna. Curabitur orci magna, malesuada aporta sed, tempor eu quam. Donec interdum purus finibus arcu iaculis finibus. Etiam imperdiet non nisi sit amet convallis. Pellentesque ut enim vehicula, tristique diam ac, gravida ex. Nam ut est blandit, rhoncus arcu vel, vestibulum risus. Nulla facilisi. Suspendisse non tortor maximus, rutrum dui quis, mattis felis. Nunc orci diam, rutrum eget dui at, blandit placerat elit. Nam nec magna ligula. Maecenas malesuada viverra tortor ut volutpat. Fusce a tristique neque. Maecenas convallis justo non ligula blandit, eget suscipit mauris fringilla. Morbi tempor nibh eget dictum egestas. Vestibulum suscipit orci purus, nec pellentesque est facilisis eget. Sed lacinia quis est nec dignissim. Sed mi nibh, sodales vitae viverra eget, auctor non diam. Vivamus nec turpis eget risus dictum tincidunt. Ut quis eros at dolor scelerisque dictum. Donec porta, lectus nec am.\r\n"
+TEXT1:	.ascii	"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ornare est vel arcu venenatis fringilla. Maecenas at bibendum velit. Nunc eget metus metus. Pellentesque iaculis mauris lobortis ante semper vestibulum. Morbi et aliquete nunc. Donec porttitit.\r\n"
+TEXT2:	.ascii	"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla in massa lorem. Nulla lacinia a lectus vel tristique. Duis blandit justo non hendrerit accumsan. Vivamus ut laoreet eros. Suspendisse potent. Aliquam efficitur nunc sapien, ac ultrices odio hen"
+TEXT3:	.ascii	"drerit id. Nam sit amet diam mattis, volutpat leo et, pulvinar justo. Nam non lacinia orci. Donec condimentum nibh ex, sed accumsan lorem efficitur ut. Quisque tincidunt suscipit urna at placerat. Vivamus ultricies, nunc porttitor pulvinar dignissim vivam.\r\n"
 ****************************************************************
 **	Data region without an initial value
 ****************************************************************
