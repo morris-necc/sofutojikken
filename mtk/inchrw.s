@@ -4,33 +4,11 @@
 
 .text
 .even
-
 inbyte:
-    movem.l %d1-%d3, -(%sp)
-inbyte_start:
-    move.l	#1, %d0             /* GETSTRING */
-    move.l	#0, %d1			    /*ch = 0*/
-    move.l	#BUF_INBYTE, %d2
-    move.l	#1, %d3
-    trap	#0
-
-    cmpi.b	#1, %d0
-    bne     inbyte_start
-
-    clr.l	%d0
-    move.b  BUF_INBYTE, %d0
-    move.b  %d0, 0x00d00039     /* debug LED0 */
-
-    movem.l (%sp)+, %d1-%d3
-    rts
-
-	
-
-inbyte_test:
 	movem.l	%a0/%d1-%d3, -(%sp)
 	lea.l	BUF_INBYTE, %a0
 	
-inbyte_loop_test:
+inbyte_loop:
 	/* At some point, GETSTRING is called */
 	move.l	#SYSCALL_NUM_GETSTRING, %d0				/* GETSTRING*/
 	move.l	#0, %d1				/* channel */
@@ -39,7 +17,7 @@ inbyte_loop_test:
 	trap	#0				
 	
 	cmp.l	#0, %d0
-	beq	inbyte_loop_test
+	beq	inbyte_loop
 
 	move.b	(%a0), %d0
 	move.b	%d0, LED7
