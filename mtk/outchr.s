@@ -2,29 +2,25 @@
 
 .include "equdefs.inc"
 
-
 .text
 .even
 
 outbyte:
-	movem.l	%d1-%d3/%a0, -(%sp)	
-outbyte_loop:
-	move.l	(%sp), %a0
-	add.l	#23, %a0
-	
-	/* uses putstring*/
-	move.b	(%a0), LED0
-	move.l	#SYSCALL_NUM_PUTSTRING, %d0	/* PUTSTRING */
-	move.l	#0, %d1				/*ch = 0 */
-	move.l	%a0, %d2			/*p = character */
-	move.l	#1, %d3				/*size = 1 */
-	trap	#0
+    move.b  7(%sp), BUF_OUTBYTE
+    movem.l %d0-%d3, -(%sp)
+outbyte_start:
+    move.l	#2, %d0             /* PUTSTRING */
+    move.l	#0, %d1
+    move.l	#BUF_OUTBYTE, %d2
+    move.l	#1, %d3
+    trap	#0
 
-	cmpi.l	#0, %d0
-	beq	outbyte_loop	/* if one character output doesn't succeed, it should be retried*/
+    cmpi.b	#1, %d0
+    bne     outbyte_start
 
-	movem.l	(%sp)+, %d1-%d3/%a0
-	rts
+    movem.l (%sp)+, %d0-%d3
+    rts
 
 .section .bss
-outbyte_buf:	.ds.b	1
+BUF_OUTBYTE:    .ds.b 1
+    .even
