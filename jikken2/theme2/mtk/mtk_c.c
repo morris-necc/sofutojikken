@@ -45,11 +45,11 @@ void set_task((*task_ptr)()) {
   for (TASK_ID_TYPE i = 1; i <= NUMTASK; i++) {
     // Find an empty slot in 'task_tab[]' omitting the 0th slot
     if (task_tab[i].status != OCCUPIED) {
-      new_task = i;
+      new_task_id = i;
       task.tab[i].task_addr = task_ptr;  //And substitute the ID to the 'new_task'
       task.tab[i].status = OCCUPIED;  //update status
-      task.tab[i].stack_ptr = init_stack(new_task); // stack initialization
-      addq(&ready, new_task) //register to ready queue
+      task.tab[i].stack_ptr = init_stack(new_task_id); // stack initialization
+      addq(&ready, new_task_id) //register to ready queue
       break;
     }
   }
