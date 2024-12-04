@@ -1,6 +1,15 @@
 #include <stdio.h>
 #include "mtk_c.h"
 
+TASK_ID_TYPE curr_task;
+TASK_ID_TYPE new_task;
+TASK_ID_TYPE next_task;
+TASK_ID_TYPE ready;
+
+SEMAPHORE_TYPE semaphore[NUMSEMAPHORE];
+TCB_TYPE task_tab[NUMTASK+1];
+STACK_TYPE stacks[NUMTASK];
+
 void init_kernel() {
   //No arguments
   //Returns nothing
