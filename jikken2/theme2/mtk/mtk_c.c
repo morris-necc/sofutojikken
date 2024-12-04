@@ -68,7 +68,9 @@ void* init_stack(TASK_ID_TYPE task_id) {
 }
 
 void begin_sch() {
-  //no argument
+  //No argument
+  //Returns nothing
+  
   curr_task = removeq(&ready); //take out one task from ready queue and put it in curr_task
   init_timer(); //initialize timer
   first_task(); //call first_task
