@@ -1,10 +1,10 @@
 // ******************************************
 // Constants
 // ******************************************
-#define NULLTASKID 0
-#define NUMTASK 5
+#define NULLTASKID 0 /*Queue's termination*/
+#define NUMTASK 5    /*Maximum number of tasks*/
 #define NUMSEMAPHORE 3
-#define STKSIZE 1024
+#define STKSIZE 1024 /*size of 1Kbyte*/
 
 
 // ******************************************
@@ -40,7 +40,7 @@ extern TASK_ID_TYPE next_task;
 extern TASK_ID_TYPE ready;
 
 extern SEMAPHORE_TYPE semaphore[NUMSEMAPHORE];
-extern TCB_TYPE task_tab[NUMTASK+1];
+extern TCB_TYPE task_tab[NUMTASK+1]; /*declaration of TCB's array*/
 extern STACK_TYPE stacks[NUMTASK];
 
 extern void init_kernel();
