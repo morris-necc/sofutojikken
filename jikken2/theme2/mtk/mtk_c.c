@@ -85,8 +85,22 @@ void begin_sch() {
   first_task(); //call first_task
 }
 
-void addq() {
-  //queue
+void addq(void* pointerToAQueue, TASK_ID_TYPE newTaskID) {
+  TASK_ID_TYPE currentTaskID = *pointerToAQueue;
+	if(currentTaskID != NULLTASKID) {
+	  while(1) {
+			TASK_ID_TYPE nextInLine = task_tab[currentTaskID].next;
+			if(nextInLine == NULLTASKID) {
+				task_tab[currentTaskID].next = newTaskID;
+				task_tab[newTaskID].next = NULLTASKID;
+				break;
+			} else {
+				currentTaskID = task_tab[currentTaskID].next;
+			}
+		}
+	} else {
+		*pointerToAQueue = newTaskID;
+	}
 }
 
 void removeq() {
