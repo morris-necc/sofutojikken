@@ -1,3 +1,6 @@
+#ifndef MTK_C_H
+#define MTK_C_H
+
 // ******************************************
 // Constants
 // ******************************************
@@ -10,14 +13,15 @@
 #define OCCUPIED 1
 #define FINISHED 2
 
+
 // ******************************************
 // User-made datatypes
 // ******************************************
 typedef int TASK_ID_TYPE;
 
 typedef struct {
-  void (*task addr)();
-  void *stack ptr;
+  void (*task_addr)();
+  void *stack_ptr;
   int priority;
   int status;
   TASK_ID_TYPE next;
@@ -46,12 +50,19 @@ extern SEMAPHORE_TYPE semaphore[NUMSEMAPHORE];
 extern TCB_TYPE task_tab[NUMTASK+1];
 extern STACK_TYPE stacks[NUMTASK];
 
-extern void init_kernel();
-extern void set_task();
-extern void init_stack();
-extern void begin_sch();
+// ******************************************
+// Function Declarations
+// ******************************************
+void init_kernel();
+void set_task(void (*task_ptr)());
+void* init_stack(TASK_ID_TYPE task_id);
+void begin_sch();
+
+
 extern void addq();
 extern void removeq();
+
+
 extern void sched();
 extern void sleep();
 extern void wakeup();
