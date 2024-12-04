@@ -6,6 +6,9 @@
 #define NUMSEMAPHORE 3
 #define STKSIZE 1024
 
+#define UNDEFINED 0
+#define OCCUPIED 1
+#define FINISHED 2
 
 // ******************************************
 // User-made datatypes
