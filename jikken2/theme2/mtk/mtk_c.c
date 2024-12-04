@@ -85,7 +85,7 @@ void begin_sch() {
   first_task(); //call first_task
 }
 
-void addq(void* pointerToAQueue, TASK_ID_TYPE newTaskID) {
+void addq(TASK_ID_TYPE* pointerToAQueue, TASK_ID_TYPE newTaskID) {
   TASK_ID_TYPE currentTaskID = *pointerToAQueue;
 	if(currentTaskID != NULLTASKID) {
 	  while(1) {
