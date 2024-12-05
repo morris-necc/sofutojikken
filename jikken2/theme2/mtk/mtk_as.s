@@ -26,8 +26,8 @@ first_task:
 	/* restore the ssp's value recorded in this task's TCB & USP value recorded in the ss*/
 	adda.l	#4, %a1		/* get stack pointer */
 	move.l	(%a1), %sp	/* restore stack pointer */
-	move.l	(%sp)+, %a2	/* pop stack containing _____ into a2*/
-	move.l	%a2, %USP	/* i dont get this part */
+	move.l	(%sp)+, %a2	/* pop stack containing USP into a2*/
+	move.l	%a2, %USP	/* restore USP */
 	
 
 	/* restoration of al of remained registers */
