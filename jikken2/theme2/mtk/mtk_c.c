@@ -113,10 +113,10 @@ TASK_ID_TYPE removeq(TASK_ID_TYPE* pointerToAQueue) {
 	}
 }
 
-void sched() {
-    while ((next_task = removeq(&ready)) == NULLTASKID) {
-        // Infinite loop if next task is NULLTASKID
-    }
+void sched(){
+    next_task = removeq(&ready);
+    if(next_task == NULLTASKID)
+	while(1);   //if next_task is nulltaskid, infinite loop
 }
 
 
