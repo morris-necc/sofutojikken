@@ -3,10 +3,16 @@
 #define MAX 1024
 
 void task1(){ 
-    // task1 definition 
-} 
+  while(1){
+    P(0);
+    V(0);}
+}
+
 void task2(){ 
-    // task2 definition 
+    // task2 definition
+  while(1){
+    P(0);
+    V(0);
 }
 
 void main(){

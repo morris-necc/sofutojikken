@@ -12,6 +12,16 @@
 #define UNDEFINED 0
 #define OCCUPIED 1
 #define FINISHED 2
+//*******************************************
+// extern variables
+//******************************************
+
+extern int id;//to check
+extern void pv_handler();
+extern void first_task();
+extern void swtch();
+extern void init_timer();
+
 
 
 // ******************************************

@@ -25,9 +25,10 @@ swtch:
 	move.w %SR , -(%sp)/*SR is piled up on the stack so that the process can be returned by the RTE.*/
 	
 	movem.l %d0-%d7/%a0-%a7,-(%sp)/*Saving register of task under execution*/
-	move.l %USP, -(%sp)
+	move.l %USP, %a1
+	move.l %a1, -(%sp)
 
-	move.l curr_task,%d0 /*current task */
+	move.l curr_task,%d0 /*current task ID*/
 	lea.l task_tab, %a0 /*save the pointer to the beginning of task_tab*/
 	mulu #20, %d0 /* because every element takes 4*5 bytes*/
 	addq.l #4,%d0 /*to access stack_ptr*/
@@ -47,7 +48,8 @@ swtch:
 	move.l (%a0), %sp /* read out next task's SSP*/
 
 	/*Read out register of next task*/
-	move.l (%sp)+,%USP
+	move.l (%sp)+,%a1
+	move.l %a1,%USP
 	movem.l (%sp)+,%d0-%d7/%a0-%a7
 
 	rte
@@ -72,7 +74,8 @@ first_task:
 	/* restore the ssp's value recorded in this task's TCB & USP value recorded in the ss*/
 	adda.l	#4, %a1		/* get stack pointer */
 	move.l	(%a1), %sp	/* restore stack pointer */
-	move.l	(%sp)+, %USP	/* restore USP */
+	move.l	(%sp)+, %a2
+	move.l	%a2, %USP	/* restore USP */
 	
 
 	/* restoration of al of remained registers */
@@ -90,13 +93,13 @@ first_task:
 ******************************************
 /* called from hardware intrruptprocessing interface for timer(prepared in 1st part) */
 hard_clock: /* timer interrupt routine */
-	movem.l %d0-%d1/%a1,-(%sp)  //save register of task under execution(piled up in ss: executed in timer interrupt!!!!)
+	movem.l %d0-%d1/%a1,-(%sp)  /*save register of task under execution(piled up in ss: executed in timer interrupt!!!!)*/
 	/*to check if supervisor mode*/
 	move.l %sp, %a1
 	adda.l #12,%a1
-	move.l (%a1),%d1//get SR value to %d1
+	move.l (%a1),%d1/*get SR value to %d1*/
 	addi.l #2000,%d1
-	cmpi.l #2000,%d1 //check if supervisor mode
+	cmpi.l #2000,%d1 /*check if supervisor mode*/
 	beq hard_clock_end
 	/* add "curr_task" to the end of 'ready' using addq() */
 	move.l curr_task,-(%sp)
