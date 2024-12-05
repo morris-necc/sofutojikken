@@ -59,8 +59,8 @@ void* init_stack(TASK_ID_TYPE task_id);
 void begin_sch();
 
 
-extern void addq();
-extern void removeq();
+extern void addq(TASK_ID_TYPE* pointerToAQueue, TASK_ID_TYPE newTaskID);
+extern TASK_ID_TYPE removeq(TASK_ID_TYPE* pointerToAQueue);
 
 
 extern void sched();
