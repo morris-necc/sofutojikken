@@ -64,7 +64,7 @@ extern TASK_ID_TYPE removeq(TASK_ID_TYPE* pointerToAQueue);
 
 
 extern void sched();
-extern void sleep();
-extern void wakeup();
-extern void p_body();
-extern void v_body();  //again, idk if tihs is right
+extern void sleep(int ch);
+extern void wakeup(int ch);
+extern void p_body(int id);
+extern void v_body(int id);  //again, idk if tihs is right
