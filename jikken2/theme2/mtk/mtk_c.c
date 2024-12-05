@@ -114,16 +114,22 @@ TASK_ID_TYPE removeq(TASK_ID_TYPE* pointerToAQueue) {
 }
 
 void sched() {
-  //queue
+    while ((next_task = removeq(&ready)) == NULLTASKID) {
+        // Infinite loop if next task is NULLTASKID
+    }
 }
 
-void sleep() {
-  //semaphore, queue
+
+void sleep(int ch) {
+    addq(&semaphore[ch].task_list, curr_task);
+    sched();
+    swtch();    
 }
 
-void wakeup() {
-  //semaphore, queue
+void wakeup(int ch) {
+    addq(&ready, removeq(&semaphore[ch].task_list));
 }
+
 
 void p_body() {
   //semaphore
