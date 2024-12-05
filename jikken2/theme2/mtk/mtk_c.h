@@ -1,5 +1,5 @@
-#ifndef MTK_C_H
-#define MTK_C_H
+#ifndef _MTK_C_H
+#define _MTK_C_H
 
 // ******************************************
 // Constants
@@ -79,8 +79,5 @@ void wakeup(int ch);
 void p_body(int id);
 void v_body(int id);  //again, idk if tihs is right
 
-extern int id;
-extern void pv_handler();
-extern void init_timer();
-extern void swtch();
-extern void first_task();
+
+#endif

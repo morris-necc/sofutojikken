@@ -13,9 +13,10 @@ void task2(){
   while(1){
     P(0);
     V(0);
+    }
 }
 
-void main(){
+int main(){
   //hardware initialization
   init_kernel(); // maybe?
   
@@ -23,4 +24,5 @@ void main(){
   set_task(task1);
   set_task(task2);
   begin_sch(); //start multitasking
+  return 0;
 }
