@@ -59,12 +59,12 @@ void* init_stack(TASK_ID_TYPE task_id);
 void begin_sch();
 
 
-extern void addq(TASK_ID_TYPE* pointerToAQueue, TASK_ID_TYPE newTaskID);
-extern TASK_ID_TYPE removeq(TASK_ID_TYPE* pointerToAQueue);
+void addq(TASK_ID_TYPE* pointerToAQueue, TASK_ID_TYPE newTaskID);
+TASK_ID_TYPE removeq(TASK_ID_TYPE* pointerToAQueue);
 
 
-extern void sched();
-extern void sleep(int ch);
-extern void wakeup(int ch);
-extern void p_body(int id);
-extern void v_body(int id);  //again, idk if tihs is right
+void sched();
+void sleep(int ch);
+void wakeup(int ch);
+void p_body(int id);
+void v_body(int id);  //again, idk if tihs is right
