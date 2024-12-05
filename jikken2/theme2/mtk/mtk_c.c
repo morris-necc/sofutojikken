@@ -28,7 +28,7 @@ void init_kernel() {
   //Registrate the P/V system call's interruption processing routine (pv_handler)
   //in the interrupt vector of TRAP #1
   // idk what this means
-  *(int*) 0x0084 = (int)pv_handler;
+  *(int*) 0x0084 = (int)(pv_handler);
 
   //Initialize the semaphore's value
   for(int i=0; i < NUMSEMAPHORE; i++){
