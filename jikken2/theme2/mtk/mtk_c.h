@@ -68,3 +68,9 @@ void sleep(int ch);
 void wakeup(int ch);
 void p_body(int id);
 void v_body(int id);  //again, idk if tihs is right
+
+extern int id;
+extern void pv_handler();
+extern void init_timer();
+extern void swtch();
+extern void first_task();
