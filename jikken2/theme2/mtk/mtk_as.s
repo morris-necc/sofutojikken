@@ -1,24 +1,25 @@
 .include "equdefs.inc"
 .section .text
-	.global pv_handler
-	.global P
-	.global V
 
-	.extern p_body
-	.extern v_body
-	.extern curr_task
-	.extern addq
-	.extern sched
-	.extern ready /*points to the first task*/
-	.extern task_tab
-	.extern next_task
+.global pv_handler
+.global P
+.global V
+
+.extern p_body
+.extern v_body
+.extern curr_task
+.extern addq
+.extern sched
+.extern ready /*points to the first task*/
+.extern task_tab
+.extern next_task
  
 
 ********************
 ** System call numbers 
 ******************** 
-	.equ    SYSCALL_P, 0
-	.equ    SYSCALL_V, 1
+.equ    SYSCALL_P, 0
+.equ    SYSCALL_V, 1
  
 swtch:
 	move.w %SR , -(%sp)/*SR is piled up on the stack so that the process can be returned by the RTE.*/
@@ -50,19 +51,6 @@ swtch:
 	movem.l (%sp)+,%d0-%d7/%a0-%a7
 
 	rte
-	
-	/*SSP’s saving:*/
-	*****************************************
-	** subroutine first_task
-	** To start user task: stack used by kernel is switched to the stack pointed by "curr_task"
-	** activated once (with "begin_sch()")
-	** ends with RTE
-	** needs to be in supervisor mode
-	*****************************************
-.extern curr_task
-.extern addq
-.extern sched
-.extern ready /*points to the first task*/
 
 *****************************************
 ** subroutine first_task
@@ -84,8 +72,7 @@ first_task:
 	/* restore the ssp's value recorded in this task's TCB & USP value recorded in the ss*/
 	adda.l	#4, %a1		/* get stack pointer */
 	move.l	(%a1), %sp	/* restore stack pointer */
-	move.l	(%sp)+, %a2	/* pop stack containing USP into a2*/
-	move.l	%a2, %USP	/* restore USP */
+	move.l	(%sp)+, %USP	/* restore USP */
 	
 
 	/* restoration of al of remained registers */
@@ -101,8 +88,8 @@ first_task:
 *** create the timer subroutines:
 *** init_timer/Trap#0:OK/set_timer:OK/reset_timer:OK/hard_clock
 ******************************************
-//called from hardware intrruptprocessing interface for timer(prepared in 1st part)
-hard_clock: // timer interrupt routine
+/* called from hardware intrruptprocessing interface for timer(prepared in 1st part) */
+hard_clock: /* timer interrupt routine */
 	movem.l %d0-%d1/%a1,-(%sp)  //save register of task under execution(piled up in ss: executed in timer interrupt!!!!)
 	/*to check if supervisor mode*/
 	move.l %sp, %a1
@@ -111,24 +98,24 @@ hard_clock: // timer interrupt routine
 	addi.l #2000,%d1
 	cmpi.l #2000,%d1 //check if supervisor mode
 	beq hard_clock_end
-	//add "curr_task" to the end of 'ready' using addq()
+	/* add "curr_task" to the end of 'ready' using addq() */
 	move.l curr_task,-(%sp)
 	move.l #ready, -(%sp)
 	jsr addq
 	addq.l #8, %sp
 
-	//start "sched": the ID of task to be executed next='next_task'
+	/* start "sched": the ID of task to be executed next='next_task' */
 	jsr sched
-	//start 'swtch'
+	/* start 'swtch'*/
 	jsr swtch
-	movem.l (%sp)+, %d0-%d1/%a1 //restoration of register
+	movem.l (%sp)+, %d0-%d1/%a1 /*restoration of register */
 	rts
 
 hard_clock_end:
 	movem.l (%sp)+, %d0-%d1/%a1
 	rts
 
-init_timer:	//clock interrupt routine: generates hardware interruption by the timer control routine(created in jikken1): interruption period: 1s)
+init_timer:	/* clock interrupt routine: generates hardware interruption by the timer control routine(created in jikken1): interruption period: 1s) */
 	movem.l %d0-%d2,-(%sp)
 	move.l	#SYSCALL_NUM_RESET_TIMER, %d0
 	trap #0
