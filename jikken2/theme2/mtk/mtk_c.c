@@ -131,10 +131,16 @@ void wakeup(int ch) {
 }
 
 
-void p_body() {
-  //semaphore
+void p_body(int id) {
+  semaphore[id].count--;
+  if (semaphore[id].count < 0){
+    sleep(id);
+  }
 }
 
-void v_body() {
-  //semaphore
+void v_body(int id) {
+  semaphore[id].count++
+    if (semaphore[id].count <= 0){
+      wakeup(id);
+    }
 }
