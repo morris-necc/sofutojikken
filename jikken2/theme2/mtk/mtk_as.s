@@ -5,7 +5,41 @@
 	.extern addq
 	.extern sched
 	.extern ready /*points to the first task*/
+	.extern task_tab
+	.extern next_task
 
+swtch:
+	move.w %SR , -(%sp)/*SR is piled up on the stack so that the process can be returned by the RTE.*/
+	
+	movem.l %d0-%d7/%a0-%a7,-(%sp)/*Saving register of task under execution*/
+	move.l %USP, -(%sp)
+
+	move.l curr_task,%d0 /*current task ID*/
+	lea.l task_tab, %a0 /*save the pointer to the beginning of task_tab*/
+	mulu #20, %d0 /* because every element takes 4*5 bytes*/
+	addq.l #4,%d0 /*to access stack_ptr*/
+	adda.l %d0, %a0 /*access the stack_ptr of curr_task in task_tab*/
+	move.l %sp, (%a0) /* record the SSP*/
+
+	/*Substitute ‘next_task’ for ‘curr_task’*/
+	lea.l curr_task, %a1
+	move.l next_task,(%a1)
+
+	/* Read out SSP of next task*/
+	move.l curr_task,%d0 /*current task ID*/
+	lea.l task_tab, %a0 /*save the pointer to the beginning of task_tab*/
+	mulu #20, %d0 /* because every element takes 4*5 bytes*/
+	addq.l #4,%d0 /*to access stack_ptr*/
+	adda.l %d0, %a0 /*access the stack_ptr of curr_task in task_tab*/
+	move.l (%a0), %sp /* read out next task's SSP*/
+
+	/*Read out register of next task*/
+	move.l (%sp)+,%USP
+	movem.l (%sp)+,%d0-%d7/%a0-%a7
+
+	rte
+	
+	/*SSP’s saving:*/
 	*****************************************
 	** subroutine first_task
 	** To start user task: stack used by kernel is switched to the stack pointed by "curr_task"
