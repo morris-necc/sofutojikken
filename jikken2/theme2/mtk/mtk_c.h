@@ -39,7 +39,7 @@ typedef struct {
 
 typedef struct {
   int count;
-  int nst; //reserved
+  int nst; /*reserved*/
   TASK_ID_TYPE task_list;
 } SEMAPHORE_TYPE;
 

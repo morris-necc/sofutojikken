@@ -26,9 +26,8 @@ void init_kernel() {
   ready = NULLTASKID; //Task id = 0;
 
   //Registrate the P/V system call's interruption processing routine (pv_handler)
-  //in the interrupt vector of TRAP #1
-  // idk what this means
-  *(int*) 0x0084 = (int)(pv_handler);
+  //set the interrupt vector of TRAP #1
+  *(int*) 0x084 = (int)(pv_handler);
 
   //Initialize the semaphore's value
   for(int i=0; i < NUMSEMAPHORE; i++){
@@ -116,7 +115,7 @@ TASK_ID_TYPE removeq(TASK_ID_TYPE* pointerToAQueue) {
 void sched(){
     next_task = removeq(&ready);
     if(next_task == NULLTASKID)
-	while(1);   //if next_task is nulltaskid, infinite loop
+	    while(1);   //if next_task is nulltaskid, infinite loop
 }
 
 

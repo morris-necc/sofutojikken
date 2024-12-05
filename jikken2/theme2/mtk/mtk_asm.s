@@ -1,9 +1,13 @@
 .include "equdefs.inc"
-.section .text
 
+
+.global first_task
 .global pv_handler
 .global P
 .global V
+.global hard_clock
+.global swtch
+.global init_timer
 
 .extern p_body
 .extern v_body
@@ -14,7 +18,8 @@
 .extern task_tab
 .extern next_task
  
-
+.section .text
+.even
 ********************
 ** System call numbers 
 ******************** 
