@@ -99,7 +99,7 @@ void addq(TASK_ID_TYPE* pointerToAQueue, TASK_ID_TYPE newTaskID) {
 			}
 		}
 	} else {
-		pointerToAQueue = &newTaskID;
+		*pointerToAQueue = newTaskID;
 	}
 }
 
@@ -108,7 +108,7 @@ TASK_ID_TYPE removeq(TASK_ID_TYPE* pointerToAQueue) {
 	if(topID == NULLTASKID) {
 		return NULLTASKID;
 	} else {
-		pointerToAQueue = &task_tab[topID].next;
+		*pointerToAQueue = task_tab[topID].next;
 		return topID;
 	}
 }
