@@ -86,9 +86,9 @@ void begin_sch() {
 }
 
 void addq(TASK_ID_TYPE* pointerToAQueue, TASK_ID_TYPE newTaskID) {
-  TASK_ID_TYPE currentTaskID = *pointerToAQueue;
+  	TASK_ID_TYPE currentTaskID = *pointerToAQueue;
 	if(currentTaskID != NULLTASKID) {
-	  while(1) {
+		while(1) {
 			TASK_ID_TYPE nextInLine = task_tab[currentTaskID].next;
 			if(nextInLine == NULLTASKID) {
 				task_tab[currentTaskID].next = newTaskID;
@@ -103,26 +103,44 @@ void addq(TASK_ID_TYPE* pointerToAQueue, TASK_ID_TYPE newTaskID) {
 	}
 }
 
-void removeq() {
-  //queue
+TASK_ID_TYPE removeq(TASK_ID_TYPE* pointerToAQueue) {
+	TASK_ID_TYPE topID = *pointerToAQueue;
+	if(topID == NULLTASKID) {
+		return NULLTASKID;
+	} else {
+		*pointerToAQueue = task_tab[topID].next;
+		return topID;
+	}
 }
 
-void sched() {
-  //queue
+void sched(){
+    next_task = removeq(&ready);
+    if(next_task == NULLTASKID)
+	while(1);   //if next_task is nulltaskid, infinite loop
 }
 
-void sleep() {
-  //semaphore, queue
+
+void sleep(int ch) {
+    addq(&semaphore[ch].task_list, curr_task);
+    sched();
+    swtch();    
 }
 
-void wakeup() {
-  //semaphore, queue
+void wakeup(int ch) {
+    addq(&ready, removeq(&semaphore[ch].task_list));
 }
 
-void p_body() {
-  //semaphore
+
+void p_body(int id) {
+  semaphore[id].count--;
+  if (semaphore[id].count < 0){
+    sleep(id);
+  }
 }
 
-void v_body() {
-  //semaphore
+void v_body(int id) {
+  semaphore[id].count++
+    if (semaphore[id].count <= 0){
+      wakeup(id);
+    }
 }
