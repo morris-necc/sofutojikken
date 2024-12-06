@@ -26,35 +26,35 @@
 .equ    SYSCALL_V, 1
  
 swtch:
-	move.w %SR , -(%sp)/*SR is piled up on the stack so that the process can be returned by the RTE.*/
+	move.w 	%SR , -(%sp)/*SR is piled up on the stack so that the process can be returned by the RTE.*/
 	
-	movem.l %d0-%d7/%a0-%a6,-(%sp)/*Saving register of task under execution*/
-	move.l %USP, %a1
-	move.l %a1, -(%sp)
+	movem.l %d0-%d7/%a0-%a7,-(%sp)/*Saving register of task under execution*/
+	move.l 	%USP, %a1
+	move.l 	%a1, -(%sp)
 
-	move.l curr_task,%d0 /*current task ID*/
-	lea.l task_tab, %a0 /*save the pointer to the beginning of task_tab*/
-	mulu #20, %d0 /* because every element takes 4*5 bytes*/
-	addq.l #4,%d0 /*to access stack_ptr*/
-	adda.l %d0, %a0 /*access the stack_ptr of curr_task in task_tab*/
-	move.l %sp, (%a0) /* record the SSP*/
+	move.l 	curr_task,%d0 	/*current task ID*/
+	lea.l 	task_tab, %a0 	/*save the pointer to the beginning of task_tab*/
+	mulu 	#20, %d0 	/* because every element takes 4*5 bytes*/
+	addq.l 	#4, %d0 		/*to access stack_ptr*/
+	adda.l 	%d0, %a0 	/*access the stack_ptr of curr_task in task_tab*/
+	move.l 	%sp, (%a0) 	/* record the SSP*/
 
 	/*Substitute ‘next_task’ for ‘curr_task’*/
-	lea.l curr_task, %a1
-	move.l next_task,(%a1)
+	lea.l 	curr_task, %a1
+	move.l 	next_task, (%a1)
 
 	/* Read out SSP of next task*/
-	move.l curr_task,%d0 /*current task ID*/
-	lea.l task_tab, %a0 /*save the pointer to the beginning of task_tab*/
-	mulu #20, %d0 /* because every element takes 4*5 bytes*/
-	addq.l #4,%d0 /*to access stack_ptr*/
-	adda.l %d0, %a0 /*access the stack_ptr of curr_task in task_tab*/
-	move.l (%a0), %sp /* read out next task's SSP*/
+	move.l 	curr_task,%d0 	/*current task ID*/
+	lea.l 	task_tab, %a0 	/*save the pointer to the beginning of task_tab*/
+	mulu 	#20, %d0 	/* because every element takes 4*5 bytes*/
+	addq.l 	#4, %d0 		/*to access stack_ptr*/
+	adda.l 	%d0, %a0 	/*access the stack_ptr of curr_task in task_tab*/
+	move.l 	(%a0), %sp 	/* read out next task's SSP*/
 
 	/*Read out register of next task*/
-	move.l (%sp)+,%a1
-	move.l %a1,%USP
-	movem.l (%sp)+,%d0-%d7/%a0-%a6
+	move.l 	(%sp)+, %a1
+	move.l 	%a1, %USP
+	movem.l (%sp)+, %d0-%d7/%a0-%a7
 
 	rte
 
@@ -84,7 +84,7 @@ first_task:
 
 	/* restoration of al of remained registers */
 	/* restore the values of remained 15 registers piled up on the supervisor's stack*/
-	movem.l	(%sp)+, %d0-%d7/%a0-%a6
+	movem.l	(%sp)+, %d0-%d7/%a0-%a7
 
 	/* start of user task */
 	/* execute the RTE instruction*/
@@ -99,19 +99,6 @@ first_task:
 hard_clock: /* timer interrupt routine */
 	movem.l	%d0-%d1/%a1,-(%sp)  /*save register of task under execution(piled up in ss: executed in timer interrupt!!!!)*/
 	/*to check if supervisor mode*/
-<<<<<<< HEAD
-	move.l %sp, %a1
-	adda.l #12,%a1
-	move.w (%a1),%d1/*get SR value to %d1*/
-	addi.w #0x2000,%d1
-	cmpi.w #0x2000,%d1 /*check if supervisor mode*/
-	beq hard_clock_end
-	/*add "curr_task" to the end of 'ready' using addq() */
-	move.l curr_task,-(%sp)
-	move.l #ready, -(%sp)
-	jsr addq
-	addq.l #8, %sp
-=======
 	movea.l %sp, %a1
 	adda.l 	#12,%a1
 	move.w 	(%a1),%d1	/*get SR value to %d1*/
@@ -123,7 +110,6 @@ hard_clock: /* timer interrupt routine */
 	move.l 	#ready, -(%sp)
 	jsr 	addq
 	add.l 	#8, %sp
->>>>>>> 89d5780826148eecc9f663a0cbd5973bda40bd30
 
 	/* start "sched": the ID of task to be executed next='next_task' */
 	jsr sched
@@ -138,7 +124,7 @@ init_timer:	/* clock interrupt routine: generates hardware interruption by the t
 	movem.l %d0-%d2,-(%sp)
 	
 	move.l	#SYSCALL_NUM_RESET_TIMER, %d0
-	trap #0
+	trap 	#0
 
 	move.l	#SYSCALL_NUM_SET_TIMER, %d0
 	move.w	#10000, %d1
@@ -179,13 +165,9 @@ V:
 ** According to D0, call p_body() or v_body()
 ********************************
 pv_handler:
-	move.w	#0x2700, %SR
-<<<<<<< HEAD
 	movem.l	%d1, -(%sp)	/* save argument on top of stack */
-	cmp	#0, %d0
-=======
+	move.w	#0x2700, %SR
 	cmp.l	#0, %d0
->>>>>>> 89d5780826148eecc9f663a0cbd5973bda40bd30
 	beq	CALL_P_BODY
 	cmp.l	#1, %d0
 	beq 	CALL_V_BODY
