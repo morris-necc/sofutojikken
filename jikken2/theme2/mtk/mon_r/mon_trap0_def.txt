@@ -1,0 +1,41 @@
+****************
+*** システムコール番号
+****************
+.equ SYSCALL_NUM_GETSTRING,		1
+.equ SYSCALL_NUM_PUTSTRING,		2
+.equ SYSCALL_NUM_RESET_TIMER,	3
+.equ SYSCALL_NUM_SET_TIMER,		4
+
+Trap #0 specification of the monitor systemcalls.
+
+SYSCALL_RESET_TIMER
+IN:
+	D0(L)	SYSCALL_NUM_RESET_TIMER
+OUT:
+	nothing
+
+SYSCALL_SET_TIMER
+IN:
+	D0(L)	SYSCALL_NUM_SET_TIMER
+	D1(W)	Timer interval (%D1 * 0.1msec)
+	D2(L)	Address of the timer interrupt main routine
+OUT:
+	nothing
+
+SYSCALL_GETSTRING
+IN:
+	D0(L)	SYSCALL_NUM_GETSTRING
+	D1(L)	Number of serial channel
+	D2(L)	Address of the memory area which received string is stored
+	D3(L)	Maximum number to be received to the memory area
+OUT:
+	D0(L)	Number of characters which is actually received to memory
+
+SYSCALL_PUTSTRING
+IN:
+	D0(L)	SYSCALL_NUM_PUTSTRING
+	D1(L)	Number of serial channel
+	D2(L)	Address of the memory area which sending string is stored
+	D3(L)	Maximum number to be sent to the serial buffer
+OUT:
+	D0(L)	Number of characters which is actually sent to serial buffer

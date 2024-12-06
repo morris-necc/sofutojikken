@@ -3,17 +3,26 @@
 #define MAX 1024
 
 void task1(){ 
-  while(1){
-    P(0);
-    V(0);}
-}
-
-void task2(){ 
+	P(1);
+	for(int i=1;i<=20;i++){
+		printf("\n1 %d",i);
+  	}
+  	V(1);
+  	while(1){
+  		printf("\ntask1 finished");
+  		}
+  	}
+void task2()
+{ 
     // task2 definition
-  while(1){
-    P(0);
-    V(0);
-    }
+	P(2);
+	for(int i=1;i<=20;i++){
+		printf("\n2 %d",i);
+  	}
+  	V(2);
+  	while(1){
+  		printf("\ntask2 finished");
+  	}
 }
 
 int main(){

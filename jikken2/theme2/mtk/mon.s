@@ -102,7 +102,7 @@ monitor_begin:				| start of the change
                             
     jsr		INIT_Q
     
-    move.w	#0x0000, %SR		/*USER MODE, LEVEL 0*/
+    move.w	#0x2000, %SR		/*USER MODE, LEVEL 0*/
     
     jmp		start			| end of the change
     
@@ -283,7 +283,6 @@ INTERGET:
 	move.l	#0, %d0		/* Queue #0 */
 	move.b	%d2, %d1 	/* move data to d1*/
 	jsr	INQ		
-	move.b	#'a', LED3
 	
 INTERGET_END:
 	movem.l	(%sp)+, %d0

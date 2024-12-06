@@ -29,7 +29,7 @@
 swtch:
 	move.w %SR , -(%sp)/*SR is piled up on the stack so that the process can be returned by the RTE.*/
 	
-	movem.l %d0-%d7/%a0-%a7,-(%sp)/*Saving register of task under execution*/
+	movem.l %d0-%d7/%a0-%a6,-(%sp)/*Saving register of task under execution*/
 	move.l %USP, %a1
 	move.l %a1, -(%sp)
 
@@ -55,7 +55,7 @@ swtch:
 	/*Read out register of next task*/
 	move.l (%sp)+,%a1
 	move.l %a1,%USP
-	movem.l (%sp)+,%d0-%d7/%a0-%a7
+	movem.l (%sp)+,%d0-%d7/%a0-%a6
 
 	rte
 
@@ -85,7 +85,7 @@ first_task:
 
 	/* restoration of al of remained registers */
 	/* restore the values of remained 15 registers piled up on the supervisor's stack*/
-	movem.l	(%sp)+, %d0-%d7/%a0-%a7
+	movem.l	(%sp)+, %d0-%d7/%a0-%a6
 
 	/* start of user task */
 	/* execute the RTE instruction*/
@@ -102,11 +102,11 @@ hard_clock: /* timer interrupt routine */
 	/*to check if supervisor mode*/
 	move.l %sp, %a1
 	adda.l #12,%a1
-	move.l (%a1),%d1/*get SR value to %d1*/
-	addi.l #2000,%d1
-	cmpi.l #2000,%d1 /*check if supervisor mode*/
+	move.w (%a1),%d1/*get SR value to %d1*/
+	addi.w #0x2000,%d1
+	cmpi.w #0x2000,%d1 /*check if supervisor mode*/
 	beq hard_clock_end
-	/* add "curr_task" to the end of 'ready' using addq() */
+	/*add "curr_task" to the end of 'ready' using addq() */
 	move.l curr_task,-(%sp)
 	move.l #ready, -(%sp)
 	jsr addq
@@ -116,8 +116,6 @@ hard_clock: /* timer interrupt routine */
 	jsr sched
 	/* start 'swtch'*/
 	jsr swtch
-	movem.l (%sp)+, %d0-%d1/%a1 /*restoration of register */
-	rts
 
 hard_clock_end:
 	movem.l (%sp)+, %d0-%d1/%a1
@@ -166,8 +164,8 @@ V:
 ** According to D0, call p_body() or v_body()
 ********************************
 pv_handler:
-	movem.l	%d1, -(%sp)	/* save argument on top of stack */
 	move.w	#0x2700, %SR
+	movem.l	%d1, -(%sp)	/* save argument on top of stack */
 	cmp	#0, %d0
 	beq	CALL_P_BODY
 	cmp	#1, %d0
