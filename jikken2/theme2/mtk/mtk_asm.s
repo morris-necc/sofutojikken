@@ -1,6 +1,5 @@
 .include "equdefs.inc"
 
-
 .global first_task
 .global pv_handler
 .global P
@@ -98,26 +97,24 @@ first_task:
 ******************************************
 /* called from hardware intrruptprocessing interface for timer(prepared in 1st part) */
 hard_clock: /* timer interrupt routine */
-	movem.l %d0-%d1/%a1,-(%sp)  /*save register of task under execution(piled up in ss: executed in timer interrupt!!!!)*/
+	movem.l	%d0-%d1/%a1,-(%sp)  /*save register of task under execution(piled up in ss: executed in timer interrupt!!!!)*/
 	/*to check if supervisor mode*/
-	move.l %sp, %a1
-	adda.l #12,%a1
-	move.l (%a1),%d1/*get SR value to %d1*/
-	addi.l #2000,%d1
-	cmpi.l #2000,%d1 /*check if supervisor mode*/
-	beq hard_clock_end
+	movea.l %sp, %a1
+	adda.l 	#12,%a1
+	move.w 	(%a1),%d1	/*get SR value to %d1*/
+	addi.w 	#0x2000,%d1
+	cmpi.w 	#0x2000,%d1 	/*check if supervisor mode*/
+	beq 	hard_clock_end
 	/* add "curr_task" to the end of 'ready' using addq() */
-	move.l curr_task,-(%sp)
-	move.l #ready, -(%sp)
-	jsr addq
-	addq.l #8, %sp
+	move.l 	curr_task,-(%sp)
+	move.l 	#ready, -(%sp)
+	jsr 	addq
+	add.l 	#8, %sp
 
 	/* start "sched": the ID of task to be executed next='next_task' */
 	jsr sched
 	/* start 'swtch'*/
 	jsr swtch
-	movem.l (%sp)+, %d0-%d1/%a1 /*restoration of register */
-	rts
 
 hard_clock_end:
 	movem.l (%sp)+, %d0-%d1/%a1
@@ -125,6 +122,7 @@ hard_clock_end:
 
 init_timer:	/* clock interrupt routine: generates hardware interruption by the timer control routine(created in jikken1): interruption period: 1s) */
 	movem.l %d0-%d2,-(%sp)
+	
 	move.l	#SYSCALL_NUM_RESET_TIMER, %d0
 	trap #0
 
@@ -134,6 +132,7 @@ init_timer:	/* clock interrupt routine: generates hardware interruption by the t
 	trap	#0
 
 	movem.l (%sp)+,%d0-%d2
+	rts
 
 ********************************
 ** Entrance of P system call
@@ -168,9 +167,9 @@ V:
 pv_handler:
 	movem.l	%d1, -(%sp)	/* save argument on top of stack */
 	move.w	#0x2700, %SR
-	cmp	#0, %d0
+	cmp.l	#0, %d0
 	beq	CALL_P_BODY
-	cmp	#1, %d0
+	cmp.l	#1, %d0
 	beq 	CALL_V_BODY
 	bra	end_pv_handler
 CALL_P_BODY:
