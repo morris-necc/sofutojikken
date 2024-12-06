@@ -59,7 +59,7 @@ void* init_stack(TASK_ID_TYPE task_id) {
   //returns address void *type that the user task SSP
 
   int* int_ssp = (int*)&stacks[task_id-1].sstack[STKSIZE]; //set int_ssp as bottom of stack
-  *(--int_ssp) = task_tab[task_id].task_addr; //push value of PC on the stack
+  *(--int_ssp) = (int)task_tab[task_id].task_addr; //push value of PC on the stack
 
   //push initial SR on the stack
   unsigned short int* short_ssp = (unsigned short int*)int_ssp;
@@ -70,7 +70,7 @@ void* init_stack(TASK_ID_TYPE task_id) {
   int_ssp -= 15;
 
   //push initial USP
-  *(--int_ssp) = (int*)&stacks[task_id-1].ustack[STKSIZE];
+  *(--int_ssp) = (int)&stacks[task_id-1].ustack[STKSIZE];
   
   return (void*)int_ssp;
 }
