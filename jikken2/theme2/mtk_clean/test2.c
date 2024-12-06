@@ -3,22 +3,23 @@
 #define MAX 1024
 
 void task1(){
-  P(1);
-  for(int i = 1; i <= 20; ++i){
+  P(0);
+  for(int i = 1; i <= 10; ++i){
     printf("\n1 %d", i);
   }
-  V(1);
+  printf("task1 loop done?");
+  V(0);
   while(1){
     printf("\ntask1 finished");
   }
 }
 
 void task2(){
-  P(1);
+  P(0);
   for(int i = 1; i <= 20; ++i){
-    printf("\n1 %d", i);
+    printf("\n2 %d", i);
   }
-  V(1);
+  V(0);
   while(1){
     printf("\ntask2 finished");
   }
@@ -26,11 +27,11 @@ void task2(){
 
 
 void task3(){
-  P(1);
+  P(0);
   for(int i = 1; i <= 20; ++i){
-    printf("\n1 %d", i);
+    printf("\n3 %d", i);
   }
-  V(1);
+  V(0);
   while(1){
     printf("\ntask3 finished");
   }
