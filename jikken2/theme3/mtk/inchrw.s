@@ -6,12 +6,13 @@
 .even
 
 inbyte:
-	move.l  4(%sp), CHANNEL			/* CHANNEL <- fp */
-	movem.l	%d1-%d3, -(%sp)
+	movem.l	%d1-%d3/%a0, -(%sp)
+	move.l	%sp, %a0
+	add.l	#20, %a0
 	
 inbyte_loop:
 	move.l	#SYSCALL_NUM_GETSTRING, %d0	/* GETSTRING*/
-	move.l	CHANNEL, %d1			/* channel */
+	move.l	(%a0), %d1			/* channel */
 	move.l	#BUF_INBYTE, %d2		/* head destination */
 	move.l	#1, %d3				/* no. of data to be read */
 	trap	#0				
@@ -21,11 +22,11 @@ inbyte_loop:
 
 	move.b	BUF_INBYTE, LED7
 
-	movem.l	(%sp)+, %d1-%d3
+	movem.l	(%sp)+, %d1-%d3/%a0
 	
 	rts
 
-inkey:
+inkey: /* ignore this */
 	movem.l	%a0/%d1-%d3, -(%sp)
 	lea.l	BUF_INBYTE, %a0
 	
@@ -51,6 +52,4 @@ inkey_end:
 
 .section .bss
 BUF_INBYTE: 	.ds.b 1
-CHANNEL:	.ds.l 1
     .even
-
