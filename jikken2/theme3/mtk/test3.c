@@ -12,19 +12,26 @@ FILE *com1in;
 FILE *com1out;
 
 void init_ports() {
-	bool success = true;
-	while(!success){
+	int success = 4;
+	while(success > 0){
+	
+	
 		com0in = fdopen(3, "r");
-		if (com0in == EBADF) success = false;
+		if (com0in != NULL) success--;
 	
 		com0out = fdopen(3, "w");
-		if (com0out == EBADF) success = false;
+		if (com0out != NULL) success--;
+		else fprintf(com0out, "Port 0 succesfully connected \n");
 	
 		com1in = fdopen(4, "r");
-		if (com1in == EBADF) success = false;
+		if (com1in != NULL) success--;
 	
 		com1out = fdopen(4, "w");
-		if (com1out == EBADF) success = false;
+		if (com1out != NULL) success--;
+		else fprintf(com0out, "Port 1 succesfully connected \n");
+		
+		success = 4;
+		
 	}
 	
 	fprintf(com0out, "Ports Initialized! \n");
