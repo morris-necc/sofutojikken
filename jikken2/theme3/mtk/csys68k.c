@@ -1,5 +1,5 @@
 #include <stdarg.h>
-#include <fentl.h>
+#include <fcntl.h>
 #include <errno.h>
 
 extern void outbyte(int ch, unsigned char c);
