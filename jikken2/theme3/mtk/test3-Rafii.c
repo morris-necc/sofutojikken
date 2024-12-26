@@ -5,8 +5,6 @@
 // escape characters definition
 #define ESC "\x1b"
 
-#define CLEARDISPLAY ESC "[H" ESC "[2J"
-
 #define CURSORINVISIBLE ESC "[?25l"
 #define CURSORVISIBLE ESC "[?25h"
 
@@ -39,16 +37,12 @@ int clock_pos_x, clock_pos_y;
 int chatlog_start_x, chatlog_start_y, chatlog_x, chatlog_y;
 
 int chatlog_read_index = 0, chatlog_write_index = 0, chatlog_size = 0;
-int chatlog_sender[1000] = {};
+char chatlog_sender[1000][11] = {};
 char chatlog[1000][101] = {};
 //
 
 
-void gotoxy(int channel, int x, int y) {
-	FILE* fd;
-	if(channel == 0) fd = com0out;
-	if(channel == 1) fd = com1out;
-	
+void gotoxy(FILE* fd, int x, int y) {
 	fprintf(fd, "\033[%d;%dH", x, y);
 }
 
@@ -178,9 +172,28 @@ void welcome_ui(int channel) {
 	// save coordinate to write chat log
 	chatlog_start_x = clock_pos_x + 2;
 	chatlog_start_y = 1;
+	// set chatlog pos
+	chatlog_x = chatlog_start_x;
+	chatlog_y = chatlog_start_y;
 	
 	// enable back cursor after drawing
 	fprintf(fd, "%s", CURSORVISIBLE);
+}
+
+void refresh_clock(FILE* fd) {
+	// refresh current runtime
+	gotoxy(fd, clock_pos_x, clock_pos_y);
+	fprintf(fd, "%02d:%02d:%02d", global_hour, global_min, global_sec);		// (10, 20)
+}
+
+void refresh_chat(FILE* fd) {
+	if(chatlog_read_index != chatlog_write_index) {
+		gotoxy(fd, chatlog_x, chatlog_y);
+		fprintf(fd, "| %s: %s", chatlog_sender[chatlog_read_index], chatlog[chatlog_read_index]);
+		
+		chatlog_x++;
+		chatlog_read_index++;
+	}
 }
 
 void draw_client_ui(int channel) {
@@ -199,26 +212,45 @@ void draw_client_ui(int channel) {
 	// disable cursor while drawing
 	fprintf(fd, "%s", CURSORINVISIBLE);
 	
-	// refresh current runtime
-	gotoxy(channel, clock_pos_x, clock_pos_y);
-	fprintf(fd, "%02d:%02d:%02d", global_hour, global_min, global_sec);		// (10, 20)
+	// refresh clock
+	refresh_clock(fd);
 	
-	//return;		// debug 
+	// refresh chatlog
+	refresh_chat(fd);
 	
-	chatlog_x = chatlog_start_x;
-	chatlog_y = chatlog_start_y;
-	
-	// print chatlog
-	if(chatlog_read_index < chatlog_write_index) {
-		gotoxy(channel, chatlog_x, chatlog_y);
-		fprintf(fd, "| Client%d: %s", chatlog_sender[chatlog_read_index] + 1, chatlog[chatlog_read_index]);
-		
-		chatlog_x++;
-		chatlog_read_index++;
-	}
+	// reposition cursor for input
+	gotoxy(fd, chatlog_x + 2, chatlog_y);
 	
 	// enable back cursor after drawing
-	// fprintf(fd, "%s", CURSORVISIBLE);
+	fprintf(fd, "%s", CURSORVISIBLE);
+}
+
+void get_client_input(int channel) {
+	FILE* fd;
+	if(channel == 0) fd = com0out;
+	if(channel == 1) fd = com1out;
+	
+	char input_buffer[101];
+	int input_index = 0;
+	if (inbyte(fd)) {
+		// Input is available, use fscanf to read from com0in
+		char tmp;
+		fscanf(fd, "%c", &tmp);  // Read one character at a time
+            
+		if (tmp == '\n') {
+			// End of input, process the message
+			input_buffer[input_index] = '\0';  					// Null-terminate the string
+			printf("Received message: %s\n", input_buffer);  	// Process message
+                
+			// Reset buffer index for the next message
+			input_index = 0;
+		} else {
+			// Store the character in the buffer
+			if (input_index < 100) {
+				input_buffer[input_index++] = tmp;
+			}
+		}
+	}
 }
 
 void client1() {
@@ -235,23 +267,23 @@ void client1() {
 	welcome_ui(0);
 	
 	// testing purpose
-	chatlog_sender[0] = 0;
+	strcpy(chatlog_sender[0], "announcer");
 	strcpy(chatlog[0], "Hi your message starts here\n");
-	chatlog_write_index++;
-	chatlog_size++;
+	
+	char tmp;
 	
 	while(1) {
 		// draw the ui for client1
 		draw_client_ui(0);
 		
-		// get input from user
-		// fscanf(com0in, "%c", &key_in);
-		
+		// use the pv stuff
 		P(0);
 		P(1);
-		
-		// input the string into chatlog
-		
+			get_client_input(0);
+			// input the string into chatlog
+			// strcpy(chatlog_sender[chatlog_write_index], "Client1");
+			// strcpy(chatlog[chatlog_write_index], tmp);
+			// chatlog_write_index++;
 		V(1);
 		V(0);	
 	}
