@@ -180,7 +180,6 @@ bool checkRotatable(int size, int turn) {
 		//brute force check if another ship is in the way
 		for (int i = 1; i < size; i++){
 			if (players[turn].map[players[turn].y + i][players[turn].x] == SHIP) return false;
-			
 		}
 		
 		
@@ -768,4 +767,3 @@ int main()
     	return 0;
 	
 }
-
