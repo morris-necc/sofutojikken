@@ -1,0 +1,398 @@
+68K GAS  mtk_asm.s 			page 1
+
+
+   1               	.include "equdefs.inc"
+   1               	***************************************************************
+   2               	**各種レジスタ定義
+   3               	***************************************************************
+   4               	***************
+   5               	**レジスタ群の先頭
+   6               	***************
+   7               	.equ REGBASE,   0xFFF000          | DMAPを使用．
+   8               	.equ IOBASE,    0x00d00000
+   9               	***************
+  10               	**割り込み関係のレジスタ
+  11               	***************
+  12               	.equ IVR,       REGBASE+0x300     |割り込みベクタレジスタ
+  13               	.equ IMR,       REGBASE+0x304     |割り込みマスクレジスタ
+  14               	.equ ISR,       REGBASE+0x30c     |割り込みステータスレジスタ
+  15               	.equ IPR,       REGBASE+0x310     |割り込みペンディングレジスタ
+  16               	***************
+  17               	**タイマ関係のレジスタ
+  18               	***************
+  19               	.equ TCTL1,     REGBASE+0x600     |タイマ１コントロールレジスタ
+  20               	.equ TPRER1,    REGBASE+0x602     |タイマ１プリスケーラレジスタ
+  21               	.equ TCMP1,     REGBASE+0x604     |タイマ１コンペアレジスタ
+  22               	.equ TCN1,      REGBASE+0x608     |タイマ１カウンタレジスタ
+  23               	.equ TSTAT1,    REGBASE+0x60a     |タイマ１ステータスレジスタ
+  24               	***************
+  25               	** UART1（送受信）関係のレジスタ
+  26               	***************
+  27               	.equ USTCNT1,   REGBASE+0x900     | UART1ステータス/コントロールレジスタ
+  28               	.equ UBAUD1,    REGBASE+0x902     | UART1ボーコントロールレジスタ
+  29               	.equ URX1,      REGBASE+0x904     | UART1受信レジスタ
+  30               	.equ UTX1,      REGBASE+0x906     | UART1送信レジスタ
+  31               	***************
+  32               	** LED
+  33               	***************
+  34               	.equ LED7,      IOBASE+0x000002f  |ボード搭載のLED用レジスタ
+  35               	.equ LED6,      IOBASE+0x000002d  |使用法については付録A.4.3.1
+  36               	.equ LED5,      IOBASE+0x000002b
+  37               	.equ LED4,      IOBASE+0x0000029
+  38               	.equ LED3,      IOBASE+0x000003f
+  39               	.equ LED2,      IOBASE+0x000003d
+  40               	.equ LED1,      IOBASE+0x000003b
+  41               	.equ LED0,      IOBASE+0x0000039
+  42               	
+  43               	***************
+  44               	**システムコール番号
+  45               	***************
+  46               	.equ SYSCALL_NUM_GETSTRING,     1
+  47               	.equ SYSCALL_NUM_PUTSTRING,     2
+  48               	.equ SYSCALL_NUM_RESET_TIMER,   3
+  49               	.equ SYSCALL_NUM_SET_TIMER,     4
+   2               	.section .text
+   3               	
+   4               	.global swtch
+   5               	.global pv_handler
+   6               	.global init_timer
+   7               	.global first_task
+   8               	.global P
+68K GAS  mtk_asm.s 			page 2
+
+
+   9               	.global V
+  10               	
+  11               	**齊藤　作成**
+  12               	********************************************************************************************
+  13               	**【機能】
+  14               	**Pシステムコールの入口…Cから呼ばれる関数（サブルーチン）として作�
+  15               	**Cプログラムから引数（セマフォID）付きで呼び出される
+  16               	**中では適切な値をレジスタに置き，TRAP #1 命令を実行する．
+  17               	********************************************************************************************
+  18               	**【レジスタ用途】
+  19               	**d0:p_body()のIDとして０を代入
+  20               	**d1:セマフォIDを代入
+  21               	*********************************************************************************************
+  22               	
+  23               	.text
+  24               	.even
+  25               	P:	
+  26 0000 48E7 6040 		movem.l %d1-%d2/%a1,-(%sp)	|レジスタ退避	
+  27 0004 7000      		move.l #0,%d0				|d0 = 0
+  28 0006 224F      		movea.l	%sp, %a1			|スタックポインタをa1にコピー
+  29 0008 7410      		move.l	#16,   %d2			|a1,d1,d2,PC各4ずつ
+  30 000a D3C2      		adda.l	%d2,   %a1			|スタックポインタにプラス16
+  31 000c 2211      		move.l	(%a1), %d1			|↑その位置の中身(セマフォID)をd1にコピー
+  32 000e 4E41      		trap #1						|pv_handlerを呼び出す
+  33 0010 4CDF 0206 		movem.l (%sp)+,%d1-%d2/%a1	|レジスタ復帰
+  34 0014 4E75      		rts
+  35               		
+  36               	**齊藤　作成**
+  37               	********************************************************************************************
+  38               	**【機能】
+  39               	**Vシステムコールの入口…Cから呼ばれる関数（サブルーチン）として作�
+  40               	**Cプログラムから引数（セマフォID）付きで呼び出される
+  41               	**中では適切な値をレジスタに置き，TRAP #1 命令を実行する．
+  42               	********************************************************************************************
+  43               	**【レジスタ用途】
+  44               	**d0:v_body()のIDとして1を代入
+  45               	**d1:セマフォIDを代入
+  46               	*********************************************************************************************
+  47               	
+  48               	.text
+  49               	.even
+  50               	V:	
+  51 0016 48E7 6040 		movem.l %d1-%d2/%a1,-(%sp)	| レジスタ退避	
+  52 001a 7001      		move.l #1,%d0				| d0 = 1
+  53 001c 224F      		movea.l	%sp, %a1			| スタックポインタをa1にコピー
+  54 001e 7410      		move.l	#16,   %d2			| a1,d1,d2,PC各4ずつ
+  55 0020 D3C2      		adda.l	%d2,   %a1			| スタックポインタにプラス16
+  56 0022 2211      		move.l	(%a1), %d1			| ↑その位置の中身(セマフォID)をd1にコピー
+  57 0024 4E41      		trap #1						| pv_handlerを呼び出す
+  58 0026 4CDF 0206 		movem.l (%sp)+,%d1-%d2/%a1	| レジスタ復帰
+  59 002a 4E75      		rts
+  60               		
+  61               	**齊藤作成**
+  62               	*****************************************
+  63               	**☆P.sとV.s中のtrap#1命令で呼び出される☆
+  64               	*****************************************
+  65               	**【機能】
+68K GAS  mtk_asm.s 			page 3
+
+
+  66               	**タスクの切り換え…割り込み処理ルーチンとして作成．
+  67               	**関数として呼び出されることはあってはならないが，
+  68               	**Cプログラムから関数として見えるようにしておくと，Cプログラム内で�
+  69               	**参照することができるので，例外ベクタに登録するのが容易である．
+  70               	***************************************************************************************************
+  71               	**【レジスタ用途】
+  72               	**d0:0ならp_body()、1ならv_body()
+  73               	**d1:セマフォID
+  74               	**両関数とも引数にセマフォIDを取るので、これをスタックに積んだ後サ�
+  75               	*********************************************************************************************
+  76               	.extern p_body
+  77               	.extern v_body
+  78               	
+  79               	.text
+  80               	.even
+  81               	pv_handler:
+  82 002c 40E7      		move.w	%SR, -(%sp)	|現走行レベルの退避	
+  83 002e 48E7 8080 		movem.l %d0/%a0, -(%sp)	|レジスタ退避
+  84 0032 46FC 2700 		move.w	#0x2700, %SR	|割り込み禁止 走行レベル７
+  85               		/*d0の値チェック*/
+  86 0036 0C80 0000 		cmp.l #0, %d0
+  86      0000 
+  87 003c 6700 000C 	    beq SYSCALL_p
+  88 0040 0C80 0000 		cmp.l #1, %d0
+  88      0001 
+  89 0046 6700 000C 		beq SYSCALL_v
+  90               	SYSCALL_p:
+  91 004a 203C 0000 		move.l #p_body, %d0
+  91      0000 
+  92 0050 6000 000C 		bra JUMP_pv
+  93               	SYSCALL_v:
+  94 0054 203C 0000 		move.l #v_body, %d0
+  94      0000 
+  95 005a 6000 0002 		bra JUMP_pv
+  96               	JUMP_pv:	
+  97 005e 2040      		movea.l %d0, %a0	
+  98 0060 2F01      		move.l %d1,-(%sp)	|セマフォIDをスタックに積む
+  99 0062 4E90      		jsr (%a0)			|p_body or v_body にジャンプ
+ 100               	
+ 101               	pv_FINISH:
+ 102 0064 588F      		addq.l #4,%sp		|引数として使われて削除されているのでスタックポインタを�
+ 103 0066 4CDF 0101 		movem.l (%sp)+,%d0/%a0 	|レジスタ復帰
+ 104 006a 46DF      		move.w	(%sp)+, %SR	|旧走行レベルの回復
+ 105 006c 4E73      		rte
+ 106               		
+ 107               	.extern task_tab
+ 108               	.extern curr_task
+ 109               	.extern next_task
+ 110               	
+ 111               	
+ 112               	swtch:
+ 113               	*********
+ 114               	***1. SR をスタックに積んで，RTE で復帰できるようにする．
+ 115               	***2. 実行中のタスクのレジスタの退避：
+ 116               	***D0〜D7，A0〜A6，USP をタスクのスーパバイザスタックに積む．
+ 117               	***3. SSP の保存:
+ 118               	***このタスクの TCB の位置を求め， SSP を正しい位置に記録する．
+68K GAS  mtk_asm.s 			page 4
+
+
+ 119               	***4. curr task を変更:
+ 120               	***curr task に next task を代入する．swtch の呼び出し前にスケジューラ sched �
+ 121               	***ているため，next task には次に実行するタスク ID がセットされている．
+ 122               	***5. 次のタスクの SSP の読み出し：
+ 123               	***新たな curr task の値を元に TCB の位置を割り出して，その中に記録され�
+ 124               	***値を回復する．これにより，スーパバイザスタックが次のタスクのもの
+ 125               	***6. 次のタスクのレジスタの読み出し：
+ 126               	***切り換わったスーパバイザスタックから USP，D0〜D7，A0〜A6 の値を回復�
+ 127               	***7. タスク切り替えをおこす:
+ 128               	***RTE を実行する．
+ 129               	*********
+ 130               		***1. SR をスタックに積んで，RTE で復帰できるようにする．
+ 131 006e 40E7      		move.w %sr, -(%sp)      		/*SRを退避*/
+ 132               	
+ 133               		***2. 実行中のタスクのレジスタの退避：
+ 134 0070 48E7 FFFE 		movem.l %d0-%d7/%a0-%a6, -(%sp)	/*実行中のタスクのレジスタを退避*/
+ 135 0074 4E6E      		move.l %USP, %a6        		/*USPをa6に転送*/
+ 136 0076 2F0E      		move.l %a6, -(%sp)      		/*USPを退避*/
+ 137               	
+ 138               		***3. SSP の保存:
+ 139 0078 7000      		move.l #0, %d0  
+ 140 007a 2039 0000 		move.l curr_task, %d0	/*カレントタスクのIDを転送*/
+ 140      0000 
+ 141 0080 41F9 0000 		lea.l task_tab, %a0		/*タスクコントロールブロックの先頭アドレスを転送*/
+ 141      0000 
+ 142 0086 C0FC 0014 		mulu #20, %d0			/*カレントIDを20倍*/
+ 143 008a D1C0      		adda.l %d0, %a0			/*カレントタスクのTCBのアドレスを求める*/
+ 144 008c 5888      		addq.l #4, %a0			/*SSPの位置を計算*/
+ 145 008e 208F      		move.l %sp, (%a0)		/*SSPを保存*/
+ 146               	
+ 147               		***4. curr task を変更:
+ 148 0090 43F9 0000 		lea.l curr_task, %a1    /*カレントタスクのアドレスをa1に転送*/
+ 148      0000 
+ 149 0096 22B9 0000 		move.l next_task, (%a1) /*next_taskの値をa1に格納*/
+ 149      0000 
+ 150               	
+ 151               		***5. 次のタスクの SSP の読み出し：
+ 152 009c 2039 0000 		move.l curr_task, %d0   /*カレントタスクのIDを転送*/
+ 152      0000 
+ 153 00a2 41F9 0000 		lea.l task_tab, %a0     /*タスクコントロールブロックの先頭アドレスを転送*/
+ 153      0000 
+ 154 00a8 C0FC 0014 		mulu #20, %d0			/*カレントIDを20倍*/
+ 155 00ac D1C0      		adda.l %d0, %a0         /*カレントタスクのTCBのアドレスを求める*/
+ 156 00ae 5888      		addq.l #4, %a0			/*SSPの位置を計算*/
+ 157 00b0 2E50      		move.l (%a0), %sp       /*SSPを回復*/
+ 158               	
+ 159               		***6. 次のタスクのレジスタの読み出し：
+ 160 00b2 2C5F      		move.l (%sp)+, %a6     			/*a6を復帰*/
+ 161 00b4 4E66      		move.l %a6, %USP        		/*USPを回復*/
+ 162 00b6 4CDF 7FFF 		movem.l (%sp)+, %d0-%d7/%a0-%a6 /*全レジスタ回復*/
+ 163               	
+ 164               		***7. タスク切り替えをおこす:
+ 165 00ba 4E73      		rte
+ 166               	
+ 167               	.extern addq
+ 168               	.extern sched
+ 169               	.extern ready
+68K GAS  mtk_asm.s 			page 5
+
+
+ 170               	
+ 171               	first_task:
+ 172               	************
+ 173               	***1. TCB 先頭番地の計算：
+ 174               	***curr task の TCB のアドレスを見つける．
+ 175               	***2. USP，SSP の値の回復：
+ 176               	***このタスクの TCB に記録されている SSP の値およびスーパバイザスタッ�
+ 177               	***る USP の値を回復する．
+ 178               	***3. 残りの全レジスタの回復：
+ 179               	***スーパーバイザスタックに積まれている残り 15 本のレジスタの値を回�
+ 180               	***4. ユーザタスクの起動：
+ 181               	***RTE 命令を実行する．
+ 182               	************
+ 183               		***1.TCBの先頭番地の計算
+ 184 00bc 7200      		move.l #0, %d1        
+ 185 00be 2239 0000 		move.l curr_task, %d1   /* カレントタスクのIDを転送 */
+ 185      0000 
+ 186 00c4 41F9 0000 		lea.l task_tab, %a0     /* タスクコントロールブロックの先頭アドレスを転送 *
+ 186      0000 
+ 187 00ca C2FC 0014 		mulu #20, %d1           /* カレントIDを20倍 */
+ 188 00ce D1C1      		adda.l %d1, %a0         /* カレントタスクのTCBのアドレスを求める */
+ 189               	
+ 190               		***2. USP，SSP の値の回復：
+ 191 00d0 5888      		addq.l #4, %a0          /* SSPの位置を計算 */
+ 192 00d2 2E50      		move.l (%a0), %sp       /* SSPを回復 */
+ 193 00d4 2C5F      		move.l (%sp)+, %a6      /* a6を復帰 */
+ 194 00d6 4E66      		move.l %a6,%USP         /* USPを回復 */
+ 195               	
+ 196               		***3. 残りの全レジスタの回復：
+ 197               		***move.w	(%sp)+, %SR	|旧走行レベルの回復
+ 198 00d8 4CDF 7FFF 		movem.l (%sp)+, %d0-%d7/%a0-%a6     /*全レジスタ回復*/
+ 199               	
+ 200               		***4. ユーザタスクの起動：
+ 201 00dc 13FC 0038 		move.b #'8',LED7
+ 201      00D0 002F 
+ 202 00e4 4E73      		rte     				/*ユーザタスクの起動*/
+ 203               	
+ 204               	/*
+ 205               	; 7. init_timer
+ 206               	; クロック割り込みルーチンhard_clockをベクトルテーブルに登録するルーチ
+ 207               	; 
+ 208               	; 担当：武石
+ 209               	*/
+ 210               	
+ 211               	init_timer:
+ 212 00e6 48E7 E000 	    movem.l %d0-%d2,-(%sp)
+ 213               	
+ 214 00ea 7003      		move.l #SYSCALL_NUM_RESET_TIMER,%d0 | SYSCALL_NUM_RESET_TIMER=3
+ 215 00ec 4E40      		trap   #0
+ 216               	
+ 217 00ee 7004      		move.l #SYSCALL_NUM_SET_TIMER, %d0  | SYSCALL_NUM_SET_TIMER=4
+ 218 00f0 323C 00C8 		move.w #200, %d1                  | たいたい1秒
+ 219 00f4 243C 0000 		move.l #hard_clock, %d2
+ 219      0000 
+ 220 00fa 4E40      		trap #0
+ 221               	
+ 222 00fc 4CDF 0007 	    movem.l (%sp)+, %d0-%d2
+68K GAS  mtk_asm.s 			page 6
+
+
+ 223 0100 4E75      	    rts
+ 224               	    
+ 225               	/*
+ 226               	; 6. hard_clock
+ 227               	; クロック割り込みルーチン。モニタのシステムコールTRAP #0 を利用して�
+ 228               	; 
+ 229               	; 担当：武石
+ 230               	*/
+ 231               	
+ 232               	hard_clock:
+ 233               	    * 1. 実行中のタスクのレジスタの退避
+ 234 0102 48E7 C040 	    movem.l %d0-%d1/%a1,-(%sp)
+ 235               	
+ 236               	    * テキストp22参照
+ 237 0106 224F      	    movea.l	%sp, %a1
+ 238 0108 700C      	    move.l #12, %d0     | レジスタ3つ分
+ 239 010a D3C0      	    adda.l %d0, %a1     | a1 = SR
+ 240 010c 3211      	    move.w (%a1), %d1   | d1 = (SR)
+ 241 010e 0241 2000 	    andi.w #0x2000, %d1 | d1 = (SR) & 0x2000
+ 242 0112 0C41 2000 	    cmpi.w #0x2000, %d1 | 13bit目が1かどうか
+ 243 0116 6700 0020 	    beq hard_clock_end  | 13bit目が1でなければ(ユーザーモードであれば)終了
+ 244               	
+ 245               	    * 2. addq()により, curr_taskをreadyの末尾に追加.
+ 246 011a 2F39 0000 	    move.l curr_task, -(%sp)
+ 246      0000 
+ 247 0120 2F3C 0000 	    move.l #ready, -(%sp)
+ 247      0000 
+ 248 0126 4EB9 0000 	    jsr addq
+ 248      0000 
+ 249 012c 508F      	    add.l #8, %sp
+ 250               	
+ 251               	    * 3. schedを起動.
+ 252 012e 4EB9 0000 	    jsr sched
+ 252      0000 
+ 253               	
+ 254               	    * 4. swtchを起動.
+ 255 0134 4EBA FF38 	    jsr swtch
+ 256               	
+ 257               	hard_clock_end:
+ 258               	    * 5. レジスタの復帰.
+ 259 0138 4CDF 0203 	    movem.l (%sp)+, %d0-%d1/%a1 
+ 260 013c 4E75      	    rts
+68K GAS  mtk_asm.s 			page 7
+
+
+DEFINED SYMBOLS
+         equdefs.inc:7      *ABS*:0000000000fff000 REGBASE
+         equdefs.inc:8      *ABS*:0000000000d00000 IOBASE
+         equdefs.inc:12     *ABS*:0000000000fff300 IVR
+         equdefs.inc:13     *ABS*:0000000000fff304 IMR
+         equdefs.inc:14     *ABS*:0000000000fff30c ISR
+         equdefs.inc:15     *ABS*:0000000000fff310 IPR
+         equdefs.inc:19     *ABS*:0000000000fff600 TCTL1
+         equdefs.inc:20     *ABS*:0000000000fff602 TPRER1
+         equdefs.inc:21     *ABS*:0000000000fff604 TCMP1
+         equdefs.inc:22     *ABS*:0000000000fff608 TCN1
+         equdefs.inc:23     *ABS*:0000000000fff60a TSTAT1
+         equdefs.inc:27     *ABS*:0000000000fff900 USTCNT1
+         equdefs.inc:28     *ABS*:0000000000fff902 UBAUD1
+         equdefs.inc:29     *ABS*:0000000000fff904 URX1
+         equdefs.inc:30     *ABS*:0000000000fff906 UTX1
+         equdefs.inc:34     *ABS*:0000000000d0002f LED7
+         equdefs.inc:35     *ABS*:0000000000d0002d LED6
+         equdefs.inc:36     *ABS*:0000000000d0002b LED5
+         equdefs.inc:37     *ABS*:0000000000d00029 LED4
+         equdefs.inc:38     *ABS*:0000000000d0003f LED3
+         equdefs.inc:39     *ABS*:0000000000d0003d LED2
+         equdefs.inc:40     *ABS*:0000000000d0003b LED1
+         equdefs.inc:41     *ABS*:0000000000d00039 LED0
+         equdefs.inc:46     *ABS*:0000000000000001 SYSCALL_NUM_GETSTRING
+         equdefs.inc:47     *ABS*:0000000000000002 SYSCALL_NUM_PUTSTRING
+         equdefs.inc:48     *ABS*:0000000000000003 SYSCALL_NUM_RESET_TIMER
+         equdefs.inc:49     *ABS*:0000000000000004 SYSCALL_NUM_SET_TIMER
+           mtk_asm.s:112    .text:000000000000006e swtch
+           mtk_asm.s:81     .text:000000000000002c pv_handler
+           mtk_asm.s:211    .text:00000000000000e6 init_timer
+           mtk_asm.s:171    .text:00000000000000bc first_task
+           mtk_asm.s:25     .text:0000000000000000 P
+           mtk_asm.s:50     .text:0000000000000016 V
+           mtk_asm.s:90     .text:000000000000004a SYSCALL_p
+           mtk_asm.s:93     .text:0000000000000054 SYSCALL_v
+           mtk_asm.s:96     .text:000000000000005e JUMP_pv
+           mtk_asm.s:101    .text:0000000000000064 pv_FINISH
+           mtk_asm.s:232    .text:0000000000000102 hard_clock
+           mtk_asm.s:257    .text:0000000000000138 hard_clock_end
+
+UNDEFINED SYMBOLS
+p_body
+v_body
+curr_task
+task_tab
+next_task
+ready
+addq
+sched
