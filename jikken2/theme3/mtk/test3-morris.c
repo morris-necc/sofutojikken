@@ -247,6 +247,8 @@ void clearShip(int size, int turn) {
 	// enable cursor
 	fprintf(screen, "\033[%d;%dH", 24, 1);
 	fprintf(screen, "%s",CURSORVISIBLE);
+	
+	fflush(screen);
 }
 
 void moveShip(int size, int turn) {
@@ -289,6 +291,8 @@ void moveShip(int size, int turn) {
 	// enable cursor
 	fprintf(screen, "\033[%d;%dH", 24, 1);
 	fprintf(screen, "%s", CURSORVISIBLE);
+	
+	fflush(screen);
 }
 
 void setupInputResponse(int turn, char in) {
@@ -429,7 +433,7 @@ void drawSetupScreen(int turn) {
 	// pick which screen to output to
 	if (turn == 0) {
 		// clear the screen
-		fprintf(com0out, DELETESCREEN);
+		// fprintf(com0out, DELETESCREEN);
 	
 		// move cursor to (1, 1)
 		fprintf(com0out, "\033[1;1H");
@@ -454,9 +458,11 @@ void drawSetupScreen(int turn) {
 		// enable cursor
 		fprintf(com0out, "%s", CURSORVISIBLE);
 		
+		fflush(com0out);
+		
 	} else {
 		// clear the screen
-		fprintf(com1out, DELETESCREEN);
+		// fprintf(com1out, DELETESCREEN);
 	
 		// move cursor to (1, 1)
 		fprintf(com1out, "\033[1;1H");
@@ -478,6 +484,8 @@ void drawSetupScreen(int turn) {
 		fprintf(com1out, "R = Rotate, WASD = Up Left Down Right, F = Place Ship\n");
 		
 		fprintf(com1out, "%s", CURSORVISIBLE);
+		
+		fflush(com1out);
 	}	
 }
 
@@ -545,12 +553,11 @@ void spawnShip(int turn) {
 			if (players[turn].map[empy][empx] == EMPTY) count++;
 			else count = 0;
 			
-			if (count == curr_size) { //this condition is never reached for some reason
-				//if space of curr_size has been reached, set spawn point
+			if (count == curr_size) { 
 				players[turn].x = empx - curr_size + 1;
 				players[turn].y = empy;
 				
-				fprintf(com0out, "new position set at %d, %d", players[turn].x, players[turn].y);
+				fprintf(com0out, "new position set at (%d, %d)", players[turn].x, players[turn].y);
 				
 				for(int i = 0; i < curr_size; i++) {
 					players[turn].map[empy][players[turn].x + i] = SHIP;
@@ -752,8 +759,14 @@ int main()
 	init_kernel();
 	init_ports();
 	
+	fprintf(com0out, DELETESCREEN);
+	fprintf(com1out, DELETESCREEN);
+	
 	printIntro();
 	initPlayers();
+	
+	fprintf(com0out, DELETESCREEN);
+	fprintf(com1out, DELETESCREEN);
 	
 	//setup stage, players traverse their own map
     	set_task(player1);
