@@ -1,5 +1,5 @@
 #include <stdarg.h>
-#include <fentl.h>
+#include <fcntl.h>
 #include <errno.h>
 
 extern void outbyte(int ch, unsigned char c);
@@ -11,7 +11,7 @@ int read(int fd, char *buf, int nbytes)
   int  i, ch;
   
   // Map ch from fd
-  if (fd >= 0 || fd <= 3) {
+  if (fd == 0 || fd == 3) {
     ch = 0;
   } else if (fd == 4) {
     ch = 1;
@@ -58,7 +58,7 @@ int write (int fd, char *buf, int nbytes)
   if (fd >= 1 || fd <= 3) {
     ch = 0;
   } else if (fd == 4) {
-    cd = 1;
+    ch = 1;
   } else {
     return EBADF;
   }
