@@ -1,0 +1,1190 @@
+68K GAS  /tmp/cc63DZVV.s 			page 1
+
+
+   1               	#NO_APP
+   2               		.file	"test2.c"
+   3               		.text
+   4               	.Ltext0:
+   5               		.cfi_sections	.debug_frame
+   6               		.section	.rodata.str1.1,"aMS",@progbits,1
+   7               	.LC0:
+   8 0000 3220 2564 		.string	"2 %d\n"
+   8      0A00 
+   9               		.text
+  10               		.align	2
+  11               		.globl	task2
+  12               		.type	task2, @function
+  13               	task2:
+  14               	.LFB4:
+  15               		.file 1 "test2.c"
+   1:test2.c       **** #include <stdio.h>
+   2:test2.c       **** #include "mtk_c.h"
+   3:test2.c       **** 
+   4:test2.c       **** #define MAX 1024
+   5:test2.c       **** 
+   6:test2.c       **** void task1()
+   7:test2.c       **** {
+   8:test2.c       **** 	P(0);
+   9:test2.c       **** 	for (int i=1;i<=500;i++){
+  10:test2.c       **** 		printf("1 %d\n", i);
+  11:test2.c       **** 		}
+  12:test2.c       **** 	V(0);
+  13:test2.c       **** 	
+  14:test2.c       **** }
+  15:test2.c       **** 
+  16:test2.c       **** void task2()
+  17:test2.c       **** {	
+  16               		.loc 1 17 1 view -0
+  17               		.cfi_startproc
+  18 0000 2F0A      		move.l %a2,-(%sp)
+  19               		.cfi_def_cfa_offset 8
+  20               		.cfi_offset 10, -8
+  21 0002 2F02      		move.l %d2,-(%sp)
+  22               		.cfi_def_cfa_offset 12
+  23               		.cfi_offset 2, -12
+  18:test2.c       **** 	P(0);
+  24               		.loc 1 18 2 view .LVU1
+  25 0004 42A7      		clr.l -(%sp)
+  26               		.cfi_def_cfa_offset 16
+  27 0006 4EB9 0000 		jsr P
+  27      0000 
+  28               	.LVL0:
+  19:test2.c       **** 	for (int i=1;i<=500;i++){
+  29               		.loc 1 19 2 view .LVU2
+  30               	.LBB2:
+  31               		.loc 1 19 7 view .LVU3
+  32               		.loc 1 19 16 view .LVU4
+  33               	.LBE2:
+  18:test2.c       **** 	P(0);
+  34               		.loc 1 18 2 is_stmt 0 view .LVU5
+  35 000c 588F      		addq.l #4,%sp
+68K GAS  /tmp/cc63DZVV.s 			page 2
+
+
+  36               		.cfi_def_cfa_offset 12
+  37               	.LBB3:
+  38               		.loc 1 19 11 view .LVU6
+  39 000e 7401      		moveq #1,%d2
+  40 0010 45F9 0000 		lea printf,%a2
+  40      0000 
+  41               	.LVL1:
+  42               	.L2:
+  20:test2.c       **** 		printf("2 %d\n", i);
+  43               		.loc 1 20 3 is_stmt 1 discriminator 3 view .LVU7
+  44 0016 2F02      		move.l %d2,-(%sp)
+  45               		.cfi_def_cfa_offset 16
+  46 0018 4879 0000 		pea .LC0
+  46      0000 
+  47               		.cfi_def_cfa_offset 20
+  48 001e 4E92      		jsr (%a2)
+  49               	.LVL2:
+  19:test2.c       **** 	for (int i=1;i<=500;i++){
+  50               		.loc 1 19 23 discriminator 3 view .LVU8
+  51 0020 5282      		addq.l #1,%d2
+  52               	.LVL3:
+  19:test2.c       **** 	for (int i=1;i<=500;i++){
+  53               		.loc 1 19 16 discriminator 3 view .LVU9
+  54 0022 508F      		addq.l #8,%sp
+  55               		.cfi_def_cfa_offset 12
+  56 0024 0C82 0000 		cmp.l #501,%d2
+  56      01F5 
+  57 002a 66EA      		jne .L2
+  58               	.LBE3:
+  21:test2.c       **** 		}
+  22:test2.c       **** 	//V(0);
+  23:test2.c       **** 	
+  24:test2.c       ****        
+  25:test2.c       **** }
+  59               		.loc 1 25 1 is_stmt 0 view .LVU10
+  60 002c 241F      		move.l (%sp)+,%d2
+  61               	.LVL4:
+  62               		.loc 1 25 1 view .LVU11
+  63 002e 245F      		move.l (%sp)+,%a2
+  64 0030 4E75      		rts
+  65               		.cfi_endproc
+  66               	.LFE4:
+  67               		.size	task2, .-task2
+  68               		.section	.rodata.str1.1
+  69               	.LC1:
+  70 0006 3120 2564 		.string	"1 %d\n"
+  70      0A00 
+  71               		.text
+  72               		.align	2
+  73               		.globl	task1
+  74               		.type	task1, @function
+  75               	task1:
+  76               	.LFB3:
+   7:test2.c       **** 	P(0);
+  77               		.loc 1 7 1 is_stmt 1 view -0
+  78               		.cfi_startproc
+  79 0032 2F0A      		move.l %a2,-(%sp)
+68K GAS  /tmp/cc63DZVV.s 			page 3
+
+
+  80               		.cfi_def_cfa_offset 8
+  81               		.cfi_offset 10, -8
+  82 0034 2F02      		move.l %d2,-(%sp)
+  83               		.cfi_def_cfa_offset 12
+  84               		.cfi_offset 2, -12
+   8:test2.c       **** 	for (int i=1;i<=500;i++){
+  85               		.loc 1 8 2 view .LVU13
+  86 0036 42A7      		clr.l -(%sp)
+  87               		.cfi_def_cfa_offset 16
+  88 0038 4EB9 0000 		jsr P
+  88      0000 
+  89               	.LVL5:
+   9:test2.c       **** 		printf("1 %d\n", i);
+  90               		.loc 1 9 2 view .LVU14
+  91               	.LBB4:
+   9:test2.c       **** 		printf("1 %d\n", i);
+  92               		.loc 1 9 7 view .LVU15
+   9:test2.c       **** 		printf("1 %d\n", i);
+  93               		.loc 1 9 16 view .LVU16
+  94               	.LBE4:
+   8:test2.c       **** 	for (int i=1;i<=500;i++){
+  95               		.loc 1 8 2 is_stmt 0 view .LVU17
+  96 003e 588F      		addq.l #4,%sp
+  97               		.cfi_def_cfa_offset 12
+  98               	.LBB5:
+   9:test2.c       **** 		printf("1 %d\n", i);
+  99               		.loc 1 9 11 view .LVU18
+ 100 0040 7401      		moveq #1,%d2
+ 101 0042 45F9 0000 		lea printf,%a2
+ 101      0000 
+ 102               	.LVL6:
+ 103               	.L7:
+  10:test2.c       **** 		}
+ 104               		.loc 1 10 3 is_stmt 1 discriminator 3 view .LVU19
+ 105 0048 2F02      		move.l %d2,-(%sp)
+ 106               		.cfi_def_cfa_offset 16
+ 107 004a 4879 0000 		pea .LC1
+ 107      0000 
+ 108               		.cfi_def_cfa_offset 20
+ 109 0050 4E92      		jsr (%a2)
+ 110               	.LVL7:
+   9:test2.c       **** 		printf("1 %d\n", i);
+ 111               		.loc 1 9 23 discriminator 3 view .LVU20
+ 112 0052 5282      		addq.l #1,%d2
+ 113               	.LVL8:
+   9:test2.c       **** 		printf("1 %d\n", i);
+ 114               		.loc 1 9 16 discriminator 3 view .LVU21
+ 115 0054 508F      		addq.l #8,%sp
+ 116               		.cfi_def_cfa_offset 12
+ 117 0056 0C82 0000 		cmp.l #501,%d2
+ 117      01F5 
+ 118 005c 66EA      		jne .L7
+ 119               	.LBE5:
+  12:test2.c       **** 	
+ 120               		.loc 1 12 2 view .LVU22
+ 121 005e 42A7      		clr.l -(%sp)
+ 122               		.cfi_def_cfa_offset 16
+68K GAS  /tmp/cc63DZVV.s 			page 4
+
+
+ 123 0060 4EB9 0000 		jsr V
+ 123      0000 
+ 124               	.LVL9:
+  14:test2.c       **** 
+ 125               		.loc 1 14 1 is_stmt 0 view .LVU23
+ 126 0066 588F      		addq.l #4,%sp
+ 127               		.cfi_def_cfa_offset 12
+ 128 0068 241F      		move.l (%sp)+,%d2
+ 129               	.LVL10:
+  14:test2.c       **** 
+ 130               		.loc 1 14 1 view .LVU24
+ 131 006a 245F      		move.l (%sp)+,%a2
+ 132 006c 4E75      		rts
+ 133               		.cfi_endproc
+ 134               	.LFE3:
+ 135               		.size	task1, .-task1
+ 136               		.section	.rodata.str1.1
+ 137               	.LC2:
+ 138 000c 2563 00   		.string	"%c"
+ 139               		.text
+ 140               		.align	2
+ 141               		.globl	task3
+ 142               		.type	task3, @function
+ 143               	task3:
+ 144               	.LFB5:
+  26:test2.c       **** 
+  27:test2.c       **** void task3()
+  28:test2.c       **** {
+ 145               		.loc 1 28 1 is_stmt 1 view -0
+ 146               		.cfi_startproc
+ 147 006e 598F      		subq.l #4,%sp
+ 148               		.cfi_def_cfa_offset 8
+ 149 0070 2F0A      		move.l %a2,-(%sp)
+ 150               		.cfi_def_cfa_offset 12
+ 151               		.cfi_offset 10, -12
+ 152 0072 2F02      		move.l %d2,-(%sp)
+ 153               		.cfi_def_cfa_offset 16
+ 154               		.cfi_offset 2, -16
+  29:test2.c       **** char c;
+ 155               		.loc 1 29 1 view .LVU26
+  30:test2.c       **** 	P(0);
+ 156               		.loc 1 30 2 view .LVU27
+ 157 0074 42A7      		clr.l -(%sp)
+ 158               		.cfi_def_cfa_offset 20
+ 159 0076 4EB9 0000 		jsr P
+ 159      0000 
+ 160               	.LVL11:
+ 161 007c 588F      		addq.l #4,%sp
+ 162               		.cfi_def_cfa_offset 16
+ 163 007e 740B      		moveq #11,%d2
+ 164 0080 D48F      		add.l %sp,%d2
+ 165 0082 45F9 0000 		lea scanf,%a2
+ 165      0000 
+ 166               	.L12:
+  31:test2.c       **** 	while(1){
+ 167               		.loc 1 31 2 discriminator 1 view .LVU28
+  32:test2.c       **** 	scanf("%c",&c);}
+68K GAS  /tmp/cc63DZVV.s 			page 5
+
+
+ 168               		.loc 1 32 2 discriminator 1 view .LVU29
+ 169 0088 2F02      		move.l %d2,-(%sp)
+ 170               		.cfi_def_cfa_offset 20
+ 171 008a 4879 0000 		pea .LC2
+ 171      0000 
+ 172               		.cfi_def_cfa_offset 24
+ 173 0090 4E92      		jsr (%a2)
+ 174               	.LVL12:
+  31:test2.c       **** 	while(1){
+ 175               		.loc 1 31 7 discriminator 1 view .LVU30
+ 176               		.loc 1 32 2 is_stmt 0 discriminator 1 view .LVU31
+ 177 0092 508F      		addq.l #8,%sp
+ 178               		.cfi_def_cfa_offset 16
+  31:test2.c       **** 	while(1){
+ 179               		.loc 1 31 2 is_stmt 1 discriminator 1 view .LVU32
+ 180               		.loc 1 32 2 discriminator 1 view .LVU33
+ 181 0094 2F02      		move.l %d2,-(%sp)
+ 182               		.cfi_def_cfa_offset 20
+ 183 0096 4879 0000 		pea .LC2
+ 183      0000 
+ 184               		.cfi_def_cfa_offset 24
+ 185 009c 4E92      		jsr (%a2)
+ 186               	.LVL13:
+  31:test2.c       **** 	while(1){
+ 187               		.loc 1 31 7 discriminator 1 view .LVU34
+ 188               		.loc 1 32 2 is_stmt 0 discriminator 1 view .LVU35
+ 189 009e 508F      		addq.l #8,%sp
+ 190               		.cfi_def_cfa_offset 16
+ 191 00a0 60E6      		jra .L12
+ 192               		.cfi_endproc
+ 193               	.LFE5:
+ 194               		.size	task3, .-task3
+ 195               		.section	.text.startup,"ax",@progbits
+ 196               		.align	2
+ 197               		.globl	main
+ 198               		.type	main, @function
+ 199               	main:
+ 200               	.LFB6:
+  33:test2.c       **** 	//V(0);
+  34:test2.c       **** }
+  35:test2.c       **** 
+  36:test2.c       **** int main()
+  37:test2.c       **** {
+ 201               		.loc 1 37 1 is_stmt 1 view -0
+ 202               		.cfi_startproc
+ 203 0000 2F0A      		move.l %a2,-(%sp)
+ 204               		.cfi_def_cfa_offset 8
+ 205               		.cfi_offset 10, -8
+  38:test2.c       **** 
+  39:test2.c       **** 	init_kernel();
+ 206               		.loc 1 39 2 view .LVU37
+ 207 0002 4EB9 0000 		jsr init_kernel
+ 207      0000 
+ 208               	.LVL14:
+  40:test2.c       **** 	
+  41:test2.c       **** 	set_task(task1);
+ 209               		.loc 1 41 2 view .LVU38
+68K GAS  /tmp/cc63DZVV.s 			page 6
+
+
+ 210 0008 4879 0000 		pea task1
+ 210      0000 
+ 211               		.cfi_def_cfa_offset 12
+ 212 000e 45F9 0000 		lea set_task,%a2
+ 212      0000 
+ 213 0014 4E92      		jsr (%a2)
+ 214               	.LVL15:
+  42:test2.c       ****     	set_task(task2);
+ 215               		.loc 1 42 6 view .LVU39
+ 216 0016 4879 0000 		pea task2
+ 216      0000 
+ 217               		.cfi_def_cfa_offset 16
+ 218 001c 4E92      		jsr (%a2)
+ 219               	.LVL16:
+  43:test2.c       ****     	set_task(task3);
+ 220               		.loc 1 43 6 view .LVU40
+ 221 001e 4879 0000 		pea task3
+ 221      0000 
+ 222               		.cfi_def_cfa_offset 20
+ 223 0024 4E92      		jsr (%a2)
+ 224               	.LVL17:
+  44:test2.c       **** 
+  45:test2.c       ****     	begin_sch();
+ 225               		.loc 1 45 6 view .LVU41
+ 226 0026 4EB9 0000 		jsr begin_sch
+ 226      0000 
+ 227               	.LVL18:
+  46:test2.c       **** 	return 0;
+ 228               		.loc 1 46 2 view .LVU42
+  47:test2.c       **** }
+ 229               		.loc 1 47 1 is_stmt 0 view .LVU43
+ 230 002c 4FEF 000C 		lea (12,%sp),%sp
+ 231               		.cfi_def_cfa_offset 8
+ 232 0030 7000      		moveq #0,%d0
+ 233 0032 245F      		move.l (%sp)+,%a2
+ 234 0034 4E75      		rts
+ 235               		.cfi_endproc
+ 236               	.LFE6:
+ 237               		.size	main, .-main
+ 238               		.text
+ 239               	.Letext0:
+ 240               		.file 2 "mtk_c.h"
+ 241               		.file 3 "/usr/local/m68k-elf/include/stdio.h"
+ 242               		.file 4 "<built-in>"
+ 243               		.section	.debug_info,"",@progbits
+ 244               	.Ldebug_info0:
+ 245 0000 0000 0257 		.long	0x257
+ 246 0004 0005      		.word	0x5
+ 247 0006 01        		.byte	0x1
+ 248 0007 04        		.byte	0x4
+ 249 0008 0000 0000 		.long	.Ldebug_abbrev0
+ 250 000c 0D        		.uleb128 0xd
+ 251 000d 0000 0000 		.long	.LASF21
+ 252 0011 1D        		.byte	0x1d
+ 253 0012 0000 0000 		.long	.LASF22
+ 254 0016 0000 0000 		.long	.LASF23
+ 255 001a 0000 0000 		.long	.LLRL4
+68K GAS  /tmp/cc63DZVV.s 			page 7
+
+
+ 256 001e 0000 0000 		.long	0
+ 257 0022 0000 0000 		.long	.Ldebug_line0
+ 258 0026 02        		.uleb128 0x2
+ 259 0027 01        		.byte	0x1
+ 260 0028 06        		.byte	0x6
+ 261 0029 0000 0000 		.long	.LASF0
+ 262 002d 02        		.uleb128 0x2
+ 263 002e 01        		.byte	0x1
+ 264 002f 08        		.byte	0x8
+ 265 0030 0000 0000 		.long	.LASF1
+ 266 0034 02        		.uleb128 0x2
+ 267 0035 02        		.byte	0x2
+ 268 0036 05        		.byte	0x5
+ 269 0037 0000 0000 		.long	.LASF2
+ 270 003b 02        		.uleb128 0x2
+ 271 003c 02        		.byte	0x2
+ 272 003d 07        		.byte	0x7
+ 273 003e 0000 0000 		.long	.LASF3
+ 274 0042 02        		.uleb128 0x2
+ 275 0043 04        		.byte	0x4
+ 276 0044 05        		.byte	0x5
+ 277 0045 0000 0000 		.long	.LASF4
+ 278 0049 02        		.uleb128 0x2
+ 279 004a 04        		.byte	0x4
+ 280 004b 07        		.byte	0x7
+ 281 004c 0000 0000 		.long	.LASF5
+ 282 0050 02        		.uleb128 0x2
+ 283 0051 08        		.byte	0x8
+ 284 0052 05        		.byte	0x5
+ 285 0053 0000 0000 		.long	.LASF6
+ 286 0057 02        		.uleb128 0x2
+ 287 0058 08        		.byte	0x8
+ 288 0059 07        		.byte	0x7
+ 289 005a 0000 0000 		.long	.LASF7
+ 290 005e 02        		.uleb128 0x2
+ 291 005f 0C        		.byte	0xc
+ 292 0060 04        		.byte	0x4
+ 293 0061 0000 0000 		.long	.LASF8
+ 294 0065 02        		.uleb128 0x2
+ 295 0066 04        		.byte	0x4
+ 296 0067 07        		.byte	0x7
+ 297 0068 0000 0000 		.long	.LASF9
+ 298 006c 0E        		.uleb128 0xe
+ 299 006d 04        		.byte	0x4
+ 300 006e 05        		.byte	0x5
+ 301 006f 696E 7400 		.string	"int"
+ 302 0073 02        		.uleb128 0x2
+ 303 0074 01        		.byte	0x1
+ 304 0075 06        		.byte	0x6
+ 305 0076 0000 0000 		.long	.LASF10
+ 306 007a 0F        		.uleb128 0xf
+ 307 007b 0000 0073 		.long	0x73
+ 308 007f 07        		.uleb128 0x7
+ 309 0080 0000 007A 		.long	0x7a
+ 310 0084 10        		.uleb128 0x10
+ 311 0085 0000 008B 		.long	0x8b
+ 312 0089 03        		.uleb128 0x3
+68K GAS  /tmp/cc63DZVV.s 			page 8
+
+
+ 313 008a 00        		.byte	0
+ 314 008b 07        		.uleb128 0x7
+ 315 008c 0000 0084 		.long	0x84
+ 316 0090 08        		.uleb128 0x8
+ 317 0091 0000 0000 		.long	.LASF11
+ 318 0095 45        		.byte	0x45
+ 319 0096 0000 009C 		.long	0x9c
+ 320 009a 03        		.uleb128 0x3
+ 321 009b 00        		.byte	0
+ 322 009c 11        		.uleb128 0x11
+ 323 009d 0000 0000 		.long	.LASF13
+ 324 00a1 02        		.byte	0x2
+ 325 00a2 43        		.byte	0x43
+ 326 00a3 06        		.byte	0x6
+ 327 00a4 0000 00AE 		.long	0xae
+ 328 00a8 05        		.uleb128 0x5
+ 329 00a9 0000 008B 		.long	0x8b
+ 330 00ad 00        		.byte	0
+ 331 00ae 08        		.uleb128 0x8
+ 332 00af 0000 0000 		.long	.LASF12
+ 333 00b3 42        		.byte	0x42
+ 334 00b4 0000 00BA 		.long	0xba
+ 335 00b8 03        		.uleb128 0x3
+ 336 00b9 00        		.byte	0
+ 337 00ba 09        		.uleb128 0x9
+ 338 00bb 0000 0000 		.long	.LASF14
+ 339 00bf D0        		.byte	0xd0
+ 340 00c0 0000 006C 		.long	0x6c
+ 341 00c4 0000 00CF 		.long	0xcf
+ 342 00c8 05        		.uleb128 0x5
+ 343 00c9 0000 007F 		.long	0x7f
+ 344 00cd 03        		.uleb128 0x3
+ 345 00ce 00        		.byte	0
+ 346 00cf 04        		.uleb128 0x4
+ 347 00d0 5600      		.string	"V"
+ 348 00d2 0C        		.byte	0xc
+ 349 00d3 0000 006C 		.long	0x6c
+ 350 00d7 0000 00DD 		.long	0xdd
+ 351 00db 03        		.uleb128 0x3
+ 352 00dc 00        		.byte	0
+ 353 00dd 09        		.uleb128 0x9
+ 354 00de 0000 0000 		.long	.LASF15
+ 355 00e2 CE        		.byte	0xce
+ 356 00e3 0000 006C 		.long	0x6c
+ 357 00e7 0000 00F2 		.long	0xf2
+ 358 00eb 05        		.uleb128 0x5
+ 359 00ec 0000 007F 		.long	0x7f
+ 360 00f0 03        		.uleb128 0x3
+ 361 00f1 00        		.byte	0
+ 362 00f2 04        		.uleb128 0x4
+ 363 00f3 5000      		.string	"P"
+ 364 00f5 08        		.byte	0x8
+ 365 00f6 0000 006C 		.long	0x6c
+ 366 00fa 0000 0100 		.long	0x100
+ 367 00fe 03        		.uleb128 0x3
+ 368 00ff 00        		.byte	0
+ 369 0100 12        		.uleb128 0x12
+68K GAS  /tmp/cc63DZVV.s 			page 9
+
+
+ 370 0101 0000 0000 		.long	.LASF24
+ 371 0105 01        		.byte	0x1
+ 372 0106 24        		.byte	0x24
+ 373 0107 05        		.byte	0x5
+ 374 0108 0000 006C 		.long	0x6c
+ 375 010c 0000 0000 		.long	.LFB6
+ 376 0110 0000 0036 		.long	.LFE6-.LFB6
+ 377 0114 01        		.uleb128 0x1
+ 378 0115 9C        		.byte	0x9c
+ 379 0116 0000 0148 		.long	0x148
+ 380 011a 01        		.uleb128 0x1
+ 381 011b 0000 0000 		.long	.LVL14
+ 382 011f 0000 00AE 		.long	0xae
+ 383 0123 01        		.uleb128 0x1
+ 384 0124 0000 0000 		.long	.LVL15
+ 385 0128 0000 009C 		.long	0x9c
+ 386 012c 01        		.uleb128 0x1
+ 387 012d 0000 0000 		.long	.LVL16
+ 388 0131 0000 009C 		.long	0x9c
+ 389 0135 01        		.uleb128 0x1
+ 390 0136 0000 0000 		.long	.LVL17
+ 391 013a 0000 009C 		.long	0x9c
+ 392 013e 01        		.uleb128 0x1
+ 393 013f 0000 0000 		.long	.LVL18
+ 394 0143 0000 0090 		.long	0x90
+ 395 0147 00        		.byte	0
+ 396 0148 06        		.uleb128 0x6
+ 397 0149 0000 0000 		.long	.LASF16
+ 398 014d 1B        		.byte	0x1b
+ 399 014e 0000 0000 		.long	.LFB5
+ 400 0152 0000 0034 		.long	.LFE5-.LFB5
+ 401 0156 01        		.uleb128 0x1
+ 402 0157 9C        		.byte	0x9c
+ 403 0158 0000 0193 		.long	0x193
+ 404 015c 13        		.uleb128 0x13
+ 405 015d 6300      		.string	"c"
+ 406 015f 01        		.byte	0x1
+ 407 0160 1D        		.byte	0x1d
+ 408 0161 06        		.byte	0x6
+ 409 0162 0000 0073 		.long	0x73
+ 410 0166 02        		.uleb128 0x2
+ 411 0167 91        		.byte	0x91
+ 412 0168 7B        		.sleb128 -5
+ 413 0169 04        		.uleb128 0x4
+ 414 016a 5000      		.string	"P"
+ 415 016c 08        		.byte	0x8
+ 416 016d 0000 006C 		.long	0x6c
+ 417 0171 0000 0177 		.long	0x177
+ 418 0175 03        		.uleb128 0x3
+ 419 0176 00        		.byte	0
+ 420 0177 01        		.uleb128 0x1
+ 421 0178 0000 0000 		.long	.LVL11
+ 422 017c 0000 00F2 		.long	0xf2
+ 423 0180 01        		.uleb128 0x1
+ 424 0181 0000 0000 		.long	.LVL12
+ 425 0185 0000 0248 		.long	0x248
+ 426 0189 01        		.uleb128 0x1
+68K GAS  /tmp/cc63DZVV.s 			page 10
+
+
+ 427 018a 0000 0000 		.long	.LVL13
+ 428 018e 0000 0248 		.long	0x248
+ 429 0192 00        		.byte	0
+ 430 0193 06        		.uleb128 0x6
+ 431 0194 0000 0000 		.long	.LASF17
+ 432 0198 10        		.byte	0x10
+ 433 0199 0000 0000 		.long	.LFB4
+ 434 019d 0000 0032 		.long	.LFE4-.LFB4
+ 435 01a1 01        		.uleb128 0x1
+ 436 01a2 9C        		.byte	0x9c
+ 437 01a3 0000 01E2 		.long	0x1e2
+ 438 01a7 04        		.uleb128 0x4
+ 439 01a8 5000      		.string	"P"
+ 440 01aa 08        		.byte	0x8
+ 441 01ab 0000 006C 		.long	0x6c
+ 442 01af 0000 01B5 		.long	0x1b5
+ 443 01b3 03        		.uleb128 0x3
+ 444 01b4 00        		.byte	0
+ 445 01b5 0A        		.uleb128 0xa
+ 446 01b6 0000 0000 		.long	.LLRL0
+ 447 01ba 0000 01D8 		.long	0x1d8
+ 448 01be 0B        		.uleb128 0xb
+ 449 01bf 6900      		.string	"i"
+ 450 01c1 13        		.byte	0x13
+ 451 01c2 0000 006C 		.long	0x6c
+ 452 01c6 0000 0000 		.long	.LLST1
+ 453 01ca 0000 0000 		.long	.LVUS1
+ 454 01ce 01        		.uleb128 0x1
+ 455 01cf 0000 0000 		.long	.LVL2
+ 456 01d3 0000 0251 		.long	0x251
+ 457 01d7 00        		.byte	0
+ 458 01d8 01        		.uleb128 0x1
+ 459 01d9 0000 0000 		.long	.LVL0
+ 460 01dd 0000 00F2 		.long	0xf2
+ 461 01e1 00        		.byte	0
+ 462 01e2 06        		.uleb128 0x6
+ 463 01e3 0000 0000 		.long	.LASF18
+ 464 01e7 06        		.byte	0x6
+ 465 01e8 0000 0000 		.long	.LFB3
+ 466 01ec 0000 003C 		.long	.LFE3-.LFB3
+ 467 01f0 01        		.uleb128 0x1
+ 468 01f1 9C        		.byte	0x9c
+ 469 01f2 0000 0248 		.long	0x248
+ 470 01f6 04        		.uleb128 0x4
+ 471 01f7 5000      		.string	"P"
+ 472 01f9 08        		.byte	0x8
+ 473 01fa 0000 006C 		.long	0x6c
+ 474 01fe 0000 0204 		.long	0x204
+ 475 0202 03        		.uleb128 0x3
+ 476 0203 00        		.byte	0
+ 477 0204 04        		.uleb128 0x4
+ 478 0205 5600      		.string	"V"
+ 479 0207 0C        		.byte	0xc
+ 480 0208 0000 006C 		.long	0x6c
+ 481 020c 0000 0212 		.long	0x212
+ 482 0210 03        		.uleb128 0x3
+ 483 0211 00        		.byte	0
+68K GAS  /tmp/cc63DZVV.s 			page 11
+
+
+ 484 0212 0A        		.uleb128 0xa
+ 485 0213 0000 0000 		.long	.LLRL2
+ 486 0217 0000 0235 		.long	0x235
+ 487 021b 0B        		.uleb128 0xb
+ 488 021c 6900      		.string	"i"
+ 489 021e 09        		.byte	0x9
+ 490 021f 0000 006C 		.long	0x6c
+ 491 0223 0000 0000 		.long	.LLST3
+ 492 0227 0000 0000 		.long	.LVUS3
+ 493 022b 01        		.uleb128 0x1
+ 494 022c 0000 0000 		.long	.LVL7
+ 495 0230 0000 0251 		.long	0x251
+ 496 0234 00        		.byte	0
+ 497 0235 01        		.uleb128 0x1
+ 498 0236 0000 0000 		.long	.LVL5
+ 499 023a 0000 00F2 		.long	0xf2
+ 500 023e 01        		.uleb128 0x1
+ 501 023f 0000 0000 		.long	.LVL9
+ 502 0243 0000 00CF 		.long	0xcf
+ 503 0247 00        		.byte	0
+ 504 0248 0C        		.uleb128 0xc
+ 505 0249 0000 0000 		.long	.LASF14
+ 506 024d 0000 0000 		.long	.LASF19
+ 507 0251 0C        		.uleb128 0xc
+ 508 0252 0000 0000 		.long	.LASF15
+ 509 0256 0000 0000 		.long	.LASF20
+ 510 025a 00        		.byte	0
+ 511               		.section	.debug_abbrev,"",@progbits
+ 512               	.Ldebug_abbrev0:
+ 513 0000 01        		.uleb128 0x1
+ 514 0001 48        		.uleb128 0x48
+ 515 0002 00        		.byte	0
+ 516 0003 7D        		.uleb128 0x7d
+ 517 0004 01        		.uleb128 0x1
+ 518 0005 7F        		.uleb128 0x7f
+ 519 0006 13        		.uleb128 0x13
+ 520 0007 00        		.byte	0
+ 521 0008 00        		.byte	0
+ 522 0009 02        		.uleb128 0x2
+ 523 000a 24        		.uleb128 0x24
+ 524 000b 00        		.byte	0
+ 525 000c 0B        		.uleb128 0xb
+ 526 000d 0B        		.uleb128 0xb
+ 527 000e 3E        		.uleb128 0x3e
+ 528 000f 0B        		.uleb128 0xb
+ 529 0010 03        		.uleb128 0x3
+ 530 0011 0E        		.uleb128 0xe
+ 531 0012 00        		.byte	0
+ 532 0013 00        		.byte	0
+ 533 0014 03        		.uleb128 0x3
+ 534 0015 18        		.uleb128 0x18
+ 535 0016 00        		.byte	0
+ 536 0017 00        		.byte	0
+ 537 0018 00        		.byte	0
+ 538 0019 04        		.uleb128 0x4
+ 539 001a 2E        		.uleb128 0x2e
+ 540 001b 01        		.byte	0x1
+68K GAS  /tmp/cc63DZVV.s 			page 12
+
+
+ 541 001c 3F        		.uleb128 0x3f
+ 542 001d 19        		.uleb128 0x19
+ 543 001e 03        		.uleb128 0x3
+ 544 001f 08        		.uleb128 0x8
+ 545 0020 3A        		.uleb128 0x3a
+ 546 0021 21        		.uleb128 0x21
+ 547 0022 01        		.sleb128 1
+ 548 0023 3B        		.uleb128 0x3b
+ 549 0024 0B        		.uleb128 0xb
+ 550 0025 39        		.uleb128 0x39
+ 551 0026 21        		.uleb128 0x21
+ 552 0027 02        		.sleb128 2
+ 553 0028 49        		.uleb128 0x49
+ 554 0029 13        		.uleb128 0x13
+ 555 002a 3C        		.uleb128 0x3c
+ 556 002b 19        		.uleb128 0x19
+ 557 002c 01        		.uleb128 0x1
+ 558 002d 13        		.uleb128 0x13
+ 559 002e 00        		.byte	0
+ 560 002f 00        		.byte	0
+ 561 0030 05        		.uleb128 0x5
+ 562 0031 05        		.uleb128 0x5
+ 563 0032 00        		.byte	0
+ 564 0033 49        		.uleb128 0x49
+ 565 0034 13        		.uleb128 0x13
+ 566 0035 00        		.byte	0
+ 567 0036 00        		.byte	0
+ 568 0037 06        		.uleb128 0x6
+ 569 0038 2E        		.uleb128 0x2e
+ 570 0039 01        		.byte	0x1
+ 571 003a 3F        		.uleb128 0x3f
+ 572 003b 19        		.uleb128 0x19
+ 573 003c 03        		.uleb128 0x3
+ 574 003d 0E        		.uleb128 0xe
+ 575 003e 3A        		.uleb128 0x3a
+ 576 003f 21        		.uleb128 0x21
+ 577 0040 01        		.sleb128 1
+ 578 0041 3B        		.uleb128 0x3b
+ 579 0042 0B        		.uleb128 0xb
+ 580 0043 39        		.uleb128 0x39
+ 581 0044 21        		.uleb128 0x21
+ 582 0045 06        		.sleb128 6
+ 583 0046 11        		.uleb128 0x11
+ 584 0047 01        		.uleb128 0x1
+ 585 0048 12        		.uleb128 0x12
+ 586 0049 06        		.uleb128 0x6
+ 587 004a 40        		.uleb128 0x40
+ 588 004b 18        		.uleb128 0x18
+ 589 004c 7A        		.uleb128 0x7a
+ 590 004d 19        		.uleb128 0x19
+ 591 004e 01        		.uleb128 0x1
+ 592 004f 13        		.uleb128 0x13
+ 593 0050 00        		.byte	0
+ 594 0051 00        		.byte	0
+ 595 0052 07        		.uleb128 0x7
+ 596 0053 0F        		.uleb128 0xf
+ 597 0054 00        		.byte	0
+68K GAS  /tmp/cc63DZVV.s 			page 13
+
+
+ 598 0055 0B        		.uleb128 0xb
+ 599 0056 21        		.uleb128 0x21
+ 600 0057 04        		.sleb128 4
+ 601 0058 49        		.uleb128 0x49
+ 602 0059 13        		.uleb128 0x13
+ 603 005a 00        		.byte	0
+ 604 005b 00        		.byte	0
+ 605 005c 08        		.uleb128 0x8
+ 606 005d 2E        		.uleb128 0x2e
+ 607 005e 01        		.byte	0x1
+ 608 005f 3F        		.uleb128 0x3f
+ 609 0060 19        		.uleb128 0x19
+ 610 0061 03        		.uleb128 0x3
+ 611 0062 0E        		.uleb128 0xe
+ 612 0063 3A        		.uleb128 0x3a
+ 613 0064 21        		.uleb128 0x21
+ 614 0065 02        		.sleb128 2
+ 615 0066 3B        		.uleb128 0x3b
+ 616 0067 0B        		.uleb128 0xb
+ 617 0068 39        		.uleb128 0x39
+ 618 0069 21        		.uleb128 0x21
+ 619 006a 06        		.sleb128 6
+ 620 006b 3C        		.uleb128 0x3c
+ 621 006c 19        		.uleb128 0x19
+ 622 006d 01        		.uleb128 0x1
+ 623 006e 13        		.uleb128 0x13
+ 624 006f 00        		.byte	0
+ 625 0070 00        		.byte	0
+ 626 0071 09        		.uleb128 0x9
+ 627 0072 2E        		.uleb128 0x2e
+ 628 0073 01        		.byte	0x1
+ 629 0074 3F        		.uleb128 0x3f
+ 630 0075 19        		.uleb128 0x19
+ 631 0076 03        		.uleb128 0x3
+ 632 0077 0E        		.uleb128 0xe
+ 633 0078 3A        		.uleb128 0x3a
+ 634 0079 21        		.uleb128 0x21
+ 635 007a 03        		.sleb128 3
+ 636 007b 3B        		.uleb128 0x3b
+ 637 007c 0B        		.uleb128 0xb
+ 638 007d 39        		.uleb128 0x39
+ 639 007e 21        		.uleb128 0x21
+ 640 007f 05        		.sleb128 5
+ 641 0080 27        		.uleb128 0x27
+ 642 0081 19        		.uleb128 0x19
+ 643 0082 49        		.uleb128 0x49
+ 644 0083 13        		.uleb128 0x13
+ 645 0084 3C        		.uleb128 0x3c
+ 646 0085 19        		.uleb128 0x19
+ 647 0086 01        		.uleb128 0x1
+ 648 0087 13        		.uleb128 0x13
+ 649 0088 00        		.byte	0
+ 650 0089 00        		.byte	0
+ 651 008a 0A        		.uleb128 0xa
+ 652 008b 0B        		.uleb128 0xb
+ 653 008c 01        		.byte	0x1
+ 654 008d 55        		.uleb128 0x55
+68K GAS  /tmp/cc63DZVV.s 			page 14
+
+
+ 655 008e 17        		.uleb128 0x17
+ 656 008f 01        		.uleb128 0x1
+ 657 0090 13        		.uleb128 0x13
+ 658 0091 00        		.byte	0
+ 659 0092 00        		.byte	0
+ 660 0093 0B        		.uleb128 0xb
+ 661 0094 34        		.uleb128 0x34
+ 662 0095 00        		.byte	0
+ 663 0096 03        		.uleb128 0x3
+ 664 0097 08        		.uleb128 0x8
+ 665 0098 3A        		.uleb128 0x3a
+ 666 0099 21        		.uleb128 0x21
+ 667 009a 01        		.sleb128 1
+ 668 009b 3B        		.uleb128 0x3b
+ 669 009c 0B        		.uleb128 0xb
+ 670 009d 39        		.uleb128 0x39
+ 671 009e 21        		.uleb128 0x21
+ 672 009f 0B        		.sleb128 11
+ 673 00a0 49        		.uleb128 0x49
+ 674 00a1 13        		.uleb128 0x13
+ 675 00a2 02        		.uleb128 0x2
+ 676 00a3 17        		.uleb128 0x17
+ 677 00a4 B742      		.uleb128 0x2137
+ 678 00a6 17        		.uleb128 0x17
+ 679 00a7 00        		.byte	0
+ 680 00a8 00        		.byte	0
+ 681 00a9 0C        		.uleb128 0xc
+ 682 00aa 2E        		.uleb128 0x2e
+ 683 00ab 00        		.byte	0
+ 684 00ac 3F        		.uleb128 0x3f
+ 685 00ad 19        		.uleb128 0x19
+ 686 00ae 3C        		.uleb128 0x3c
+ 687 00af 19        		.uleb128 0x19
+ 688 00b0 6E        		.uleb128 0x6e
+ 689 00b1 0E        		.uleb128 0xe
+ 690 00b2 03        		.uleb128 0x3
+ 691 00b3 0E        		.uleb128 0xe
+ 692 00b4 3A        		.uleb128 0x3a
+ 693 00b5 21        		.uleb128 0x21
+ 694 00b6 04        		.sleb128 4
+ 695 00b7 3B        		.uleb128 0x3b
+ 696 00b8 21        		.uleb128 0x21
+ 697 00b9 00        		.sleb128 0
+ 698 00ba 00        		.byte	0
+ 699 00bb 00        		.byte	0
+ 700 00bc 0D        		.uleb128 0xd
+ 701 00bd 11        		.uleb128 0x11
+ 702 00be 01        		.byte	0x1
+ 703 00bf 25        		.uleb128 0x25
+ 704 00c0 0E        		.uleb128 0xe
+ 705 00c1 13        		.uleb128 0x13
+ 706 00c2 0B        		.uleb128 0xb
+ 707 00c3 03        		.uleb128 0x3
+ 708 00c4 0E        		.uleb128 0xe
+ 709 00c5 1B        		.uleb128 0x1b
+ 710 00c6 0E        		.uleb128 0xe
+ 711 00c7 55        		.uleb128 0x55
+68K GAS  /tmp/cc63DZVV.s 			page 15
+
+
+ 712 00c8 17        		.uleb128 0x17
+ 713 00c9 11        		.uleb128 0x11
+ 714 00ca 01        		.uleb128 0x1
+ 715 00cb 10        		.uleb128 0x10
+ 716 00cc 17        		.uleb128 0x17
+ 717 00cd 00        		.byte	0
+ 718 00ce 00        		.byte	0
+ 719 00cf 0E        		.uleb128 0xe
+ 720 00d0 24        		.uleb128 0x24
+ 721 00d1 00        		.byte	0
+ 722 00d2 0B        		.uleb128 0xb
+ 723 00d3 0B        		.uleb128 0xb
+ 724 00d4 3E        		.uleb128 0x3e
+ 725 00d5 0B        		.uleb128 0xb
+ 726 00d6 03        		.uleb128 0x3
+ 727 00d7 08        		.uleb128 0x8
+ 728 00d8 00        		.byte	0
+ 729 00d9 00        		.byte	0
+ 730 00da 0F        		.uleb128 0xf
+ 731 00db 26        		.uleb128 0x26
+ 732 00dc 00        		.byte	0
+ 733 00dd 49        		.uleb128 0x49
+ 734 00de 13        		.uleb128 0x13
+ 735 00df 00        		.byte	0
+ 736 00e0 00        		.byte	0
+ 737 00e1 10        		.uleb128 0x10
+ 738 00e2 15        		.uleb128 0x15
+ 739 00e3 01        		.byte	0x1
+ 740 00e4 01        		.uleb128 0x1
+ 741 00e5 13        		.uleb128 0x13
+ 742 00e6 00        		.byte	0
+ 743 00e7 00        		.byte	0
+ 744 00e8 11        		.uleb128 0x11
+ 745 00e9 2E        		.uleb128 0x2e
+ 746 00ea 01        		.byte	0x1
+ 747 00eb 3F        		.uleb128 0x3f
+ 748 00ec 19        		.uleb128 0x19
+ 749 00ed 03        		.uleb128 0x3
+ 750 00ee 0E        		.uleb128 0xe
+ 751 00ef 3A        		.uleb128 0x3a
+ 752 00f0 0B        		.uleb128 0xb
+ 753 00f1 3B        		.uleb128 0x3b
+ 754 00f2 0B        		.uleb128 0xb
+ 755 00f3 39        		.uleb128 0x39
+ 756 00f4 0B        		.uleb128 0xb
+ 757 00f5 27        		.uleb128 0x27
+ 758 00f6 19        		.uleb128 0x19
+ 759 00f7 3C        		.uleb128 0x3c
+ 760 00f8 19        		.uleb128 0x19
+ 761 00f9 01        		.uleb128 0x1
+ 762 00fa 13        		.uleb128 0x13
+ 763 00fb 00        		.byte	0
+ 764 00fc 00        		.byte	0
+ 765 00fd 12        		.uleb128 0x12
+ 766 00fe 2E        		.uleb128 0x2e
+ 767 00ff 01        		.byte	0x1
+ 768 0100 3F        		.uleb128 0x3f
+68K GAS  /tmp/cc63DZVV.s 			page 16
+
+
+ 769 0101 19        		.uleb128 0x19
+ 770 0102 03        		.uleb128 0x3
+ 771 0103 0E        		.uleb128 0xe
+ 772 0104 3A        		.uleb128 0x3a
+ 773 0105 0B        		.uleb128 0xb
+ 774 0106 3B        		.uleb128 0x3b
+ 775 0107 0B        		.uleb128 0xb
+ 776 0108 39        		.uleb128 0x39
+ 777 0109 0B        		.uleb128 0xb
+ 778 010a 49        		.uleb128 0x49
+ 779 010b 13        		.uleb128 0x13
+ 780 010c 11        		.uleb128 0x11
+ 781 010d 01        		.uleb128 0x1
+ 782 010e 12        		.uleb128 0x12
+ 783 010f 06        		.uleb128 0x6
+ 784 0110 40        		.uleb128 0x40
+ 785 0111 18        		.uleb128 0x18
+ 786 0112 7A        		.uleb128 0x7a
+ 787 0113 19        		.uleb128 0x19
+ 788 0114 01        		.uleb128 0x1
+ 789 0115 13        		.uleb128 0x13
+ 790 0116 00        		.byte	0
+ 791 0117 00        		.byte	0
+ 792 0118 13        		.uleb128 0x13
+ 793 0119 34        		.uleb128 0x34
+ 794 011a 00        		.byte	0
+ 795 011b 03        		.uleb128 0x3
+ 796 011c 08        		.uleb128 0x8
+ 797 011d 3A        		.uleb128 0x3a
+ 798 011e 0B        		.uleb128 0xb
+ 799 011f 3B        		.uleb128 0x3b
+ 800 0120 0B        		.uleb128 0xb
+ 801 0121 39        		.uleb128 0x39
+ 802 0122 0B        		.uleb128 0xb
+ 803 0123 49        		.uleb128 0x49
+ 804 0124 13        		.uleb128 0x13
+ 805 0125 02        		.uleb128 0x2
+ 806 0126 18        		.uleb128 0x18
+ 807 0127 00        		.byte	0
+ 808 0128 00        		.byte	0
+ 809 0129 00        		.byte	0
+ 810               		.section	.debug_loclists,"",@progbits
+ 811 0000 0000 0032 		.long	.Ldebug_loc3-.Ldebug_loc2
+ 812               	.Ldebug_loc2:
+ 813 0004 0005      		.word	0x5
+ 814 0006 04        		.byte	0x4
+ 815 0007 00        		.byte	0
+ 816 0008 0000 0000 		.long	0
+ 817               	.Ldebug_loc0:
+ 818               	.LVUS1:
+ 819 000c 02        		.uleb128 .LVU4
+ 820 000d 00        		.uleb128 .LVU7
+ 821 000e 00        		.uleb128 .LVU7
+ 822 000f 00        		.uleb128 .LVU11
+ 823               	.LLST1:
+ 824 0010 06        		.byte	0x6
+ 825 0011 0000 0000 		.long	.LVL0
+68K GAS  /tmp/cc63DZVV.s 			page 17
+
+
+ 826 0015 04        		.byte	0x4
+ 827 0016 00        		.uleb128 .LVL0-.LVL0
+ 828 0017 0A        		.uleb128 .LVL1-.LVL0
+ 829 0018 02        		.uleb128 0x2
+ 830 0019 31        		.byte	0x31
+ 831 001a 9F        		.byte	0x9f
+ 832 001b 04        		.byte	0x4
+ 833 001c 0A        		.uleb128 .LVL1-.LVL0
+ 834 001d 22        		.uleb128 .LVL4-.LVL0
+ 835 001e 01        		.uleb128 0x1
+ 836 001f 52        		.byte	0x52
+ 837 0020 00        		.byte	0
+ 838               	.LVUS3:
+ 839 0021 02        		.uleb128 .LVU16
+ 840 0022 00        		.uleb128 .LVU19
+ 841 0023 00        		.uleb128 .LVU19
+ 842 0024 00        		.uleb128 .LVU24
+ 843               	.LLST3:
+ 844 0025 06        		.byte	0x6
+ 845 0026 0000 0000 		.long	.LVL5
+ 846 002a 04        		.byte	0x4
+ 847 002b 00        		.uleb128 .LVL5-.LVL5
+ 848 002c 0A        		.uleb128 .LVL6-.LVL5
+ 849 002d 02        		.uleb128 0x2
+ 850 002e 31        		.byte	0x31
+ 851 002f 9F        		.byte	0x9f
+ 852 0030 04        		.byte	0x4
+ 853 0031 0A        		.uleb128 .LVL6-.LVL5
+ 854 0032 2C        		.uleb128 .LVL10-.LVL5
+ 855 0033 01        		.uleb128 0x1
+ 856 0034 52        		.byte	0x52
+ 857 0035 00        		.byte	0
+ 858               	.Ldebug_loc3:
+ 859               		.section	.debug_aranges,"",@progbits
+ 860 0000 0000 0024 		.long	0x24
+ 861 0004 0002      		.word	0x2
+ 862 0006 0000 0000 		.long	.Ldebug_info0
+ 863 000a 04        		.byte	0x4
+ 864 000b 00        		.byte	0
+ 865 000c 0000      		.word	0
+ 866 000e 0000      		.word	0
+ 867 0010 0000 0000 		.long	.Ltext0
+ 868 0014 0000 00A2 		.long	.Letext0-.Ltext0
+ 869 0018 0000 0000 		.long	.LFB6
+ 870 001c 0000 0036 		.long	.LFE6-.LFB6
+ 871 0020 0000 0000 		.long	0
+ 872 0024 0000 0000 		.long	0
+ 873               		.section	.debug_rnglists,"",@progbits
+ 874               	.Ldebug_ranges0:
+ 875 0000 0000 002E 		.long	.Ldebug_ranges3-.Ldebug_ranges2
+ 876               	.Ldebug_ranges2:
+ 877 0004 0005      		.word	0x5
+ 878 0006 04        		.byte	0x4
+ 879 0007 00        		.byte	0
+ 880 0008 0000 0000 		.long	0
+ 881               	.LLRL0:
+ 882 000c 05        		.byte	0x5
+68K GAS  /tmp/cc63DZVV.s 			page 18
+
+
+ 883 000d 0000 0000 		.long	.LBB2
+ 884 0011 04        		.byte	0x4
+ 885 0012 00        		.uleb128 .LBB2-.LBB2
+ 886 0013 00        		.uleb128 .LBE2-.LBB2
+ 887 0014 04        		.byte	0x4
+ 888 0015 02        		.uleb128 .LBB3-.LBB2
+ 889 0016 20        		.uleb128 .LBE3-.LBB2
+ 890 0017 00        		.byte	0
+ 891               	.LLRL2:
+ 892 0018 05        		.byte	0x5
+ 893 0019 0000 0000 		.long	.LBB4
+ 894 001d 04        		.byte	0x4
+ 895 001e 00        		.uleb128 .LBB4-.LBB4
+ 896 001f 00        		.uleb128 .LBE4-.LBB4
+ 897 0020 04        		.byte	0x4
+ 898 0021 02        		.uleb128 .LBB5-.LBB4
+ 899 0022 20        		.uleb128 .LBE5-.LBB4
+ 900 0023 00        		.byte	0
+ 901               	.LLRL4:
+ 902 0024 07        		.byte	0x7
+ 903 0025 0000 0000 		.long	.Ltext0
+ 904 0029 A201      		.uleb128 .Letext0-.Ltext0
+ 905 002b 07        		.byte	0x7
+ 906 002c 0000 0000 		.long	.LFB6
+ 907 0030 36        		.uleb128 .LFE6-.LFB6
+ 908 0031 00        		.byte	0
+ 909               	.Ldebug_ranges3:
+ 910               		.section	.debug_line,"",@progbits
+ 911               	.Ldebug_line0:
+ 912 0000 0000 013E 		.section	.debug_str,"MS",@progbits,1
+ 912      0003 0000 
+ 912      005E 0201 
+ 912      FB0E 0D00 
+ 912      0101 0101 
+ 913               	.LASF6:
+ 914 0000 6C6F 6E67 		.string	"long long int"
+ 914      206C 6F6E 
+ 914      6720 696E 
+ 914      7400 
+ 915               	.LASF9:
+ 916 000e 756E 7369 		.string	"unsigned int"
+ 916      676E 6564 
+ 916      2069 6E74 
+ 916      00
+ 917               	.LASF12:
+ 918 001b 696E 6974 		.string	"init_kernel"
+ 918      5F6B 6572 
+ 918      6E65 6C00 
+ 919               	.LASF24:
+ 920 0027 6D61 696E 		.string	"main"
+ 920      00
+ 921               	.LASF5:
+ 922 002c 6C6F 6E67 		.string	"long unsigned int"
+ 922      2075 6E73 
+ 922      6967 6E65 
+ 922      6420 696E 
+ 922      7400 
+68K GAS  /tmp/cc63DZVV.s 			page 19
+
+
+ 923               	.LASF21:
+ 924 003e 474E 5520 		.string	"GNU C17 11.4.0 -mcpu=68000 -msoft-float -g -O2 -fomit-frame-pointer"
+ 924      4331 3720 
+ 924      3131 2E34 
+ 924      2E30 202D 
+ 924      6D63 7075 
+ 925               	.LASF7:
+ 926 0082 6C6F 6E67 		.string	"long long unsigned int"
+ 926      206C 6F6E 
+ 926      6720 756E 
+ 926      7369 676E 
+ 926      6564 2069 
+ 927               	.LASF19:
+ 928 0099 5F5F 6275 		.string	"__builtin_scanf"
+ 928      696C 7469 
+ 928      6E5F 7363 
+ 928      616E 6600 
+ 929               	.LASF14:
+ 930 00a9 7363 616E 		.string	"scanf"
+ 930      6600 
+ 931               	.LASF1:
+ 932 00af 756E 7369 		.string	"unsigned char"
+ 932      676E 6564 
+ 932      2063 6861 
+ 932      7200 
+ 933               	.LASF23:
+ 934 00bd 2F68 6F6D 		.string	"/home/students/22nen/1TE22129K/mtk/mtk_git/sofutojikken/jikken2/theme2/WORKING"
+ 934      652F 7374 
+ 934      7564 656E 
+ 934      7473 2F32 
+ 934      326E 656E 
+ 935               	.LASF4:
+ 936 010c 6C6F 6E67 		.string	"long int"
+ 936      2069 6E74 
+ 936      00
+ 937               	.LASF18:
+ 938 0115 7461 736B 		.string	"task1"
+ 938      3100 
+ 939               	.LASF17:
+ 940 011b 7461 736B 		.string	"task2"
+ 940      3200 
+ 941               	.LASF16:
+ 942 0121 7461 736B 		.string	"task3"
+ 942      3300 
+ 943               	.LASF11:
+ 944 0127 6265 6769 		.string	"begin_sch"
+ 944      6E5F 7363 
+ 944      6800 
+ 945               	.LASF3:
+ 946 0131 7368 6F72 		.string	"short unsigned int"
+ 946      7420 756E 
+ 946      7369 676E 
+ 946      6564 2069 
+ 946      6E74 00
+ 947               	.LASF15:
+ 948 0144 7072 696E 		.string	"printf"
+ 948      7466 00
+68K GAS  /tmp/cc63DZVV.s 			page 20
+
+
+ 949               	.LASF8:
+ 950 014b 6C6F 6E67 		.string	"long double"
+ 950      2064 6F75 
+ 950      626C 6500 
+ 951               	.LASF10:
+ 952 0157 6368 6172 		.string	"char"
+ 952      00
+ 953               	.LASF13:
+ 954 015c 7365 745F 		.string	"set_task"
+ 954      7461 736B 
+ 954      00
+ 955               	.LASF20:
+ 956 0165 5F5F 6275 		.string	"__builtin_printf"
+ 956      696C 7469 
+ 956      6E5F 7072 
+ 956      696E 7466 
+ 956      00
+ 957               	.LASF22:
+ 958 0176 7465 7374 		.string	"test2.c"
+ 958      322E 6300 
+ 959               	.LASF2:
+ 960 017e 7368 6F72 		.string	"short int"
+ 960      7420 696E 
+ 960      7400 
+ 961               	.LASF0:
+ 962 0188 7369 676E 		.string	"signed char"
+ 962      6564 2063 
+ 962      6861 7200 
+ 963               		.ident	"GCC: (GNU) 11.4.0"
+68K GAS  /tmp/cc63DZVV.s 			page 21
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 test2.c
+     /tmp/cc63DZVV.s:13     .text:0000000000000000 task2
+     /tmp/cc63DZVV.s:75     .text:0000000000000032 task1
+     /tmp/cc63DZVV.s:143    .text:000000000000006e task3
+     /tmp/cc63DZVV.s:199    .text.startup:0000000000000000 main
+
+UNDEFINED SYMBOLS
+P
+printf
+V
+scanf
+init_kernel
+set_task
+begin_sch

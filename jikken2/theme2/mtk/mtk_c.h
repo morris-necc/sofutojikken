@@ -5,7 +5,7 @@
 // Constants
 // ******************************************
 #define NULLTASKID 0 /*Queue's termination*/
-#define NUMTASK 5    /*Maximum number of tasks*/
+#define NUMTASK 2    /*Maximum number of tasks*/
 #define NUMSEMAPHORE 3
 #define STKSIZE 1024 /*size of 1Kbyte*/
 

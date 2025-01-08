@@ -1,0 +1,104 @@
+68K GAS  outchr.s 			page 1
+
+
+   1               	.global outbyte
+   2               	
+   3               	.include "equdefs.inc"
+   1               	    .equ    SYSCALL_NUM_GETSTRING, 1 
+   2               	    .equ    SYSCALL_NUM_PUTSTRING, 2 
+   3               	    .equ    SYSCALL_NUM_RESET_TIMER, 3 
+   4               	    .equ    SYSCALL_NUM_SET_TIMER, 4 
+   5               	
+   6               	    .equ    REGBASE, 0xFFF000 
+   7               	    .equ    IOBASE, 0x00d00000
+   8               	
+   9               	    .equ    IVR, REGBASE+0x300 
+  10               	    .equ    IMR, REGBASE+0x304 
+  11               	    .equ    ISR, REGBASE+0x30c 
+  12               	    .equ    IPR, REGBASE+0x310 
+  13               	    
+  14               	    .equ    TCTL1, REGBASE+0x600 	
+  15               	    .equ    TPRER1, REGBASE+0x602 	
+  16               	    .equ    TCMP1, REGBASE+0x604 	
+  17               	    .equ    TCN1, REGBASE+0x608 	
+  18               	    .equ    TSTAT1, REGBASE+0x60a 	
+  19               	    
+  20               	    .equ    USTCNT1, REGBASE+0x900 	
+  21               	    .equ    UBAUD1, REGBASE+0x902 	
+  22               	    .equ    URX1, REGBASE+0x904 	
+  23               	    .equ    UTX1, REGBASE+0x906 	
+  24               	    
+  25               	    .equ    LED7, IOBASE+0x000002f 	
+  26               	    .equ    LED6, IOBASE+0x000002d 	
+  27               	    .equ    LED5, IOBASE+0x000002b
+  28               	    .equ    LED4, IOBASE+0x0000029
+  29               	    .equ    LED3, IOBASE+0x000003f
+  30               	    .equ    LED2, IOBASE+0x000003d
+  31               	    .equ    LED1, IOBASE+0x000003b
+  32               	    .equ    LED0, IOBASE+0x0000039
+  33               	    .equ    PUSHSW, 0xFFF419 		
+   4               	
+   5               	.text
+   6               	.even
+   7               	
+   8               	outbyte:
+   9 0000 13EF 0007 	    move.b  7(%sp), BUF_OUTBYTE
+   9      0000 0000 
+  10 0008 48E7 F000 	    movem.l %d0-%d3, -(%sp)
+  11               	outbyte_start:
+  12 000c 7002      	    move.l	#SYSCALL_NUM_PUTSTRING, %d0             /* PUTSTRING */
+  13 000e 7200      	    move.l	#0, %d1
+  14 0010 243C 0000 	    move.l	#BUF_OUTBYTE, %d2
+  14      0000 
+  15 0016 7601      	    move.l	#1, %d3
+  16 0018 4E40      	    trap	#0
+  17               	
+  18 001a 0C00 0001 	    cmpi.b	#1, %d0
+  19 001e 6600 FFEC 	    bne     outbyte_start
+  20               	
+  21 0022 4CDF 000F 	    movem.l (%sp)+, %d0-%d3
+  22 0026 4E75      	    rts
+68K GAS  outchr.s 			page 2
+
+
+  23               	
+  24               	.section .bss
+  25 0000 00        	BUF_OUTBYTE:    .ds.b 1
+  26 0001 00        	    .even
+68K GAS  outchr.s 			page 3
+
+
+DEFINED SYMBOLS
+            outchr.s:8      .text:0000000000000000 outbyte
+         equdefs.inc:1      *ABS*:0000000000000001 SYSCALL_NUM_GETSTRING
+         equdefs.inc:2      *ABS*:0000000000000002 SYSCALL_NUM_PUTSTRING
+         equdefs.inc:3      *ABS*:0000000000000003 SYSCALL_NUM_RESET_TIMER
+         equdefs.inc:4      *ABS*:0000000000000004 SYSCALL_NUM_SET_TIMER
+         equdefs.inc:6      *ABS*:0000000000fff000 REGBASE
+         equdefs.inc:7      *ABS*:0000000000d00000 IOBASE
+         equdefs.inc:9      *ABS*:0000000000fff300 IVR
+         equdefs.inc:10     *ABS*:0000000000fff304 IMR
+         equdefs.inc:11     *ABS*:0000000000fff30c ISR
+         equdefs.inc:12     *ABS*:0000000000fff310 IPR
+         equdefs.inc:14     *ABS*:0000000000fff600 TCTL1
+         equdefs.inc:15     *ABS*:0000000000fff602 TPRER1
+         equdefs.inc:16     *ABS*:0000000000fff604 TCMP1
+         equdefs.inc:17     *ABS*:0000000000fff608 TCN1
+         equdefs.inc:18     *ABS*:0000000000fff60a TSTAT1
+         equdefs.inc:20     *ABS*:0000000000fff900 USTCNT1
+         equdefs.inc:21     *ABS*:0000000000fff902 UBAUD1
+         equdefs.inc:22     *ABS*:0000000000fff904 URX1
+         equdefs.inc:23     *ABS*:0000000000fff906 UTX1
+         equdefs.inc:25     *ABS*:0000000000d0002f LED7
+         equdefs.inc:26     *ABS*:0000000000d0002d LED6
+         equdefs.inc:27     *ABS*:0000000000d0002b LED5
+         equdefs.inc:28     *ABS*:0000000000d00029 LED4
+         equdefs.inc:29     *ABS*:0000000000d0003f LED3
+         equdefs.inc:30     *ABS*:0000000000d0003d LED2
+         equdefs.inc:31     *ABS*:0000000000d0003b LED1
+         equdefs.inc:32     *ABS*:0000000000d00039 LED0
+         equdefs.inc:33     *ABS*:0000000000fff419 PUSHSW
+            outchr.s:25     .bss:0000000000000000 BUF_OUTBYTE
+            outchr.s:11     .text:000000000000000c outbyte_start
+
+NO UNDEFINED SYMBOLS

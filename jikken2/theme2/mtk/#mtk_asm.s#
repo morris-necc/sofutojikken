@@ -122,7 +122,7 @@ hard_clock: /* timer interrupt routine */
 	move.l 	#ready, -(%sp)
 	jsr 	addq
 	add.l 	#8, %sp
-
+>>>>>>> 89d5780826148eecc9f663a0cbd5973bda40bd30
 
 	/* start "sched": the ID of task to be executed next='next_task' */
 	jsr sched
@@ -179,11 +179,12 @@ V:
 ********************************
 pv_handler:
 	move.w	#0x2700, %SR
-
+<<<<<<< HEAD
 	movem.l	%d1, -(%sp)	/* save argument on top of stack */
-
+	cmp	#0, %d0
+=======
 	cmp.l	#0, %d0
-
+>>>>>>> 89d5780826148eecc9f663a0cbd5973bda40bd30
 	beq	CALL_P_BODY
 	cmp.l	#1, %d0
 	beq 	CALL_V_BODY

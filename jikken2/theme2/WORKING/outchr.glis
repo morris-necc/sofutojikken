@@ -1,0 +1,40 @@
+68K GAS  outchr.s 			page 1
+
+
+   1               	.global outbyte
+   2               	
+   3               	.text
+   4               	.even
+   5               	
+   6               	*****************
+   7               	**  Outbyte
+   8               	*****************
+   9               	/* char-type arg, output data to serial port 0 */
+  10               	outbyte:
+  11 0000 48E7 F080 		movem.l	%d0-%d3/%a0, -(%sp)
+  12 0004 204F      		move.l 	%sp, %a0
+  13 0006 D1FC 0000 		add.l	#27, %a0
+  13      001B 
+  14               	
+  15               	TRY:	
+  16 000c 7002      		move.l	#2, %d0
+  17 000e 7200      		move.l	#0, %d1			/*ch = 0*/
+  18 0010 2408      		move.l	%a0, %d2		/*p = #BUF*/
+  19 0012 7601      		move.l	#1, %d3			/*size = %d0 (The length of a given string)*/	
+  20 0014 4E40      		trap	#0
+  21               	
+  22 0016 0C40 0000 		cmp	#0, %d0
+  23 001a 6700 FFF0 		beq 	TRY
+  24               	
+  25 001e 4CDF 010F 		movem.l	(%sp)+, %d0-%d3/%a0
+  26 0022 4E75      		rts
+  27               		
+  28               	
+68K GAS  outchr.s 			page 2
+
+
+DEFINED SYMBOLS
+            outchr.s:10     .text:0000000000000000 outbyte
+            outchr.s:15     .text:000000000000000c TRY
+
+NO UNDEFINED SYMBOLS
