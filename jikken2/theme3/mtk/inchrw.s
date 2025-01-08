@@ -21,6 +21,7 @@ inbyte_loop:
 	beq	inbyte_loop
 
 	move.b	BUF_INBYTE, %d0
+	/* move.b	#0, BUF_INBYTE */	/* try uncommenting if input doesn't work like you intended */
 
 	movem.l	(%sp)+, %d1-%d3/%a0
 	
