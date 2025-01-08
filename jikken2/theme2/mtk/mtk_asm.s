@@ -99,6 +99,7 @@ first_task:
 hard_clock: /* timer interrupt routine */
 	movem.l	%d0-%d1/%a1,-(%sp)  /*save register of task under execution(piled up in ss: executed in timer interrupt!!!!)*/
 	/*to check if supervisor mode*/
+<<<<<<< HEAD
 	move.l %sp, %a1
 	adda.l #12,%a1
 	move.w (%a1),%d1/*get SR value to %d1*/
@@ -111,6 +112,8 @@ hard_clock: /* timer interrupt routine */
 	jsr addq
 	addq.l #8, %sp
 	
+=======
+>>>>>>> ecb62f0ffacf88f4d0e555ae5812f57884444171
 	movea.l %sp, %a1
 	adda.l 	#12,%a1
 	move.w 	(%a1),%d1	/*get SR value to %d1*/
@@ -122,7 +125,10 @@ hard_clock: /* timer interrupt routine */
 	move.l 	#ready, -(%sp)
 	jsr 	addq
 	add.l 	#8, %sp
+<<<<<<< HEAD
 
+=======
+>>>>>>> ecb62f0ffacf88f4d0e555ae5812f57884444171
 
 	/* start "sched": the ID of task to be executed next='next_task' */
 	jsr sched

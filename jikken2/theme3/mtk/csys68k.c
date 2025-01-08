@@ -11,7 +11,7 @@ int read(int fd, char *buf, int nbytes)
   int  i, ch;
   
   // Map ch from fd
-  if (fd >= 0 || fd <= 3) {
+  if (fd == 0 || fd == 3) {
     ch = 0;
   } else if (fd == 4) {
     ch = 1;

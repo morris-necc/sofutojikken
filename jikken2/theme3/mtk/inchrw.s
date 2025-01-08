@@ -20,7 +20,7 @@ inbyte_loop:
 	cmp.l	#0, %d0
 	beq	inbyte_loop
 
-	move.b	BUF_INBYTE, LED7
+	move.b	BUF_INBYTE, %d0
 
 	movem.l	(%sp)+, %d1-%d3/%a0
 	

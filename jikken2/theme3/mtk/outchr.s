@@ -14,7 +14,7 @@ outbyte:
 
 TRY:	
 	move.l	#2, %d0
-	move.l	%a0, %d1		/*ch = a0*/
+	move.l	(%a0), %d1		/*ch = a0*/
 	
 	add.l	#7, %a0			/*a0 = char*/
 	
