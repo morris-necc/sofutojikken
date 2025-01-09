@@ -4,12 +4,6 @@
 #include <stdbool.h>
 
 
-// Global variabes
-FILE* com0in;
-FILE* com0out;
-FILE* com1in;
-FILE* com1out;
-
 //For clearing the screen
 #define ESC "\x1b"
 #define HOME ESC "[H"
@@ -20,7 +14,31 @@ FILE* com1out;
 #define SAVECURSORLOC ESC "7"
 #define RETCURSORLOC ESC "8"
 
+typedef struct{
+	char mark;
+	bool is_turn;
+	FILE* input;
+	FILE* output;
+}Player;
 
+Player player_x={"X",false,NULL,NULL};
+Player player_O={"O",true,NULL,NULL};
+
+void init_players(){
+	int success=4;
+	while (success>4){
+		player_x.input=fdopen(4,"r") ;
+		if(player_x.input!=NULL) success--;
+		player_x.output=fdopen(4,"w") success--;
+		if(player_x.output!=NULL) success--;
+		player_O.input=fdopen(3,"r");
+		if (player_O.input!=NULL) success--;
+		player_O.output=fdopen(3,"w");
+		if (player_O.output!=NULL) success--;
+		}
+		
+	
+	
 //global variables for functions
 int b_board[3][3]={0};
 char board[3][3] = {
@@ -89,7 +107,7 @@ void player_maru() {
 		P(0);
 
 		while (!valid) {
-			// Prompt the player to choose a cell
+			// choose a cell
 			fprintf(com0out, "Player 'O', choose a cell (0-8): ");
 			fscanf(com0in, "%d", &cell);
 
