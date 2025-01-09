@@ -62,39 +62,38 @@
 
 
   22               	
-  23 0024 13F9 0000 		move.b	BUF_INBYTE, LED7
-  23      0000 00D0 
-  23      002F 
+  23 0024 1039 0000 		move.b	BUF_INBYTE, %d0
+  23      0000 
   24               	
-  25 002e 4CDF 010E 		movem.l	(%sp)+, %d1-%d3/%a0
+  25 002a 4CDF 010E 		movem.l	(%sp)+, %d1-%d3/%a0
   26               		
-  27 0032 4E75      		rts
+  27 002e 4E75      		rts
   28               	
   29               	inkey: /* ignore this */
-  30 0034 48E7 7080 		movem.l	%a0/%d1-%d3, -(%sp)
-  31 0038 41F9 0000 		lea.l	BUF_INBYTE, %a0
+  30 0030 48E7 7080 		movem.l	%a0/%d1-%d3, -(%sp)
+  31 0034 41F9 0000 		lea.l	BUF_INBYTE, %a0
   31      0000 
   32               		
-  33 003e 2200      		move.l	%d0, %d1			/* put channel number*/
+  33 003a 2200      		move.l	%d0, %d1			/* put channel number*/
   34               	
-  35 0040 7001      		move.l	#SYSCALL_NUM_GETSTRING, %d0			
-  36 0042 2408      		move.l	%a0, %d2			/* head destination */
-  37 0044 7601      		move.l	#1, %d3				/* no. of data to be read */
-  38 0046 4E40      		trap	#0				
+  35 003c 7001      		move.l	#SYSCALL_NUM_GETSTRING, %d0			
+  36 003e 2408      		move.l	%a0, %d2			/* head destination */
+  37 0040 7601      		move.l	#1, %d3				/* no. of data to be read */
+  38 0042 4E40      		trap	#0				
   39               	
-  40 0048 0C80 0000 		cmp.l	#0, %d0
+  40 0044 0C80 0000 		cmp.l	#0, %d0
   40      0000 
-  41 004e 6700 0008 		beq	empty
+  41 004a 6700 0008 		beq	empty
   42               	
-  43 0052 1010      		move.b	(%a0), %d0
-  44 0054 4EFA 0004 		jmp	inkey_end
+  43 004e 1010      		move.b	(%a0), %d0
+  44 0050 4EFA 0004 		jmp	inkey_end
   45               		
   46               	empty:	
-  47 0058 70FF      		move.l	#0xffffffff, %d0
+  47 0054 70FF      		move.l	#0xffffffff, %d0
   48               	
   49               	inkey_end:
-  50 005a 4CDF 010E 		movem.l	(%sp)+, %a0/%d1-%d3
-  51 005e 4E75      		rts
+  50 0056 4CDF 010E 		movem.l	(%sp)+, %a0/%d1-%d3
+  51 005a 4E75      		rts
   52               	
   53               	.section .bss
   54 0000 00        	BUF_INBYTE: 	.ds.b 1
@@ -134,8 +133,8 @@ DEFINED SYMBOLS
             inchrw.s:8      .text:0000000000000000 inbyte
             inchrw.s:13     .text:000000000000000c inbyte_loop
             inchrw.s:54     .bss:0000000000000000 BUF_INBYTE
-            inchrw.s:29     .text:0000000000000034 inkey
-            inchrw.s:46     .text:0000000000000058 empty
-            inchrw.s:49     .text:000000000000005a inkey_end
+            inchrw.s:29     .text:0000000000000030 inkey
+            inchrw.s:46     .text:0000000000000054 empty
+            inchrw.s:49     .text:0000000000000056 inkey_end
 
 NO UNDEFINED SYMBOLS
