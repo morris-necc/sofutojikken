@@ -1,9 +1,10 @@
 #include <stdarg.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <stdbool.h>
 
-extern void outbyte(int ch, unsigned char c);
-extern char inbyte(int ch);
+extern void outbyte(bool ch, unsigned char c);
+extern char inbyte(bool ch);
 
 int read(int fd, char *buf, int nbytes)
 {
@@ -11,7 +12,7 @@ int read(int fd, char *buf, int nbytes)
   int  i, ch;
   
   // Map ch from fd
-  if (fd == 0 || fd == 3) {
+  if (fd == 0 || fd == 1 || fd == 2 || fd == 3) {
     ch = 0;
   } else if (fd == 4) {
     ch = 1;
@@ -55,7 +56,7 @@ int write (int fd, char *buf, int nbytes)
   int ch, i, j;
   
   // Map ch from fd
-  if (fd >= 1 || fd <= 3) {
+  if (fd >= 0 || fd <= 3) {
     ch = 0;
   } else if (fd == 4) {
     ch = 1;
