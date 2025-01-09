@@ -120,7 +120,8 @@ hard_clock_end:
 	movem.l (%sp)+, %d0-%d1/%a1
 	rts
 
-init_timer:	/* clock interrupt routine: generates hardware interruption by the timer control routine(created in jikken1): interruption period: 1s) */
+init_timer:	/* clock interrupt routine: generates hardware interruption by the timer 
+		control routine(created in jikken1): interruption period: 1s) */
 	movem.l %d0-%d2,-(%sp)
 	
 	move.l	#SYSCALL_NUM_RESET_TIMER, %d0
