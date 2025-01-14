@@ -3,7 +3,7 @@
 #include "mtk_c.h"
 #include <stdbool.h>
 
-
+#define BOARD_SIZE 3
 
 // Global variabes
 FILE* com0in;
