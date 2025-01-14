@@ -1,4 +1,4 @@
-68K GAS  /tmp/ccPOAUte.s 			page 1
+68K GAS  /tmp/cc26R5lq.s 			page 1
 
 
    1               	#NO_APP
@@ -58,7 +58,7 @@
   17:csys68k.c     ****     ch = 1;
   18:csys68k.c     ****   } else {
   19:csys68k.c     ****     return EBADF;
-68K GAS  /tmp/ccPOAUte.s 			page 2
+68K GAS  /tmp/cc26R5lq.s 			page 2
 
 
   20:csys68k.c     ****   }
@@ -118,7 +118,7 @@
   56 0030 4A85      		tst.l %d5
   57 0032 6FF0      		jle .L1
   58 0034 47F9 0000 		lea inbyte,%a3
-68K GAS  /tmp/ccPOAUte.s 			page 3
+68K GAS  /tmp/cc26R5lq.s 			page 3
 
 
   58      0000 
@@ -178,7 +178,7 @@
   47:csys68k.c     ****     }
   99               		.loc 1 47 17 is_stmt 0 view .LVU24
  100 0068 5283      		addq.l #1,%d3
-68K GAS  /tmp/ccPOAUte.s 			page 4
+68K GAS  /tmp/cc26R5lq.s 			page 4
 
 
  101               	.LVL7:
@@ -238,7 +238,7 @@
  143      3800 
   46:csys68k.c     ****       return (i + 1);
  144               		.loc 1 46 5 is_stmt 1 view .LVU36
-68K GAS  /tmp/ccPOAUte.s 			page 5
+68K GAS  /tmp/cc26R5lq.s 			page 5
 
 
   47:csys68k.c     ****     }
@@ -298,7 +298,7 @@
   38:csys68k.c     ****       continue;
  189               		.loc 1 38 7 view .LVU49
   39:csys68k.c     **** 
-68K GAS  /tmp/ccPOAUte.s 			page 6
+68K GAS  /tmp/cc26R5lq.s 			page 6
 
 
  190               		.loc 1 39 7 view .LVU50
@@ -358,7 +358,7 @@
   66:csys68k.c     ****   for (i = 0; i < nbytes; i++) {
  227               		.loc 1 66 3 view .LVU59
  228               		.loc 1 66 17 view .LVU60
-68K GAS  /tmp/ccPOAUte.s 			page 7
+68K GAS  /tmp/cc26R5lq.s 			page 7
 
 
  229 00da 6F28      		jle .L31
@@ -418,7 +418,7 @@
  270 0110 42A7      		clr.l -(%sp)
  271               		.cfi_def_cfa_offset 28
  272 0112 4E93      		jsr (%a3)
-68K GAS  /tmp/ccPOAUte.s 			page 8
+68K GAS  /tmp/cc26R5lq.s 			page 8
 
 
  273               	.LVL30:
@@ -478,7 +478,7 @@
  320 002f 08        		.byte	0x8
  321 0030 0000 0000 		.long	.LASF1
  322 0034 01        		.uleb128 0x1
-68K GAS  /tmp/ccPOAUte.s 			page 9
+68K GAS  /tmp/cc26R5lq.s 			page 9
 
 
  323 0035 02        		.byte	0x2
@@ -538,7 +538,7 @@
  377 0098 0000 0000 		.long	.LASF16
  378 009c 01        		.byte	0x1
  379 009d 06        		.byte	0x6
-68K GAS  /tmp/ccPOAUte.s 			page 10
+68K GAS  /tmp/cc26R5lq.s 			page 10
 
 
  380 009e 0D        		.byte	0xd
@@ -598,7 +598,7 @@
  434 0109 0000 0000 		.long	.LVUS3
  435 010d 0E        		.uleb128 0xe
  436 010e 6A00      		.string	"j"
-68K GAS  /tmp/ccPOAUte.s 			page 11
+68K GAS  /tmp/cc26R5lq.s 			page 11
 
 
  437 0110 01        		.byte	0x1
@@ -658,7 +658,7 @@
  491 017f 0000 0000 		.long	.LVUS0
  492 0183 04        		.uleb128 0x4
  493 0184 6900      		.string	"i"
-68K GAS  /tmp/ccPOAUte.s 			page 12
+68K GAS  /tmp/cc26R5lq.s 			page 12
 
 
  494 0186 0B        		.byte	0xb
@@ -718,7 +718,7 @@
  548 000e 7D        		.uleb128 0x7d
  549 000f 01        		.uleb128 0x1
  550 0010 7F        		.uleb128 0x7f
-68K GAS  /tmp/ccPOAUte.s 			page 13
+68K GAS  /tmp/cc26R5lq.s 			page 13
 
 
  551 0011 13        		.uleb128 0x13
@@ -778,7 +778,7 @@
  605 0048 21        		.uleb128 0x21
  606 0049 01        		.sleb128 1
  607 004a 3B        		.uleb128 0x3b
-68K GAS  /tmp/ccPOAUte.s 			page 14
+68K GAS  /tmp/cc26R5lq.s 			page 14
 
 
  608 004b 0B        		.uleb128 0xb
@@ -838,7 +838,7 @@
  662 0081 0E        		.uleb128 0xe
  663 0082 3A        		.uleb128 0x3a
  664 0083 0B        		.uleb128 0xb
-68K GAS  /tmp/ccPOAUte.s 			page 15
+68K GAS  /tmp/cc26R5lq.s 			page 15
 
 
  665 0084 3B        		.uleb128 0x3b
@@ -898,7 +898,7 @@
  719 00ba 12        		.uleb128 0x12
  720 00bb 06        		.uleb128 0x6
  721 00bc 40        		.uleb128 0x40
-68K GAS  /tmp/ccPOAUte.s 			page 16
+68K GAS  /tmp/cc26R5lq.s 			page 16
 
 
  722 00bd 18        		.uleb128 0x18
@@ -958,7 +958,7 @@
  776 00f3 49        		.uleb128 0x49
  777 00f4 13        		.uleb128 0x13
  778 00f5 11        		.uleb128 0x11
-68K GAS  /tmp/ccPOAUte.s 			page 17
+68K GAS  /tmp/cc26R5lq.s 			page 17
 
 
  779 00f6 01        		.uleb128 0x1
@@ -1018,7 +1018,7 @@
  833 0034 74        		.sleb128 -12
  834 0035 06        		.byte	0x6
  835 0036 20        		.byte	0x20
-68K GAS  /tmp/ccPOAUte.s 			page 18
+68K GAS  /tmp/cc26R5lq.s 			page 18
 
 
  836 0037 7A        		.byte	0x7a
@@ -1078,7 +1078,7 @@
  890 0071 46        		.uleb128 .LVL4-.Ltext0
  891 0072 5C        		.uleb128 .LVL5-.Ltext0
  892 0073 01        		.uleb128 0x1
-68K GAS  /tmp/ccPOAUte.s 			page 19
+68K GAS  /tmp/cc26R5lq.s 			page 19
 
 
  893 0074 50        		.byte	0x50
@@ -1138,7 +1138,7 @@
  947 00af 9F        		.byte	0x9f
  948 00b0 04        		.byte	0x4
  949 00b1 40        		.uleb128 .LVL2-.Ltext0
-68K GAS  /tmp/ccPOAUte.s 			page 20
+68K GAS  /tmp/cc26R5lq.s 			page 20
 
 
  950 00b2 6A        		.uleb128 .LVL7-.Ltext0
@@ -1198,7 +1198,7 @@
  1004               	.LVUS2:
  1005 00f5 00        		.uleb128 .LVU8
  1006 00f6 00        		.uleb128 .LVU41
-68K GAS  /tmp/ccPOAUte.s 			page 21
+68K GAS  /tmp/cc26R5lq.s 			page 21
 
 
  1007 00f7 00        		.uleb128 .LVU42
@@ -1258,7 +1258,7 @@
  1044      6420 696E 
  1044      7400 
  1045               	.LASF7:
-68K GAS  /tmp/ccPOAUte.s 			page 22
+68K GAS  /tmp/cc26R5lq.s 			page 22
 
 
  1046 0071 6C6F 6E67 		.string	"long long unsigned int"
@@ -1318,20 +1318,20 @@
  1071               	.LASF11:
  1072 0140 6E62 7974 		.string	"nbytes"
  1072      6573 00
-68K GAS  /tmp/ccPOAUte.s 			page 23
+68K GAS  /tmp/cc26R5lq.s 			page 23
 
 
  1073               	.LASF15:
  1074 0147 6F75 7462 		.string	"outbyte"
  1074      7974 6500 
  1075               		.ident	"GCC: (GNU) 11.4.0"
-68K GAS  /tmp/ccPOAUte.s 			page 24
+68K GAS  /tmp/cc26R5lq.s 			page 24
 
 
 DEFINED SYMBOLS
                             *ABS*:0000000000000000 csys68k.c
-     /tmp/ccPOAUte.s:9      .text:0000000000000000 read
-     /tmp/ccPOAUte.s:210    .text:00000000000000d2 write
+     /tmp/cc26R5lq.s:9      .text:0000000000000000 read
+     /tmp/cc26R5lq.s:210    .text:00000000000000d2 write
 
 UNDEFINED SYMBOLS
 inbyte

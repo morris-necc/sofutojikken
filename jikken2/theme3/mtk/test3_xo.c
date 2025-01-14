@@ -21,10 +21,11 @@ typedef struct{
 	FILE* output;
 }Player;
 
+//init players
 Player player_x={"X",false,NULL,NULL};
 Player player_O={"O",true,NULL,NULL};
 
-void init_players(){
+void init_ports(){
 	int success=4;
 	while (success>4){
 		player_x.input=fdopen(4,"r") ;
@@ -36,7 +37,9 @@ void init_players(){
 		player_O.output=fdopen(3,"w");
 		if (player_O.output!=NULL) success--;
 		}
-		
+	fprintf(player_O.output, "Ports Initialized! \n");
+	fprintf(player_x.output, "Ports Initialized! \n");
+	}	
 	
 	
 //global variables for functions
@@ -47,7 +50,7 @@ char board[3][3] = {
     {'6', '7', '8'}
 };
 int valid_cells[9] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
-bool player_X_playing = false;
+
 
 //fct for tracking empty cells
 bool is_valid_cell(int cell) {
@@ -77,7 +80,7 @@ void update_board(int cell, char mark) {
 //displays the board after the change
 void display_board() {
 	FILE* screen;
-	if (player_X_playing) screen=com1out;
+	if (player_x.turn) screen=com1out;
 	else screen = com0out;
 	// disable cursor while drawing
 	fprintf(screen, "%s", CURSORINVISIBLE);
@@ -88,20 +91,20 @@ void display_board() {
             		if (j < 2) fprintf(screen,"|");     // Print column separator
        			 }
         		fprintf(screen,"\n");
-        if (i < 2) fprintf(screen,"---+---+---\n"); // Print row separator
+        	if (i < 2) fprintf(screen,"---+---+---\n"); // Print row separator
     }
-    	fprintf(screen,"\n");
+    	fflush(screen);
 	// enable cursor
 	fprintf(screen, "\033[%d;%dH", 24, 1);
 	fprintf(screen, "%s", CURSORVISIBLE);
 	
-	fflush(screen);
+	
     }
 
 void player_maru() {
 	int cell = -1;
 	bool valid = false;
-	player_X_playing = false;
+	player_x.turn = false;
 	while (1)
 	{
 		P(0);
@@ -128,7 +131,8 @@ void player_x() {
 		
 	int cell = -1;
 	bool valid = false;
-	player_X_playing = true;
+	player_x.turn = true;
+	
 	while(1){
 		P(0);
 
@@ -247,26 +251,6 @@ int check_win(char board[3][3],int in,char mark){//in is the last input cell [0.
 	return 0;
 }
 
-
-void init_ports() {
-	int success = 4;
-	while(success > 0){
-		com0in = fdopen(3, "r");
-		if (com0in != NULL) success--;
-	
-		com0out = fdopen(3, "w");
-		if (com0out != NULL) success--;
-	
-		com1in = fdopen(4, "r");
-		if (com1in != NULL) success--;
-	
-		com1out = fdopen(4, "w");
-		if (com1out != NULL) success--;
-	}
-	
-	fprintf(com0out, "Ports Initialized! \n");
-	fprintf(com1out, "Ports Initialized! \n");
-}
 
 int main()
 {
