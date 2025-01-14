@@ -5,42 +5,37 @@
 
 void task1()
 {
-	P(1);
-	for(int i = 1; i <= 20; ++i){
-		printf("\n1 %d", i);
-	}
-	V(1);
-	while(1){
-		printf("\ntask1 finished");
-	}
+	P(0);
+	for (int i=1;i<=500;i++){
+		printf("1 %d\n", i);
+		}
+	V(0);
+	
 }
 
 void task2()
 {	
-	P(1);
-	for(int i = 1; i <= 20; ++i){
-		printf("\n2 %d", i);
-	}
-	V(1);
-	while(1){
-		printf("\ntask2 finished");
-	}
+	P(0);
+	for (int i=1;i<=500;i++){
+		printf("2 %d\n", i);
+		}
+	//V(0);
+	
+       
 }
 
 void task3()
 {
-	P(1);
-	for(int i = 1; i <= 20; ++i){
-		printf("\n3 %d", i);
-	}
-	V(1);
+char c;
+	P(0);
 	while(1){
-		printf("\ntask3 finished");
-	}
+	scanf("%c",&c);}
+	//V(0);
 }
 
-void main()
+int main()
 {
+
 	init_kernel();
 	
 	set_task(task1);
@@ -48,6 +43,6 @@ void main()
     	set_task(task3);
 
     	begin_sch();
-	
+	return 0;
 }
 

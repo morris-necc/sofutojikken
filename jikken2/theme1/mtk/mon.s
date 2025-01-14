@@ -283,7 +283,6 @@ INTERGET:
 	move.l	#0, %d0		/* Queue #0 */
 	move.b	%d2, %d1 	/* move data to d1*/
 	jsr	INQ		
-	move.b	#'a', LED3
 	
 INTERGET_END:
 	movem.l	(%sp)+, %d0

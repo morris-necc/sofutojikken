@@ -3,11 +3,10 @@
 #define MAX 1024
 
 void task1(){ 
-	P(1);
+
 	for(int i=1;i<=20;i++){
-		printf("\n1 %d",i);
-  	}
-  	V(1);
+	  printf("\n1 %d",i);}
+   
   	while(1){
   		printf("\ntask1 finished");
   		}
@@ -15,11 +14,11 @@ void task1(){
 void task2()
 { 
     // task2 definition
-	P(2);
+    
 	for(int i=1;i<=20;i++){
 		printf("\n2 %d",i);
   	}
-  	V(2);
+      
   	while(1){
   		printf("\ntask2 finished");
   	}

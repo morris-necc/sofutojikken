@@ -99,7 +99,6 @@ first_task:
 hard_clock: /* timer interrupt routine */
 	movem.l	%d0-%d1/%a1,-(%sp)  /*save register of task under execution(piled up in ss: executed in timer interrupt!!!!)*/
 	/*to check if supervisor mode*/
-<<<<<<< HEAD
 	move.l %sp, %a1
 	adda.l #12,%a1
 	move.w (%a1),%d1/*get SR value to %d1*/
@@ -112,8 +111,6 @@ hard_clock: /* timer interrupt routine */
 	jsr addq
 	addq.l #8, %sp
 	
-=======
->>>>>>> ecb62f0ffacf88f4d0e555ae5812f57884444171
 	movea.l %sp, %a1
 	adda.l 	#12,%a1
 	move.w 	(%a1),%d1	/*get SR value to %d1*/
@@ -125,10 +122,7 @@ hard_clock: /* timer interrupt routine */
 	move.l 	#ready, -(%sp)
 	jsr 	addq
 	add.l 	#8, %sp
-<<<<<<< HEAD
-
-=======
->>>>>>> ecb62f0ffacf88f4d0e555ae5812f57884444171
+>>>>>>> 89d5780826148eecc9f663a0cbd5973bda40bd30
 
 	/* start "sched": the ID of task to be executed next='next_task' */
 	jsr sched
@@ -185,11 +179,12 @@ V:
 ********************************
 pv_handler:
 	move.w	#0x2700, %SR
-
+<<<<<<< HEAD
 	movem.l	%d1, -(%sp)	/* save argument on top of stack */
-
+	cmp	#0, %d0
+=======
 	cmp.l	#0, %d0
-
+>>>>>>> 89d5780826148eecc9f663a0cbd5973bda40bd30
 	beq	CALL_P_BODY
 	cmp.l	#1, %d0
 	beq 	CALL_V_BODY

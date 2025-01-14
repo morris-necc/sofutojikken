@@ -3,14 +3,42 @@
 #include "mtk_c.h"
 #include <stdbool.h>
 
-#define BOARD_SIZE 3
 
-// Global variabes
-FILE* com0in;
-FILE* com0out;
-FILE* com1in;
-FILE* com1out;
+//For clearing the screen
+#define ESC "\x1b"
+#define HOME ESC "[H"
+#define DELETESCREEN ESC "[2J"
+#define CURSORINVISIBLE ESC "[?25l"
+#define CURSORVISIBLE ESC "[?25h"
 
+#define SAVECURSORLOC ESC "7"
+#define RETCURSORLOC ESC "8"
+
+typedef struct{
+	char mark;
+	bool is_turn;
+	FILE* input;
+	FILE* output;
+}Player;
+
+Player player_x={"X",false,NULL,NULL};
+Player player_O={"O",true,NULL,NULL};
+
+void init_players(){
+	int success=4;
+	while (success>4){
+		player_x.input=fdopen(4,"r") ;
+		if(player_x.input!=NULL) success--;
+		player_x.output=fdopen(4,"w") success--;
+		if(player_x.output!=NULL) success--;
+		player_O.input=fdopen(3,"r");
+		if (player_O.input!=NULL) success--;
+		player_O.output=fdopen(3,"w");
+		if (player_O.output!=NULL) success--;
+		}
+		
+	
+	
 //global variables for functions
 int b_board[3][3]={0};
 char board[3][3] = {
@@ -19,25 +47,23 @@ char board[3][3] = {
     {'6', '7', '8'}
 };
 int valid_cells[9] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
-int num_valid_cells = 9; // Tracks the number of valid cells
 bool player_X_playing = false;
 
 //fct for tracking empty cells
 bool is_valid_cell(int cell) {
-    for (int i = 0; i < num_valid_cells; i++) {
+    for (int i = 0; i < valid_cells.length(); i++) {
         if (valid_cells[i] == cell) return true;
     }
     return false;
 }
 
 void remove_cell(int cell) {
-    for (int i = 0; i < num_valid_cells; i++) {
+    for (int i = 0; i < valid_cells.length(); i++) {
         if (valid_cells[i] == cell) {
             // Shift the remaining cells
-            for (int j = i; j < num_valid_cells - 1; j++) {
+            for (int j = i; j < valid_cells.length() - 1; j++) {
                 valid_cells[j] = valid_cells[j + 1];
             }
-            num_valid_cells--;
             break;
         }
     }
@@ -50,32 +76,43 @@ void update_board(int cell, char mark) {
 }
 //displays the board after the change
 void display_board() {
-    for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 3; j++) {
-            printf(" %c ", board[i][j]); // Print the current cell value
-            if (j < 2) printf("|");     // Print column separator
-        }
-        printf("\n");
-        if (i < 2) printf("---+---+---\n"); // Print row separator
+	FILE* screen;
+	if (player_X_playing) screen=com1out;
+	else screen = com0out;
+	// disable cursor while drawing
+	fprintf(screen, "%s", CURSORINVISIBLE);
+	
+    	for (int i = 0; i < 3; i++) {
+        	for (int j = 0; j < 3; j++) {
+            		fprintf(screen," %c ", board[i][j]); // Print the current cell value
+            		if (j < 2) fprintf(screen,"|");     // Print column separator
+       			 }
+        		fprintf(screen,"\n");
+        if (i < 2) fprintf(screen,"---+---+---\n"); // Print row separator
     }
-    printf("\n");
-}
+    	fprintf(screen,"\n");
+	// enable cursor
+	fprintf(screen, "\033[%d;%dH", 24, 1);
+	fprintf(screen, "%s", CURSORVISIBLE);
+	
+	fflush(screen);
+    }
 
 void player_maru() {
+	int cell = -1;
+	bool valid = false;
+	player_X_playing = false;
 	while (1)
 	{
-		p(0);
-		int cell = -1;
-		bool valid = false;
-		player_X_playing = false;
+		P(0);
 
 		while (!valid) {
-			// Prompt the player to choose a cell
+			// choose a cell
 			fprintf(com0out, "Player 'O', choose a cell (0-8): ");
 			fscanf(com0in, "%d", &cell);
 
 			// Validate the chosen cell
-			if (is_cell_valid(cell)) {
+			if (is_valid_cell(cell)) {
 				valid = true;
 				update_board(cell, 'O');  // Place 'O' on the board
 				remove_cell(cell);       // Remove the cell from the available list
@@ -84,15 +121,17 @@ void player_maru() {
 			}
 		}
 		display_board(); // Show the updated board
-		v(0);
+		V(0);
 	}
 }
 void player_x() {
+		
+	int cell = -1;
+	bool valid = false;
+	player_X_playing = true;
 	while(1){
-		p(0);
-		int cell = -1;
-		bool valid = false;
-		player_X_playing = true;
+		P(0);
+
 
 		while (!valid) {
 			// Prompt the player to choose a cell
@@ -100,7 +139,7 @@ void player_x() {
 			fscanf(com1in, "%d", &cell);
 
 			// Validate the chosen cell
-			if (is_cell_valid(cell)) {
+			if (is_valid_cell(cell)) {
 				valid = true;
 				update_board(cell, 'X');  // Place 'X' on the board
 				remove_cell(cell);       // Remove the cell from the available list
@@ -109,7 +148,7 @@ void player_x() {
 			}
 		}
 		display_board(); // Show the updated board
-		v(0);
+		V(0);
 	}
 }
 void hurry_msg() {
@@ -205,6 +244,7 @@ int check_win(char board[3][3],int in,char mark){//in is the last input cell [0.
 	}
 	else
 		return 0;
+	return 0;
 }
 
 
@@ -228,18 +268,20 @@ void init_ports() {
 	fprintf(com1out, "Ports Initialized! \n");
 }
 
-void main()
+int main()
 {
 	// initialization
-	init_kernel();
+
 	init_ports();
 
 	init_board();
 	set_task(player_maru);
 	set_task(player_x);
-    set_task(hurry_msg);
+    	set_task(hurry_msg);
 
-    begin_sch();
+    	begin_sch();
+    	return 0;
 	
 }
+
 

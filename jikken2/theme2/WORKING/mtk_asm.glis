@@ -1,0 +1,304 @@
+68K GAS  mtk_asm.s 			page 1
+
+
+   1               	.include "equdefs.inc"
+   1               	    .equ    SYSCALL_NUM_GETSTRING, 1 
+   2               	    .equ    SYSCALL_NUM_PUTSTRING, 2 
+   3               	    .equ    SYSCALL_NUM_RESET_TIMER, 3 
+   4               	    .equ    SYSCALL_NUM_SET_TIMER, 4 
+   5               	
+   6               	    .equ    REGBASE, 0xFFF000 
+   7               	    .equ    IOBASE, 0x00d00000
+   8               	
+   9               	    .equ    IVR, REGBASE+0x300 
+  10               	    .equ    IMR, REGBASE+0x304 
+  11               	    .equ    ISR, REGBASE+0x30c 
+  12               	    .equ    IPR, REGBASE+0x310 
+  13               	    
+  14               	    .equ    TCTL1, REGBASE+0x600 	
+  15               	    .equ    TPRER1, REGBASE+0x602 	
+  16               	    .equ    TCMP1, REGBASE+0x604 	
+  17               	    .equ    TCN1, REGBASE+0x608 	
+  18               	    .equ    TSTAT1, REGBASE+0x60a 	
+  19               	    
+  20               	    .equ    USTCNT1, REGBASE+0x900 	
+  21               	    .equ    UBAUD1, REGBASE+0x902 	
+  22               	    .equ    URX1, REGBASE+0x904 	
+  23               	    .equ    UTX1, REGBASE+0x906 	
+  24               	    
+  25               	    .equ    LED7, IOBASE+0x000002f 	
+  26               	    .equ    LED6, IOBASE+0x000002d 	
+  27               	    .equ    LED5, IOBASE+0x000002b
+  28               	    .equ    LED4, IOBASE+0x0000029
+  29               	    .equ    LED3, IOBASE+0x000003f
+  30               	    .equ    LED2, IOBASE+0x000003d
+  31               	    .equ    LED1, IOBASE+0x000003b
+  32               	    .equ    LED0, IOBASE+0x0000039
+  33               	    .equ    PUSHSW, 0xFFF419 		
+   2               	
+   3               	.global first_task
+   4               	.global pv_handler
+   5               	.global P
+   6               	.global V
+   7               	.global hard_clock
+   8               	.global swtch
+   9               	.global init_timer
+  10               	
+  11               	.extern p_body
+  12               	.extern v_body
+  13               	.extern curr_task
+  14               	.extern addq
+  15               	.extern sched
+  16               	.extern ready /*points to the first task*/
+  17               	.extern task_tab
+  18               	.extern next_task
+  19               	 
+  20               	.section .text
+  21               	.even
+  22               	********************
+  23               	** System call numbers 
+  24               	******************** 
+68K GAS  mtk_asm.s 			page 2
+
+
+  25               	.equ    SYSCALL_P, 0
+  26               	.equ    SYSCALL_V, 1
+  27               	 
+  28               	swtch:
+  29 0000 40E7      		move.w %SR , -(%sp)/*SR is piled up on the stack so that the process can be returned by the RTE.*/
+  30               		
+  31 0002 48E7 FFFE 		movem.l %d0-%d7/%a0-%a6,-(%sp) /*Saving register of task under execution*/
+  32 0006 4E69      		move.l %USP, %a1
+  33 0008 2F09      		move.l %a1, -(%sp)
+  34               	
+  35 000a 2039 0000 		move.l curr_task,%d0 /*current task ID*/
+  35      0000 
+  36 0010 41F9 0000 		lea.l task_tab, %a0 /*save the pointer to the beginning of task_tab*/
+  36      0000 
+  37 0016 C0FC 0014 		mulu #20, %d0 /* because every element takes 4*5 bytes*/
+  38 001a 5880      		add.l #4,%d0 /*to access stack_ptr*/
+  39 001c D1C0      		adda.l %d0, %a0 /*access the stack_ptr of curr_task in task_tab*/
+  40 001e 208F      		move.l %sp, (%a0) /* record the SSP*/
+  41               	
+  42               		/*Substitute ‘next_task’ for ‘curr_task’*/
+  43 0020 43F9 0000 		lea.l curr_task, %a1
+  43      0000 
+  44 0026 22B9 0000 		move.l next_task,(%a1)
+  44      0000 
+  45               	
+  46               		/* Read out SSP of next task*/
+  47 002c 2039 0000 		move.l curr_task,%d0 /*current task ID*/
+  47      0000 
+  48 0032 41F9 0000 		lea.l task_tab, %a0 /*save the pointer to the beginning of task_tab*/
+  48      0000 
+  49 0038 C0FC 0014 		mulu #20, %d0 /* because every element takes 4*5 bytes*/
+  50 003c 5880      		addq.l #4,%d0 /*to access stack_ptr*/
+  51 003e D1C0      		adda.l %d0, %a0 /*access the stack_ptr of curr_task in task_tab*/
+  52 0040 2E50      		move.l (%a0), %sp /* read out next task's SSP*/
+  53               	
+  54               		/*Read out register of next task*/
+  55 0042 225F      		move.l (%sp)+,%a1
+  56 0044 4E61      		move.l %a1,%USP
+  57 0046 4CDF 7FFF 		movem.l (%sp)+,%d0-%d7/%a0-%a6
+  58               	
+  59 004a 4E73      		rte
+  60               	
+  61               	*****************************************
+  62               	** subroutine first_task
+  63               	** To start user task: stack used by kernel is switched to the stack pointed by "curr_task"
+  64               	** activated once (with "begin_sch()")
+  65               	** ends with RTE
+  66               	** needs to be in supervisor mode
+  67               	*****************************************
+  68               	first_task:
+  69               		/* calcuate TCB's head address */
+  70               		/* find the address of TCB of 'curr_task' */
+  71 004c 46FC 2700 		move.w	#0x2700, %sr
+  72 0050 4281      		clr.l	%d1
+  73 0052 43F9 0000 		lea.l	task_tab, %a1
+  73      0000 
+  74 0058 2239 0000 		move.l	curr_task, %d1
+68K GAS  mtk_asm.s 			page 3
+
+
+  74      0000 
+  75 005e C2FC 0014 		mulu	#20, %d1	/* TCB datatype takes up 20 bytes*/
+  76 0062 D3C1      		adda.l	%d1, %a1	/* add 20*curr_task to access task_tab[curr_task]*/
+  77               	
+  78               		/* restoration of values of USP and SSP */
+  79               		/* restore the ssp's value recorded in this task's TCB & USP value recorded in the ss*/
+  80 0064 2E69 0004 		move.l	4(%a1), %sp	/* restore stack pointer */
+  81 0068 245F      		move.l	(%sp)+, %a2
+  82 006a 4E62      		move.l	%a2, %USP	/* restore USP */
+  83               		
+  84               	
+  85               		/* restoration of al of remained registers */
+  86               		/* restore the values of remained 15 registers piled up on the supervisor's stack*/
+  87 006c 4CDF 7FFF 		movem.l	(%sp)+, %d0-%d7/%a0-%a6
+  88               	
+  89               		/* start of user task */
+  90               		/* execute the RTE instruction*/
+  91 0070 4E73      		rte
+  92               		
+  93               		
+  94               	******************************************
+  95               	*** create the timer subroutines:
+  96               	*** init_timer/Trap#0:OK/set_timer:OK/reset_timer:OK/hard_clock
+  97               	******************************************
+  98               	/* called from hardware intrruptprocessing interface for timer(prepared in 1st part) */
+  99               	hard_clock: /* timer interrupt routine */
+ 100 0072 48E7 C040 		movem.l	%d0-%d1/%a1,-(%sp)  /*save register of task under execution(piled up in ss: executed in ti
+ 101               		/*to check if supervisor mode*/
+ 102 0076 224F      		movea.l %sp, %a1
+ 103 0078 D3FC 0000 		adda.l 	#12,%a1
+ 103      000C 
+ 104 007e 3211      		move.w 	(%a1),%d1	/*get SR value to %d1*/
+ 105 0080 0641 2000 		addi.w 	#0x2000,%d1
+ 106 0084 0C41 2000 		cmpi.w 	#0x2000,%d1 	/*check if supervisor mode*/
+ 107 0088 6600 0020 		bne 	hard_clock_end
+ 108               		/* add "curr_task" to the end of 'ready' using addq() */
+ 109 008c 2F39 0000 		move.l 	curr_task,-(%sp)
+ 109      0000 
+ 110 0092 2F3C 0000 		move.l 	#ready, -(%sp)
+ 110      0000 
+ 111 0098 4EB9 0000 		jsr 	addq
+ 111      0000 
+ 112 009e 508F      		add.l 	#8, %sp
+ 113               	
+ 114               		/* start "sched": the ID of task to be executed next='next_task' */
+ 115 00a0 4EB9 0000 		jsr sched
+ 115      0000 
+ 116               		/* start 'swtch'*/
+ 117 00a6 4EBA FF58 		jsr swtch
+ 118               	
+ 119               	hard_clock_end:
+ 120 00aa 4CDF 0203 		movem.l (%sp)+, %d0-%d1/%a1
+ 121 00ae 4E75      		rts
+ 122               	
+ 123               	init_timer:	/* clock interrupt routine: generates hardware interruption by the timer control routin
+ 124 00b0 48E7 E000 		movem.l %d0-%d2,-(%sp)
+ 125               		
+68K GAS  mtk_asm.s 			page 4
+
+
+ 126 00b4 7003      		move.l	#SYSCALL_NUM_RESET_TIMER, %d0
+ 127 00b6 4E40      		trap #0
+ 128               	
+ 129 00b8 7004      		move.l	#SYSCALL_NUM_SET_TIMER, %d0
+ 130 00ba 323C 2710 		move.w	#10000, %d1
+ 131 00be 243C 0000 		move.l	#hard_clock, %d2
+ 131      0000 
+ 132 00c4 4E40      		trap	#0
+ 133               	
+ 134 00c6 4CDF 0007 		movem.l (%sp)+,%d0-%d2
+ 135 00ca 4E75      		rts
+ 136               	
+ 137               	********************************
+ 138               	** Entrance of P system call
+ 139               	** Input: D1 = semaphore ID
+ 140               	********************************
+ 141               	P:
+ 142 00cc 48E7 C000 		movem.l	%d0-%d1, -(%sp)
+ 143 00d0 7000      		move.l	#SYSCALL_P, %d0
+ 144 00d2 222F 000C 		move.l	12(%sp), %d1
+ 145 00d6 4E41      		trap	#1
+ 146 00d8 4CDF 0003 		movem.l	(%sp)+, %d0-%d1
+ 147 00dc 4E75      		rts
+ 148               		
+ 149               	********************************
+ 150               	** Entrance of V system call
+ 151               	** Input: D1 = semaphore ID
+ 152               	********************************
+ 153               	V:
+ 154 00de 48E7 C000 		movem.l	%d0-%d1, -(%sp)
+ 155 00e2 7001      		move.l	#SYSCALL_V, %d0
+ 156 00e4 222F 000C 		move.l	12(%sp), %d1
+ 157 00e8 4E41      		trap	#1
+ 158 00ea 4CDF 0003 		movem.l	(%sp)+, %d0-%d1
+ 159 00ee 4E75      		rts
+ 160               	
+ 161               	********************************
+ 162               	** TRAP #1 interrupt provessing routine
+ 163               	** D0 = P/V system call
+ 164               	** D1 = Semaphore ID
+ 165               	** According to D0, call p_body() or v_body()
+ 166               	********************************
+ 167               	pv_handler:
+ 168 00f0 48E7 4000 		movem.l	%d1, -(%sp)	/* save argument on top of stack */
+ 169 00f4 46FC 2700 		move.w	#0x2700, %SR
+ 170 00f8 0C80 0000 		cmpi.l	#0, %d0
+ 170      0000 
+ 171 00fe 6700 0010 		beq	CALL_P_BODY
+ 172 0102 0C80 0000 		cmpi.l	#1, %d0
+ 172      0001 
+ 173 0108 6700 0010 		beq 	CALL_V_BODY
+ 174 010c 6000 0016 		bra	end_pv_handler
+ 175               	CALL_P_BODY:
+ 176 0110 4EB9 0000 		jsr	p_body
+ 176      0000 
+ 177 0116 6000 000C 		bra 	end_pv_handler
+ 178               	CALL_V_BODY:	
+68K GAS  mtk_asm.s 			page 5
+
+
+ 179 011a 4EB9 0000 		jsr	v_body
+ 179      0000 
+ 180 0120 6000 0002 		bra	end_pv_handler
+ 181               	end_pv_handler:
+ 182 0124 4CDF 0002 		movem.l	(%sp)+, %d1
+ 183 0128 4E73      		rte
+68K GAS  mtk_asm.s 			page 6
+
+
+DEFINED SYMBOLS
+         equdefs.inc:1      *ABS*:0000000000000001 SYSCALL_NUM_GETSTRING
+         equdefs.inc:2      *ABS*:0000000000000002 SYSCALL_NUM_PUTSTRING
+         equdefs.inc:3      *ABS*:0000000000000003 SYSCALL_NUM_RESET_TIMER
+         equdefs.inc:4      *ABS*:0000000000000004 SYSCALL_NUM_SET_TIMER
+         equdefs.inc:6      *ABS*:0000000000fff000 REGBASE
+         equdefs.inc:7      *ABS*:0000000000d00000 IOBASE
+         equdefs.inc:9      *ABS*:0000000000fff300 IVR
+         equdefs.inc:10     *ABS*:0000000000fff304 IMR
+         equdefs.inc:11     *ABS*:0000000000fff30c ISR
+         equdefs.inc:12     *ABS*:0000000000fff310 IPR
+         equdefs.inc:14     *ABS*:0000000000fff600 TCTL1
+         equdefs.inc:15     *ABS*:0000000000fff602 TPRER1
+         equdefs.inc:16     *ABS*:0000000000fff604 TCMP1
+         equdefs.inc:17     *ABS*:0000000000fff608 TCN1
+         equdefs.inc:18     *ABS*:0000000000fff60a TSTAT1
+         equdefs.inc:20     *ABS*:0000000000fff900 USTCNT1
+         equdefs.inc:21     *ABS*:0000000000fff902 UBAUD1
+         equdefs.inc:22     *ABS*:0000000000fff904 URX1
+         equdefs.inc:23     *ABS*:0000000000fff906 UTX1
+         equdefs.inc:25     *ABS*:0000000000d0002f LED7
+         equdefs.inc:26     *ABS*:0000000000d0002d LED6
+         equdefs.inc:27     *ABS*:0000000000d0002b LED5
+         equdefs.inc:28     *ABS*:0000000000d00029 LED4
+         equdefs.inc:29     *ABS*:0000000000d0003f LED3
+         equdefs.inc:30     *ABS*:0000000000d0003d LED2
+         equdefs.inc:31     *ABS*:0000000000d0003b LED1
+         equdefs.inc:32     *ABS*:0000000000d00039 LED0
+         equdefs.inc:33     *ABS*:0000000000fff419 PUSHSW
+           mtk_asm.s:68     .text:000000000000004c first_task
+           mtk_asm.s:167    .text:00000000000000f0 pv_handler
+           mtk_asm.s:141    .text:00000000000000cc P
+           mtk_asm.s:153    .text:00000000000000de V
+           mtk_asm.s:99     .text:0000000000000072 hard_clock
+           mtk_asm.s:28     .text:0000000000000000 swtch
+           mtk_asm.s:123    .text:00000000000000b0 init_timer
+           mtk_asm.s:25     *ABS*:0000000000000000 SYSCALL_P
+           mtk_asm.s:26     *ABS*:0000000000000001 SYSCALL_V
+           mtk_asm.s:119    .text:00000000000000aa hard_clock_end
+           mtk_asm.s:175    .text:0000000000000110 CALL_P_BODY
+           mtk_asm.s:178    .text:000000000000011a CALL_V_BODY
+           mtk_asm.s:181    .text:0000000000000124 end_pv_handler
+
+UNDEFINED SYMBOLS
+curr_task
+task_tab
+next_task
+ready
+addq
+sched
+p_body
+v_body

@@ -1,0 +1,50 @@
+68K GAS  inchrw.s 			page 1
+
+
+   1               	.global inbyte
+   2               	
+   3               	.text
+   4               	.even
+   5               	
+   6               	**********************
+   7               	**  Inbyte
+   8               	**********************
+   9               	/* return one character (char-type) read out from the serial port 0, no arg */
+  10               	inbyte:
+  11 0000 48E7 7080 		movem.l	%d1-%d3/%a0, -(%sp)
+  12 0004 41F9 0000 		lea.l	SERIAL_PORT_0, %a0
+  12      0000 
+  13               	TRY:
+  14 000a 7001      		move.l	#1, %d0
+  15 000c 7200      		move.l	#0, %d1			/*ch = 0*/
+  16 000e 2408      		move.l	%a0, %d2		/*p = #BUF*/
+  17 0010 7601      		move.l	#1, %d3			/*size = 1*/
+  18 0012 4E40      		trap	#0
+  19               	
+  20 0014 0C00 0000 		cmpi.b	#0, %d0
+  21 0018 6700 FFF0 		beq 	TRY
+  22               		
+  23 001c 4280      		clr.l	%d0
+  24 001e 1010      		move.b  (%a0), %d0
+  25 0020 13C0 00D0 		move.b  %d0, 0x00d00039     /* debug LED0 */
+  25      0039 
+  26               	
+  27 0026 4CDF 010E 		movem.l	(%sp)+, %d1-%d3/%a0
+  28 002a 4E75      		rts
+  29               	*********************
+  30               	** Inkey (EXTRA)
+  31               	*********************
+  32               	/* return unsigned int value (0x00 to 0xff) if single char is input, else -1*/
+  33               	
+  34               	.section .bss
+  35 0000 00        	SERIAL_PORT_0:	.ds.b 1
+  36 0001 00        		.even
+68K GAS  inchrw.s 			page 2
+
+
+DEFINED SYMBOLS
+            inchrw.s:10     .text:0000000000000000 inbyte
+            inchrw.s:35     .bss:0000000000000000 SERIAL_PORT_0
+            inchrw.s:13     .text:000000000000000a TRY
+
+NO UNDEFINED SYMBOLS
