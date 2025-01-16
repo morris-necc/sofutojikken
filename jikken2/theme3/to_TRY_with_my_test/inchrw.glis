@@ -1,0 +1,134 @@
+68K GAS  inchrw.s 			page 1
+
+
+   1               	.include "equdefs.inc"
+   1               	***************************************************************
+   2               	**各種レジスタ定義
+   3               	***************************************************************
+   4               	***************
+   5               	**レジスタ群の先頭
+   6               	***************
+   7               	.equ REGBASE,   0xFFF000          | DMAPを使用．
+   8               	.equ IOBASE,    0x00d00000
+   9               	***************
+  10               	**割り込み関係のレジスタ
+  11               	***************
+  12               	.equ IVR,       REGBASE+0x300     |割り込みベクタレジスタ
+  13               	.equ IMR,       REGBASE+0x304     |割り込みマスクレジスタ
+  14               	.equ ISR,       REGBASE+0x30c     |割り込みステータスレジスタ
+  15               	.equ IPR,       REGBASE+0x310     |割り込みペンディングレジスタ
+  16               	***************
+  17               	**タイマ関係のレジスタ
+  18               	***************
+  19               	.equ TCTL1,     REGBASE+0x600     |タイマ１コントロールレジスタ
+  20               	.equ TPRER1,    REGBASE+0x602     |タイマ１プリスケーラレジスタ
+  21               	.equ TCMP1,     REGBASE+0x604     |タイマ１コンペアレジスタ
+  22               	.equ TCN1,      REGBASE+0x608     |タイマ１カウンタレジスタ
+  23               	.equ TSTAT1,    REGBASE+0x60a     |タイマ１ステータスレジスタ
+  24               	***************
+  25               	** UART1（送受信）関係のレジスタ
+  26               	***************
+  27               	.equ USTCNT1,   REGBASE+0x900     | UART1ステータス/コントロールレジスタ
+  28               	.equ UBAUD1,    REGBASE+0x902     | UART1ボーコントロールレジスタ
+  29               	.equ URX1,      REGBASE+0x904     | UART1受信レジスタ
+  30               	.equ UTX1,      REGBASE+0x906     | UART1送信レジスタ
+  31               	***************
+  32               	** LED
+  33               	***************
+  34               	.equ LED7,      IOBASE+0x000002f  |ボード搭載のLED用レジスタ
+  35               	.equ LED6,      IOBASE+0x000002d  |使用法については付録A.4.3.1
+  36               	.equ LED5,      IOBASE+0x000002b
+  37               	.equ LED4,      IOBASE+0x0000029
+  38               	.equ LED3,      IOBASE+0x000003f
+  39               	.equ LED2,      IOBASE+0x000003d
+  40               	.equ LED1,      IOBASE+0x000003b
+  41               	.equ LED0,      IOBASE+0x0000039
+  42               	
+  43               	***************
+  44               	**システムコール番号
+  45               	***************
+  46               	.equ SYSCALL_NUM_GETSTRING,     1
+  47               	.equ SYSCALL_NUM_PUTSTRING,     2
+  48               	.equ SYSCALL_NUM_RESET_TIMER,   3
+  49               	.equ SYSCALL_NUM_SET_TIMER,     4...
+   2               	.global inbyte
+   3               	
+   4               	.text
+   5               	.even
+   6               	
+   7               	inbyte:
+   8 0000 48E7 70C0 		movem.l %a0-%a1/%d1-%d3, -(%SP)	/* STORE REGISTERS */
+68K GAS  inchrw.s 			page 2
+
+
+   9 0004 41F9 0000 		lea.l ibDATA, %a0				/* SET ADDRESS OF ibDATA TO a0 */
+   9      0000 
+  10               	inbyte_loop:
+  11               		/* GET THE ARGUMENT OF INBYTE */
+  12 000a 7218      		move.l	#24, %d1				/* CALCULATE OFFSET: 6 [Registers] * 4 [BYTES / Register] = 24 [Bytes] */
+  13 000c 224F      		move.l	%sp, %a1				/* Note (1/2): This argument is sign-extended to 4 bytes,  */
+  14 000e D3C1      		adda.l	%d1, %a1				/* Note (2/2): so, offset is not necessary compared to the inbyte: in theme 2 *
+  15               		
+  16               		/* SYSCALL: GETSTRING */
+  17 0010 7001      		move.l #SYSCALL_NUM_GETSTRING, %D0
+  18 0012 2211      		move.l (%a1), %d1         		| ch   = fd
+  19 0014 2408      		move.l %a0,   %d2         		| p    = #ibDATA
+  20 0016 7601      		move.l #1,    %d3          		| size = 1
+  21 0018 4E40      		trap #0
+  22               	
+  23               		/* FLAG CHECK */
+  24 001a 0C80 0000 		cmp.l #0, %d0					/* see if GETSTRING is successful */
+  24      0000 
+  25 0020 6700 FFE8 		beq inbyte_loop					/* if false, retry */
+  26               	
+  27               		/* SUCCESS */
+  28 0024 1010      		move.b (%a0), %d0				/* copy retuned data to d0 */
+  29 0026 13C0 00D0 		move.b %d0, LED7
+  29      002F 
+  30 002c 4CDF 030E 		movem.l (%SP)+, %a0-%a1/%d1-%d3	/* STORE REGISTERS */
+  31 0030 4E75      		rts
+  32               	        
+  33               	.section .bss
+  34               	.even
+  35               	
+  36               	.global DATA
+  37               	ibDATA:
+  38 0000 00        		.ds.b 1
+  39 0001 00        		.even
+68K GAS  inchrw.s 			page 3
+
+
+DEFINED SYMBOLS
+         equdefs.inc:7      *ABS*:0000000000fff000 REGBASE
+         equdefs.inc:8      *ABS*:0000000000d00000 IOBASE
+         equdefs.inc:12     *ABS*:0000000000fff300 IVR
+         equdefs.inc:13     *ABS*:0000000000fff304 IMR
+         equdefs.inc:14     *ABS*:0000000000fff30c ISR
+         equdefs.inc:15     *ABS*:0000000000fff310 IPR
+         equdefs.inc:19     *ABS*:0000000000fff600 TCTL1
+         equdefs.inc:20     *ABS*:0000000000fff602 TPRER1
+         equdefs.inc:21     *ABS*:0000000000fff604 TCMP1
+         equdefs.inc:22     *ABS*:0000000000fff608 TCN1
+         equdefs.inc:23     *ABS*:0000000000fff60a TSTAT1
+         equdefs.inc:27     *ABS*:0000000000fff900 USTCNT1
+         equdefs.inc:28     *ABS*:0000000000fff902 UBAUD1
+         equdefs.inc:29     *ABS*:0000000000fff904 URX1
+         equdefs.inc:30     *ABS*:0000000000fff906 UTX1
+         equdefs.inc:34     *ABS*:0000000000d0002f LED7
+         equdefs.inc:35     *ABS*:0000000000d0002d LED6
+         equdefs.inc:36     *ABS*:0000000000d0002b LED5
+         equdefs.inc:37     *ABS*:0000000000d00029 LED4
+         equdefs.inc:38     *ABS*:0000000000d0003f LED3
+         equdefs.inc:39     *ABS*:0000000000d0003d LED2
+         equdefs.inc:40     *ABS*:0000000000d0003b LED1
+         equdefs.inc:41     *ABS*:0000000000d00039 LED0
+         equdefs.inc:46     *ABS*:0000000000000001 SYSCALL_NUM_GETSTRING
+         equdefs.inc:47     *ABS*:0000000000000002 SYSCALL_NUM_PUTSTRING
+         equdefs.inc:48     *ABS*:0000000000000003 SYSCALL_NUM_RESET_TIMER
+         equdefs.inc:49     *ABS*:0000000000000004 SYSCALL_NUM_SET_TIMER
+            inchrw.s:7      .text:0000000000000000 inbyte
+            inchrw.s:37     .bss:0000000000000000 ibDATA
+            inchrw.s:10     .text:000000000000000a inbyte_loop
+
+UNDEFINED SYMBOLS
+DATA

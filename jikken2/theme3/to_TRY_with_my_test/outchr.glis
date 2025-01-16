@@ -1,0 +1,146 @@
+68K GAS  outchr.s 			page 1
+
+
+   1               	.include "equdefs.inc"
+   1               	***************************************************************
+   2               	**各種レジスタ定義
+   3               	***************************************************************
+   4               	***************
+   5               	**レジスタ群の先頭
+   6               	***************
+   7               	.equ REGBASE,   0xFFF000          | DMAPを使用．
+   8               	.equ IOBASE,    0x00d00000
+   9               	***************
+  10               	**割り込み関係のレジスタ
+  11               	***************
+  12               	.equ IVR,       REGBASE+0x300     |割り込みベクタレジスタ
+  13               	.equ IMR,       REGBASE+0x304     |割り込みマスクレジスタ
+  14               	.equ ISR,       REGBASE+0x30c     |割り込みステータスレジスタ
+  15               	.equ IPR,       REGBASE+0x310     |割り込みペンディングレジスタ
+  16               	***************
+  17               	**タイマ関係のレジスタ
+  18               	***************
+  19               	.equ TCTL1,     REGBASE+0x600     |タイマ１コントロールレジスタ
+  20               	.equ TPRER1,    REGBASE+0x602     |タイマ１プリスケーラレジスタ
+  21               	.equ TCMP1,     REGBASE+0x604     |タイマ１コンペアレジスタ
+  22               	.equ TCN1,      REGBASE+0x608     |タイマ１カウンタレジスタ
+  23               	.equ TSTAT1,    REGBASE+0x60a     |タイマ１ステータスレジスタ
+  24               	***************
+  25               	** UART1（送受信）関係のレジスタ
+  26               	***************
+  27               	.equ USTCNT1,   REGBASE+0x900     | UART1ステータス/コントロールレジスタ
+  28               	.equ UBAUD1,    REGBASE+0x902     | UART1ボーコントロールレジスタ
+  29               	.equ URX1,      REGBASE+0x904     | UART1受信レジスタ
+  30               	.equ UTX1,      REGBASE+0x906     | UART1送信レジスタ
+  31               	***************
+  32               	** LED
+  33               	***************
+  34               	.equ LED7,      IOBASE+0x000002f  |ボード搭載のLED用レジスタ
+  35               	.equ LED6,      IOBASE+0x000002d  |使用法については付録A.4.3.1
+  36               	.equ LED5,      IOBASE+0x000002b
+  37               	.equ LED4,      IOBASE+0x0000029
+  38               	.equ LED3,      IOBASE+0x000003f
+  39               	.equ LED2,      IOBASE+0x000003d
+  40               	.equ LED1,      IOBASE+0x000003b
+  41               	.equ LED0,      IOBASE+0x0000039
+  42               	
+  43               	***************
+  44               	**システムコール番号
+  45               	***************
+  46               	.equ SYSCALL_NUM_GETSTRING,     1
+  47               	.equ SYSCALL_NUM_PUTSTRING,     2
+  48               	.equ SYSCALL_NUM_RESET_TIMER,   3
+  49               	.equ SYSCALL_NUM_SET_TIMER,     4...
+   2               	.global outbyte
+   3               	
+   4               	.text
+   5               	.even
+   6               	
+   7               	outbyte:
+   8 0000 48E7 7040 		movem.l %d1-%d3/%a1, -(%SP)	/* STORE REGISTERS */
+68K GAS  outchr.s 			page 2
+
+
+   9               	outbyte_loop:
+  10               		/* OBTAIN ARGUMENTS TO DISPLAY */
+  11               		/* By the stack storing above, */
+  12               		/*     the values of 4 registers and PC re are stored */
+  13               		/*     which means that, the value of stack pointer is decreased */
+  14               		/* To execute GETSTRING, calculate the address where the actual data to display is stored */
+  15               	
+  16               		/* Add 3 bytes because the argument is stored begin sign-extended 4 bytes from 1 byte */
+  17               		/* 23 [bytes] = 5 [registers] * 4 [bytes/register] + 3 [byte] */
+  18               	
+  19 0004 224F      		movea.l	%sp,   %a1			/* copy head address of stack pointer */
+  20 0006 7417      		move.l	#23,   %d2			/* calculate the necessary address number to obtain the argument */
+  21 0008 D3C2      		adda.l	%d2,   %a1			/* by summing, go to the target to display */
+  22               	
+  23 000a 13D1 0000 		move.b	(%a1), obDATA		/* copy data to obDATA */
+  23      0000 
+  24 0010 13F9 0000 		move.b obDATA, LED6
+  24      0000 00D0 
+  24      002D 
+  25               	
+  26 001a 7401      		move.l  #1,    %d2			/* go to the address of the argument */
+  27 001c D3C2      		adda.l  %d2,   %a1			/* because the arg is 4 bytes long and stored just next to the obDATA */
+  28               	
+  29               		/* SYSCALL: PUTSTRING */
+  30 001e 7002      		move.l #SYSCALL_NUM_PUTSTRING, %D0
+  31 0020 2211      		move.l (%a1),  %D1         	| ch = fd
+  32 0022 243C 0000 		move.l #obDATA, %D2       	| p  = #obDATA
+  32      0000 
+  33 0028 7601      		move.l #1, %D3          	| size = 1
+  34 002a 4E40      		trap #0
+  35               	
+  36               		/* FLAG CHECK */
+  37 002c 0C80 0000 		cmp.l #0, %d0				/* see if PUTSTRING is successful */
+  37      0000 
+  38 0032 6700 FFD0 		beq outbyte_loop			/* if false, retry */
+  39               	
+  40               		/* SUCCESS */
+  41 0036 4CDF 020E 		movem.l (%SP)+, %d1-%d3/%a1 /* RESTORE REGISTERS */
+  42 003a 4E75      		rts
+  43               	        
+  44               	.section .bss
+  45               	.even
+  46               	
+  47               	.global obDATA
+  48               	obDATA:
+  49 0000 00        		.ds.b 1
+  50 0001 00        		.even
+68K GAS  outchr.s 			page 3
+
+
+DEFINED SYMBOLS
+         equdefs.inc:7      *ABS*:0000000000fff000 REGBASE
+         equdefs.inc:8      *ABS*:0000000000d00000 IOBASE
+         equdefs.inc:12     *ABS*:0000000000fff300 IVR
+         equdefs.inc:13     *ABS*:0000000000fff304 IMR
+         equdefs.inc:14     *ABS*:0000000000fff30c ISR
+         equdefs.inc:15     *ABS*:0000000000fff310 IPR
+         equdefs.inc:19     *ABS*:0000000000fff600 TCTL1
+         equdefs.inc:20     *ABS*:0000000000fff602 TPRER1
+         equdefs.inc:21     *ABS*:0000000000fff604 TCMP1
+         equdefs.inc:22     *ABS*:0000000000fff608 TCN1
+         equdefs.inc:23     *ABS*:0000000000fff60a TSTAT1
+         equdefs.inc:27     *ABS*:0000000000fff900 USTCNT1
+         equdefs.inc:28     *ABS*:0000000000fff902 UBAUD1
+         equdefs.inc:29     *ABS*:0000000000fff904 URX1
+         equdefs.inc:30     *ABS*:0000000000fff906 UTX1
+         equdefs.inc:34     *ABS*:0000000000d0002f LED7
+         equdefs.inc:35     *ABS*:0000000000d0002d LED6
+         equdefs.inc:36     *ABS*:0000000000d0002b LED5
+         equdefs.inc:37     *ABS*:0000000000d00029 LED4
+         equdefs.inc:38     *ABS*:0000000000d0003f LED3
+         equdefs.inc:39     *ABS*:0000000000d0003d LED2
+         equdefs.inc:40     *ABS*:0000000000d0003b LED1
+         equdefs.inc:41     *ABS*:0000000000d00039 LED0
+         equdefs.inc:46     *ABS*:0000000000000001 SYSCALL_NUM_GETSTRING
+         equdefs.inc:47     *ABS*:0000000000000002 SYSCALL_NUM_PUTSTRING
+         equdefs.inc:48     *ABS*:0000000000000003 SYSCALL_NUM_RESET_TIMER
+         equdefs.inc:49     *ABS*:0000000000000004 SYSCALL_NUM_SET_TIMER
+            outchr.s:7      .text:0000000000000000 outbyte
+            outchr.s:9      .text:0000000000000004 outbyte_loop
+            outchr.s:48     .bss:0000000000000000 obDATA
+
+NO UNDEFINED SYMBOLS
