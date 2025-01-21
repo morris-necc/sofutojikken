@@ -3,6 +3,7 @@
 #include "mtk_c.h"
 #include <stdbool.h>
 
+extern char inbyte(int);
 
 //For clearing the screen
 #define ESC "\x1b"
@@ -14,22 +15,18 @@
 #define SAVECURSORLOC ESC "7"
 #define RETCURSORLOC ESC "8"
 
-//FILE *com0in;
-//FILE *com0out;
-//FILE *com1in;
-//FILE *com1out;
-
 
 typedef struct{
 	char* mark;
 	bool is_turn;
-	FILE* input;
+	int port;
+	FILE *input;
 	FILE* output;
 }Player;
 
-//init players
-Player player_x={"X",false,NULL,NULL};
-Player player_O={"O",true,NULL,NULL};
+//init players: player "O" starts 
+Player player_x={"X",false,1,NULL,NULL};
+Player player_O={"O",true,0,NULL,NULL};
 
 void init_ports(){
 	int success=4;
@@ -59,7 +56,7 @@ char valid_cells[9] = {'0', '1', '2', '3', '4', '5', '6', '7', '8'};
 int valid_cells_length=9;
 
 //fct for tracking empty cells
-bool is_valid_cell(int cell) {
+bool is_valid_cell(char cell) {
     for (int i = 0; i < valid_cells_length; i++) {
         if (valid_cells[i] == cell) return true;
     }
@@ -74,7 +71,6 @@ void remove_cell(int cell) {
                 valid_cells[j] = valid_cells[j + 1];
             }
             valid_cells_length-=1;
-            
             break;
         }
     }
@@ -92,7 +88,7 @@ void display_board() {
 	else screen = player_O.output;
 	// disable cursor while drawing
 	fprintf(screen, "%s", CURSORINVISIBLE);
-	
+	fprintf(screen, "\033[%d;%dH", 24, 1);
     	for (int i = 0; i < 3; i++) {
         	for (int j = 0; j < 3; j++) {
             		fprintf(screen," %c ", board[i][j]); // Print the current cell value
@@ -103,14 +99,14 @@ void display_board() {
     }
     	fflush(screen);
 	// enable cursor
-	fprintf(screen, "\033[%d;%dH", 24, 1);
+	
 	fprintf(screen, "%s", CURSORVISIBLE);
 	
 	
     }
 
 void player_maru() {
-	char cell;
+	char cell = "-";
 	bool valid = false;
 	player_x.is_turn = false;
 	while (1)
@@ -121,8 +117,7 @@ void player_maru() {
 		while (!valid) {
 			// choose a cell
 			fprintf(player_O.output, "Player 'O', choose a cell (0-8): \n");
-			fscanf(player_O.input, "%c", &cell);
-
+			char cell = inbyte(player_O.port);
 			// Validate the chosen cell
 			if (is_valid_cell(cell)) {
 				valid = true;
@@ -132,25 +127,47 @@ void player_maru() {
 				fprintf(player_O.output, "Invalid cell. Try again.\n");
 			}
 		}
-		display_board(); // Show the updated board
-		V(0);
+		if(check_win(board,atoi(&cell),player_O.mark)) {
+            V(1);
+			P(0);
+		}
+		else
+		{
+			display_board(); // Show the updated board
+			V(0);
+		}
 	}
 }
+
+void win_lose_msg(){
+	P(1);
+	P(1);
+	if(player_O.is_turn){
+		while(1){
+			fprintf(player_O.output,"You win!!\n");
+            fprintf(player_x.output,"You lose...\n");
+		}}
+	else{
+		while(1){
+			fprintf(player_x.output, "You win!!\n");
+			fprintf(player_O.output, "You lose...\n");
+			}
+		}
+}
 void task_player_x() {
-		
-	int cell = -1;
+	char cell = "-";
 	bool valid = false;
 	player_x.is_turn = true;
 	
 	while(1){
-		fprintf(player_x.output,"Hello player x");
+		//fprintf(player_x.output,"Hello player x");
 		P(0);
 
 
 		while (!valid) {
 			// Prompt the player to choose a cell
 			fprintf(player_x.output, "Player 'X', choose a cell (0-8): ");
-			fscanf(player_x.input, "%d", &cell);
+			char cell = inbyte(player_x.port);
 
 			// Validate the chosen cell
 			if (is_valid_cell(cell)) {
@@ -161,25 +178,29 @@ void task_player_x() {
 				fprintf(player_x.output, "Invalid cell. Try again.\n");
 			}
 		}
+		if(check_win(board,atoi(&cell),player_x.mark)) {
+               
 		display_board(); // Show the updated board
-		V(0);
+		
 	}
+	V(0);
 }
-void hurry_msg() {
+}
+// void hurry_msg() {
  
-    if (player_x.is_turn) {
-        fprintf(player_x.output, "Hurry up! you are taking sooo long!!!\n");
-    } else {
-        fprintf(player_O.output, "Hurry up! you are taking sooo long!!!\n");
-    }
-	while (1) {
-		display_board();
-	}
+//     if (player_x.is_turn) {
+//         fprintf(player_x.output, "Hurry up! you are taking sooo long!!!\n");
+//     } else {
+//         fprintf(player_O.output, "Hurry up! you are taking sooo long!!!\n");
+//     }
+// 	while (1) {
+// 		display_board();
+// 	}
 }
 //draws the init Tic-Tac-Toe board for both players
 void init_board() {
     fprintf(player_x.output, "\nTic-Tac-Toe Board:\n");
-    fprintf(player_O.output, "\nTic-Tac-Toe Board:\n");
+    fprintf(player_O.output, "\nTic-Tac-Toe Board:\n You play First\n");
 
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
@@ -271,7 +292,7 @@ int main()
 	init_board();
 	set_task(player_maru);
 	set_task(task_player_x);
-    	//set_task(hurry_msg);
+    set_task(win_lose_msg());
 
     	begin_sch();
     	return 0;
