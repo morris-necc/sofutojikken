@@ -292,7 +292,7 @@
  215 00ec 4E40      		trap   #0
  216               	
  217 00ee 7004      		move.l #SYSCALL_NUM_SET_TIMER, %d0  | SYSCALL_NUM_SET_TIMER=4
- 218 00f0 323C 2710 		move.w #10000, %d1                  | たいたい1秒
+ 218 00f0 323C 01F4 		move.w #500, %d1                  | たいたい10秒
  219 00f4 243C 0000 		move.l #hard_clock, %d2
  219      0000 
  220 00fa 4E40      		trap #0

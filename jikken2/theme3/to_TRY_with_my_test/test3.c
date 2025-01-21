@@ -17,16 +17,16 @@ extern char inbyte(int);
 
 
 typedef struct{
-	char* mark;
-	bool is_turn;
+	char mark;
+	int is_turn;
 	int port;
 	FILE *input;
 	FILE* output;
 }Player;
 
 //init players: player "O" starts 
-Player player_x={"X",false,1,NULL,NULL};
-Player player_O={"O",true,0,NULL,NULL};
+Player player_x={'X',0,1,NULL,NULL};
+Player player_O={'O',1,0,NULL,NULL};
 
 void init_ports(){
 	int success=4;
@@ -83,30 +83,94 @@ void update_board(int cell, char mark) {
 }
 //displays the board after the change
 void display_board() {
-	FILE* screen;
-	if (player_x.is_turn) screen=player_x.output;
-	else screen = player_O.output;
 	// disable cursor while drawing
-	fprintf(screen, "%s", CURSORINVISIBLE);
-	fprintf(screen, "\033[%d;%dH", 24, 1);
+	//fprintf(screen, "%s", CURSORINVISIBLE);
+	//fprintf(screen, "\033[%d;%dH", 24, 1);
     	for (int i = 0; i < 3; i++) {
         	for (int j = 0; j < 3; j++) {
-            		fprintf(screen," %c ", board[i][j]); // Print the current cell value
-            		if (j < 2) fprintf(screen,"|");     // Print column separator
+            		fprintf(player_x.output," %c ", board[i][j]); // Print the current cell value
+            		fprintf(player_O.output," %c ", board[i][j]);
+            		if (j < 2) {
+            			fprintf(player_x.output,"|");     // Print column separator
+            			fprintf(player_O.output,"|"); 
+            			}
        			 }
-        		fprintf(screen,"\n");
-        	if (i < 2) fprintf(screen,"---+---+---\n"); // Print row separator
+        		fprintf(player_x.output,"\n");
+        		fprintf(player_O.output,"\n");
+        	if (i < 2) {
+        		fprintf(player_x.output,"---+---+---\n"); // Print row separator
+        		fprintf(player_O.output,"---+---+---\n");
     }
-    	fflush(screen);
+    	//fflush(player_x.output);
 	// enable cursor
 	
-	fprintf(screen, "%s", CURSORVISIBLE);
+	//fprintf(screen, "%s", CURSORVISIBLE);
 	
 	
     }
+ }
+    
+void binary_board(char mark){//changes the X/O to 0/1
+	for (int i = 0; i < 3;i++){
+		for (int j = 0; j < 3;j++){
+			if(board[i][j]==mark){//mark is either X or O ,depending on who's playing
+				b_board[i][j] = 1;
+			}
+			else b_board[i][j]=0;
+		}
+	}
+}
+
+
+//we check after changing the X/O to 1/0 depending on who's playing
+int check_win(int in,char mark){//in is the last input cell [0..8]
+	int row= in/3;
+	int col = in % 3;
+	int win = 1;//if equals 3 means win
+	binary_board(mark);
+	// this for loop can detect if there's a win vertically or horizontally
+	for (int i = 1; i < 3; i++)
+	{
+		if (col+i-1 < 2)
+		{
+			win = win+b_board[row][col + i];
+		}
+		if (col-i+1>0){
+			win = win+b_board[row][col - i];
+		}
+		if(row+i-1<2){
+			win = win+b_board[row+i][col];
+		}
+		if(row-i+1>0){
+			win = win+b_board[row-i][col];
+		}
+	}
+	if(win==3)
+		return 1;
+
+	if (in == 4)
+	{
+		int win1 = b_board[0][0] + b_board[1][1] + b_board[2][2];
+		int win2 = b_board[0][2] + b_board[1][1] + b_board[2][0];
+		if(win1==3||win2==3)
+			return 1;
+	} else if(in%4==0){
+		int win=b_board[0][0] + b_board[1][1] + b_board[2][2];
+		if (win==3)
+			return 1;
+	}else if(in%4==2){
+		int win=b_board[0][2] + b_board[1][1] + b_board[2][0];
+		if(win==3)
+			return 1;
+	}
+	else
+		return 0;
+	return 0;
+}
+
 
 void player_maru() {
-	char cell = "-";
+	char cell;
 	bool valid = false;
 	player_x.is_turn = false;
 	while (1)
@@ -121,20 +185,21 @@ void player_maru() {
 			// Validate the chosen cell
 			if (is_valid_cell(cell)) {
 				valid = true;
-				update_board(cell, 'O');  // Place 'O' on the board
+				update_board(cell-'0', player_O.mark);  // Place 'O' on the board
 				remove_cell(cell);       // Remove the cell from the available list
-			} else {
+			} else 
 				fprintf(player_O.output, "Invalid cell. Try again.\n");
-			}
 		}
-		if(check_win(board,atoi(&cell),player_O.mark)) {
-            V(1);
+		if(check_win(cell-'0',player_O.mark)==1) {
+            		V(1);
 			P(0);
 		}
 		else
 		{
 			display_board(); // Show the updated board
+			valid = false;
 			V(0);
+			
 		}
 	}
 }
@@ -143,47 +208,52 @@ void win_lose_msg(){
 	P(1);
 	P(1);
 	if(player_O.is_turn){
-		while(1){
-			fprintf(player_O.output,"You win!!\n");
-            fprintf(player_x.output,"You lose...\n");
-		}}
+		
+		fprintf(player_O.output,"You win!!\n");
+          	fprintf(player_x.output,"You lose...\n");
+          	while(1){
+		}
+		}
 	else{
-		while(1){
+		
 			fprintf(player_x.output, "You win!!\n");
 			fprintf(player_O.output, "You lose...\n");
-			}
+			while(1){}
 		}
 }
 void task_player_x() {
-	char cell = "-";
+	char cell ;
 	bool valid = false;
 	player_x.is_turn = true;
 	
 	while(1){
 		//fprintf(player_x.output,"Hello player x");
 		P(0);
-
-
 		while (!valid) {
 			// Prompt the player to choose a cell
-			fprintf(player_x.output, "Player 'X', choose a cell (0-8): ");
+			fprintf(player_x.output, "Player 'X', choose a cell (0-8): \n");
 			char cell = inbyte(player_x.port);
 
 			// Validate the chosen cell
 			if (is_valid_cell(cell)) {
 				valid = true;
-				update_board(cell, 'X');  // Place 'X' on the board
+				update_board(cell-'0', player_x.mark);  // Place 'X' on the board
 				remove_cell(cell);       // Remove the cell from the available list
 			} else {
 				fprintf(player_x.output, "Invalid cell. Try again.\n");
 			}
 		}
-		if(check_win(board,atoi(&cell),player_x.mark)) {
+		if(check_win(cell-'0',player_x.mark)==1) {
+            		V(1);
+			P(0);
+		}else
+		{
+			display_board(); // Show the updated board
+			valid = false;
+			V(0);
+			
+		}
                
-		display_board(); // Show the updated board
-		
-	}
-	V(0);
 }
 }
 // void hurry_msg() {
@@ -196,7 +266,7 @@ void task_player_x() {
 // 	while (1) {
 // 		display_board();
 // 	}
-}
+//}
 //draws the init Tic-Tac-Toe board for both players
 void init_board() {
     fprintf(player_x.output, "\nTic-Tac-Toe Board:\n");
@@ -227,60 +297,6 @@ void init_board() {
     fprintf(player_O.output, "\n");
 }
 
-void binary_board(char board[3][3],char mark){//changes the X/O to 0/1
-	for (int i = 0; i < 3;i++){
-		for (int j = 0; j < 3;j++){
-			if(board[i][j]==mark){//mark is either X or O ,depending on who's playing
-				b_board[i][j] = 1;
-			}
-		}
-	}
-}
-//we check after changing the X/O to 1/0 depending on who's playing
-int check_win(char board[3][3],int in,char mark){//in is the last input cell [0..8]
-	int row= in/3;
-	int col = in % 3;
-	int win = 1;//if equals 3 means win
-	binary_board(board, mark);
-	// this for loop can detect if there's a win vertically or horizontally
-	for (int i = 1; i < 3; i++)
-	{
-		if (col+i-1 < 2)
-		{
-			win = +b_board[row][col + i];
-		}
-		if (col-i+1>0){
-			win = +b_board[row][col - i];
-		}
-		if(row+i-1<2){
-			win = +b_board[row+i][col];
-		}
-		if(row-i+1>0){
-			win = +b_board[row-i][col];
-		}
-	}
-	if(win==3)
-		return 1;
-
-	if (in == 4)
-	{
-		int win1 = b_board[0][0] + b_board[1][1] + b_board[2][2];
-		int win2 = b_board[0][2] + b_board[1][1] + b_board[2][0];
-		if(win1==3||win2==3)
-			return 1;
-	} else if(in%4==0){
-		int win=b_board[0][0] + b_board[1][1] + b_board[2][2];
-		if (win==3)
-			return 1;
-	}else if(in%4==2){
-		int win=b_board[0][2] + b_board[1][1] + b_board[2][0];
-		if(win==3)
-			return 1;
-	}
-	else
-		return 0;
-	return 0;
-}
 
 
 int main()
@@ -292,7 +308,8 @@ int main()
 	init_board();
 	set_task(player_maru);
 	set_task(task_player_x);
-    set_task(win_lose_msg());
+    	set_task(win_lose_msg);
+    	
 
     	begin_sch();
     	return 0;

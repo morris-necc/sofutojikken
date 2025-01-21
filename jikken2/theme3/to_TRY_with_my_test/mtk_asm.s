@@ -215,7 +215,7 @@ init_timer:
 	trap   #0
 
 	move.l #SYSCALL_NUM_SET_TIMER, %d0  | SYSCALL_NUM_SET_TIMER=4
-	move.w #10000, %d1                  | たいたい1秒
+	move.w #500, %d1                  | たいたい10秒
 	move.l #hard_clock, %d2
 	trap #0
 
