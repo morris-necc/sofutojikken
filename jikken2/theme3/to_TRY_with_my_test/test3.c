@@ -147,7 +147,6 @@ int check_win(int in,char mark){//in is the last input cell [0..8]
 	}
 	if(win==3)
 		return 1;
-
 	if (in == 4)
 	{
 		int win1 = b_board[0][0] + b_board[1][1] + b_board[2][2];
@@ -165,7 +164,6 @@ int check_win(int in,char mark){//in is the last input cell [0..8]
 	}
 	else
 		return 0;
-	return 0;
 }
 
 
@@ -191,7 +189,7 @@ void player_maru() {
 				fprintf(player_O.output, "Invalid cell. Try again.\n");
 		}
 		if(check_win(cell-'0',player_O.mark)==1) {
-            		V(1);
+            V(1);
 			P(0);
 		}
 		else
@@ -199,7 +197,6 @@ void player_maru() {
 			display_board(); // Show the updated board
 			valid = false;
 			V(0);
-			
 		}
 	}
 }
@@ -243,6 +240,7 @@ void task_player_x() {
 				fprintf(player_x.output, "Invalid cell. Try again.\n");
 			}
 		}
+
 		if(check_win(cell-'0',player_x.mark)==1) {
             		V(1);
 			P(0);
