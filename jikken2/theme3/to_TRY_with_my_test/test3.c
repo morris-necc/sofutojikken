@@ -135,12 +135,16 @@ int check_win(int in,char mark){//in is the last input cell [0..8]
 		{
 			win = win+b_board[row][col + i];
 		}
-		if (col-i+1>0){
+		win = 1;
+		if (col - i + 1 > 0)
+		{
 			win = win+b_board[row][col - i];
 		}
+		win = 1;
 		if(row+i-1<2){
 			win = win+b_board[row+i][col];
 		}
+		win = 1;
 		if(row-i+1>0){
 			win = win+b_board[row-i][col];
 		}
