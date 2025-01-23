@@ -6,7 +6,7 @@
 void task1()
 {
 	P(0);
-	for(int i = 1; i <= 200; ++i){
+	for(int i = 1; i <= 2000; ++i){
 		printf("\ntask 1 %d", i);
 	}
 	V(0);
@@ -18,7 +18,7 @@ void task1()
 void task2()
 {	
 	P(0);
-	for(int i = 1; i <= 200; ++i){
+	for(int i = 1; i <= 2000; ++i){
 		printf("\ntask 2 %d", i);
 	}
 	V(0);
@@ -30,7 +30,7 @@ void task2()
 void task3()
 {
 	P(1);
-	for(int i = 1; i <= 200; ++i){
+	for(int i = 1; i <= 2000; ++i){
 		printf("\ntask 3 %d", i);
 	}
 	V(1);
