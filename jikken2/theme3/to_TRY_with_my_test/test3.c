@@ -29,6 +29,8 @@ typedef struct{
 Player player_x={'X',0,1,0,NULL,NULL};
 Player player_O={'O',1,0,0,NULL,NULL};
 
+int win_flg=0;
+
 void init_ports(){
 	int success=4;
 	while (success>0){
@@ -94,8 +96,8 @@ void display_board() {
 	fprintf(player_O.output, "%s", CURSORINVISIBLE);
 	fprintf(player_x.output, "\033[%d;%dH", 1, 1);
 	fprintf(player_O.output, "\033[%d;%dH", 1, 1);
-	 fprintf(player_O.output,"%d\n",valid_cells_length);
-          fprintf(player_x.output,"%d\n",valid_cells_length);
+	 //fprintf(player_O.output,"%d\n",valid_cells_length);
+         //fprintf(player_x.output,"%d\n",valid_cells_length);
     	for (int i = 0; i < 3; i++) {
         	for (int j = 0; j < 3; j++) {
             		fprintf(player_x.output," %c ", board[i][j]); // Print the current cell value
@@ -134,9 +136,6 @@ void binary_board(char mark){//changes the X/O to 0/1
 int check_win(FILE* screen,int in,char mark){//in is the last input cell [0..8]
 	int row= in/3;
 	int col = in % 3;
-//	fprintf(screen,"input: %d \n",in);
-//	fprintf(screen,"row: %d \n",row);
-//	fprintf(screen,"col: %d \n",col);
 	int win[4] = {1};//if equals 3 means win
 	binary_board(mark);
 	for (int i = 0; i < 3;i++){
@@ -154,6 +153,7 @@ int check_win(FILE* screen,int in,char mark){//in is the last input cell [0..8]
 		{
 			win[1] = win[1]+b_board[row][col - i];
 		}
+
 		if(row+i-1<2){
 			win[2] = win[2]+b_board[row+i][col];
 		}
@@ -162,10 +162,12 @@ int check_win(FILE* screen,int in,char mark){//in is the last input cell [0..8]
 		}
 	}
 	for (int i = 0; i < 4; i++){
-		if(win[i]==3){
-			fprintf(screen, "vert/horiz win\n");
-			return 1;
-			}
+	if(win[i]==3){
+		fprintf(screen, "vert/horiz win\n");
+		win_flg=1;
+		return 1;
+		}
+
 	}
 	if (in == 4)
 	{
@@ -173,17 +175,20 @@ int check_win(FILE* screen,int in,char mark){//in is the last input cell [0..8]
 		int win2 = b_board[0][2] + b_board[1][1] + b_board[2][0];
 		if(win1==3||win2==3){
 			fprintf(screen, "diag1wi\n");
+			win_flg=1;
 			return 1;}
 	} else if(in%4==0){
 		int win=b_board[0][0] + b_board[1][1] + b_board[2][2];
 		if (win==3){
 			fprintf(screen, "diag2win\n");
+			win_flg=1;
 			return 1;
 			}
 	}else if(in%4==2){
 		int win=b_board[0][2] + b_board[1][1] + b_board[2][0];
 		if(win==3){
-		fprintf(screen, "diag3win\n");
+			fprintf(screen, "diag3win\n");
+			win_flg=1;
 			return 1;
 	}}
 	else
@@ -215,7 +220,8 @@ void player_maru() {
 			} else 
 				fprintf(player_O.output, "Invalid cell. Try again.\n");
 		}
-		if(check_win(player_O.output,cell-'0',player_O.mark)) {
+
+		if (check_win(player_O.output,cell-'0',player_O.mark)||valid_cells_length==0) {
 			display_board();
 			V(1);
 			P(0);
@@ -223,7 +229,6 @@ void player_maru() {
 		}
 		else
 		{
-			
 			valid = false;
 			V(0);
 		}
@@ -234,7 +239,7 @@ void win_lose_msg(){
 	P(1);
 	P(1);
 	
-	if (valid_cells_length>0){
+	if (win_flg){
 	if(player_O.is_turn){
 		player_O.score = player_O.score + 1;
 		fprintf(player_O.output, "You win!!\n");
@@ -297,7 +302,7 @@ void task_player_x() {
 			}
 		}
 
-		if(check_win(player_x.output,cell-'0',player_x.mark)) {
+		if(check_win(player_x.output,cell-'0',player_x.mark)||valid_cells_length==0) {
 			display_board();//clears screen
             V(1);
 			P(0);

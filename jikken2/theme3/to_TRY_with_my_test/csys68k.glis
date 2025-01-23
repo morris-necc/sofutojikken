@@ -1,4 +1,4 @@
-68K GAS  /tmp/ccZ3ZRsh.s 			page 1
+68K GAS  /tmp/cccBaV7C.s 			page 1
 
 
    1               	#NO_APP
@@ -58,7 +58,7 @@
   16:csys68k.c     ****   else                    return EBADF;
   17:csys68k.c     ****   
   18:csys68k.c     **** 
-68K GAS  /tmp/ccZ3ZRsh.s 			page 2
+68K GAS  /tmp/cccBaV7C.s 			page 2
 
 
   19:csys68k.c     ****   for (i = 0; i < nbytes; i++) {
@@ -118,7 +118,7 @@
   59 0034 47F9 0000 		lea inbyte,%a3
   59      0000 
   60 003a 45F9 0000 		lea outbyte,%a2
-68K GAS  /tmp/ccZ3ZRsh.s 			page 3
+68K GAS  /tmp/cccBaV7C.s 			page 3
 
 
   60      0000 
@@ -178,7 +178,7 @@
  101 0068 5283      		addq.l #1,%d3
  102               	.LVL7:
   44:csys68k.c     ****     }
-68K GAS  /tmp/ccZ3ZRsh.s 			page 4
+68K GAS  /tmp/cccBaV7C.s 			page 4
 
 
  103               		.loc 1 44 17 view .LVU26
@@ -238,7 +238,7 @@
  145               		.loc 1 43 5 is_stmt 1 view .LVU37
   44:csys68k.c     ****     }
  146               		.loc 1 44 7 view .LVU38
-68K GAS  /tmp/ccZ3ZRsh.s 			page 5
+68K GAS  /tmp/cccBaV7C.s 			page 5
 
 
   44:csys68k.c     ****     }
@@ -298,7 +298,7 @@
   36:csys68k.c     **** 
  191               		.loc 1 36 7 view .LVU51
  192 00c0 4FEF 0018 		lea (24,%sp),%sp
-68K GAS  /tmp/ccZ3ZRsh.s 			page 6
+68K GAS  /tmp/cccBaV7C.s 			page 6
 
 
  193               		.cfi_def_cfa_offset 32
@@ -358,7 +358,7 @@
  236               		.loc 1 56 10 is_stmt 0 view .LVU63
  237 00e6 7004      		moveq #4,%d0
  238 00e8 B0AF 0018 		cmp.l 24(%sp),%d0
-68K GAS  /tmp/ccZ3ZRsh.s 			page 7
+68K GAS  /tmp/cccBaV7C.s 			page 7
 
 
  239 00ec 665C      		jne .L33
@@ -418,7 +418,7 @@
  280 011c 2004      		move.l %d4,%d0
   65:csys68k.c     ****   }
   66:csys68k.c     ****   return (nbytes);
-68K GAS  /tmp/ccZ3ZRsh.s 			page 8
+68K GAS  /tmp/cccBaV7C.s 			page 8
 
 
   67:csys68k.c     **** }
@@ -478,7 +478,7 @@
  324               		.loc 1 67 1 view .LVU87
  325 014c 4CDF 0C1C 		movem.l (%sp)+,#3100
  326 0150 4E75      		rts
-68K GAS  /tmp/ccZ3ZRsh.s 			page 9
+68K GAS  /tmp/cccBaV7C.s 			page 9
 
 
  327               		.cfi_endproc
@@ -538,7 +538,7 @@
  381 0061 0000 0000 		.long	.LASF8
  382 0065 01        		.uleb128 0x1
  383 0066 04        		.byte	0x4
-68K GAS  /tmp/ccZ3ZRsh.s 			page 10
+68K GAS  /tmp/cccBaV7C.s 			page 10
 
 
  384 0067 07        		.byte	0x7
@@ -598,7 +598,7 @@
  438 00d5 6275 6600 		.string	"buf"
  439 00d9 32        		.byte	0x32
  440 00da 1A        		.byte	0x1a
-68K GAS  /tmp/ccZ3ZRsh.s 			page 11
+68K GAS  /tmp/cccBaV7C.s 			page 11
 
 
  441 00db 0000 0073 		.long	0x73
@@ -658,7 +658,7 @@
  495 0153 08        		.byte	0x8
  496 0154 0E        		.byte	0xe
  497 0155 0000 006C 		.long	0x6c
-68K GAS  /tmp/ccZ3ZRsh.s 			page 12
+68K GAS  /tmp/cccBaV7C.s 			page 12
 
 
  498 0159 02        		.uleb128 0x2
@@ -718,7 +718,7 @@
  552 01d5 0000 0080 		.long	0x80
  553 01d9 02        		.uleb128 0x2
  554 01da 0000 0000 		.long	.LVL18
-68K GAS  /tmp/ccZ3ZRsh.s 			page 13
+68K GAS  /tmp/cccBaV7C.s 			page 13
 
 
  555 01de 0000 0080 		.long	0x80
@@ -778,7 +778,7 @@
  609 002c 03        		.uleb128 0x3
  610 002d 08        		.uleb128 0x8
  611 002e 3A        		.uleb128 0x3a
-68K GAS  /tmp/ccZ3ZRsh.s 			page 14
+68K GAS  /tmp/cccBaV7C.s 			page 14
 
 
  612 002f 21        		.uleb128 0x21
@@ -838,7 +838,7 @@
  666 0065 00        		.byte	0
  667 0066 00        		.byte	0
  668 0067 08        		.uleb128 0x8
-68K GAS  /tmp/ccZ3ZRsh.s 			page 15
+68K GAS  /tmp/cccBaV7C.s 			page 15
 
 
  669 0068 24        		.uleb128 0x24
@@ -898,7 +898,7 @@
  723 009e 19        		.uleb128 0x19
  724 009f 49        		.uleb128 0x49
  725 00a0 13        		.uleb128 0x13
-68K GAS  /tmp/ccZ3ZRsh.s 			page 16
+68K GAS  /tmp/cccBaV7C.s 			page 16
 
 
  726 00a1 3C        		.uleb128 0x3c
@@ -958,7 +958,7 @@
  780 00d7 19        		.uleb128 0x19
  781 00d8 03        		.uleb128 0x3
  782 00d9 0E        		.uleb128 0xe
-68K GAS  /tmp/ccZ3ZRsh.s 			page 17
+68K GAS  /tmp/cccBaV7C.s 			page 17
 
 
  783 00da 3A        		.uleb128 0x3a
@@ -1018,7 +1018,7 @@
  837 0027 00        		.sleb128 0
  838 0028 91        		.byte	0x91
  839 0029 74        		.sleb128 -12
-68K GAS  /tmp/ccZ3ZRsh.s 			page 18
+68K GAS  /tmp/cccBaV7C.s 			page 18
 
 
  840 002a 06        		.byte	0x6
@@ -1078,7 +1078,7 @@
  894 0067 00        		.uleb128 .LVU86
  895               	.LLST4:
  896 0068 04        		.byte	0x4
-68K GAS  /tmp/ccZ3ZRsh.s 			page 19
+68K GAS  /tmp/cccBaV7C.s 			page 19
 
 
  897 0069 F001      		.uleb128 .LVL24-.Ltext0
@@ -1138,7 +1138,7 @@
  951 00a8 00        		.byte	0
  952               	.LVUS1:
  953 00a9 01        		.uleb128 .LVU10
-68K GAS  /tmp/ccZ3ZRsh.s 			page 20
+68K GAS  /tmp/cccBaV7C.s 			page 20
 
 
  954 00aa 00        		.uleb128 .LVU13
@@ -1198,7 +1198,7 @@
  1008 00e4 70        		.byte	0x70
  1009 00e5 7F        		.sleb128 -1
  1010 00e6 9F        		.byte	0x9f
-68K GAS  /tmp/ccZ3ZRsh.s 			page 21
+68K GAS  /tmp/cccBaV7C.s 			page 21
 
 
  1011 00e7 04        		.byte	0x4
@@ -1258,7 +1258,7 @@
  1065 001c 0000 0000 		.long	0
  1066               		.section	.debug_line,"",@progbits
  1067               	.Ldebug_line0:
-68K GAS  /tmp/ccZ3ZRsh.s 			page 22
+68K GAS  /tmp/cccBaV7C.s 			page 22
 
 
  1068 0000 0000 015C 		.section	.debug_str,"MS",@progbits,1
@@ -1318,7 +1318,7 @@
  1089               	.LASF4:
  1090 0106 6C6F 6E67 		.string	"long int"
  1090      2069 6E74 
-68K GAS  /tmp/ccZ3ZRsh.s 			page 23
+68K GAS  /tmp/cccBaV7C.s 			page 23
 
 
  1090      00
@@ -1353,13 +1353,13 @@
  1106 0157 6F75 7462 		.string	"outbyte"
  1106      7974 6500 
  1107               		.ident	"GCC: (GNU) 11.4.0"
-68K GAS  /tmp/ccZ3ZRsh.s 			page 24
+68K GAS  /tmp/cccBaV7C.s 			page 24
 
 
 DEFINED SYMBOLS
                             *ABS*:0000000000000000 csys68k.c
-     /tmp/ccZ3ZRsh.s:9      .text:0000000000000000 read
-     /tmp/ccZ3ZRsh.s:211    .text:00000000000000d2 write
+     /tmp/cccBaV7C.s:9      .text:0000000000000000 read
+     /tmp/cccBaV7C.s:211    .text:00000000000000d2 write
 
 UNDEFINED SYMBOLS
 inbyte
