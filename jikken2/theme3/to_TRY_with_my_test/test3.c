@@ -20,13 +20,14 @@ typedef struct{
 	char mark;
 	int is_turn;
 	int port;
+	int score;
 	FILE *input;
 	FILE* output;
 }Player;
 
 //init players: player "O" starts 
-Player player_x={'X',0,1,NULL,NULL};
-Player player_O={'O',1,0,NULL,NULL};
+Player player_x={'X',0,1,0,NULL,NULL};
+Player player_O={'O',1,0,0,NULL,NULL};
 
 void init_ports(){
 	int success=4;
@@ -136,7 +137,7 @@ int check_win(FILE* screen,int in,char mark){//in is the last input cell [0..8]
 //	fprintf(screen,"input: %d \n",in);
 //	fprintf(screen,"row: %d \n",row);
 //	fprintf(screen,"col: %d \n",col);
-	int win = 1;//if equals 3 means win
+	int win[4] = {1};//if equals 3 means win
 	binary_board(mark);
 	for (int i = 0; i < 3;i++){
 		for (int j = 0; j < 3;j++){
@@ -147,26 +148,25 @@ int check_win(FILE* screen,int in,char mark){//in is the last input cell [0..8]
 	{
 		if (col+i-1 < 2)
 		{
-			win = win+b_board[row][col + i];
+			win[0] = win[0]+b_board[row][col + i];
 		}
-		win = 1;
 		if (col - i + 1 > 0)
 		{
-			win = win+b_board[row][col - i];
+			win[1] = win[1]+b_board[row][col - i];
 		}
-		win = 1;
 		if(row+i-1<2){
-			win = win+b_board[row+i][col];
+			win[2] = win[2]+b_board[row+i][col];
 		}
-		win = 1;
 		if(row-i+1>0){
-			win = win+b_board[row-i][col];
+			win[3] = win[3]+b_board[row-i][col];
 		}
 	}
-	if(win==3){
-		fprintf(screen, "vert/horiz win\n");
-		return 1;
-		}
+	for (int i = 0; i < 4; i++){
+		if(win[i]==3){
+			fprintf(screen, "vert/horiz win\n");
+			return 1;
+			}
+	}
 	if (in == 4)
 	{
 		int win1 = b_board[0][0] + b_board[1][1] + b_board[2][2];
@@ -205,7 +205,7 @@ void player_maru() {
 		while (!valid) {
 			// choose a cell
 			fprintf(player_O.output, "Player 'O', choose a cell (0-8): \n");
-			fprintf(player_O.output,"%s", CURSORVISIBLE);//enable cursor
+			fprintf(player_O.output,"%s", "[?25h");//enable cursor
 			cell = inbyte(player_O.port);
 			// Validate the chosen cell
 			if (is_valid_cell(cell)) {
@@ -216,9 +216,10 @@ void player_maru() {
 				fprintf(player_O.output, "Invalid cell. Try again.\n");
 		}
 		if(check_win(player_O.output,cell-'0',player_O.mark)) {
-			//display_board();
+			display_board();
 			V(1);
 			P(0);
+			break;
 		}
 		else
 		{
@@ -235,21 +236,38 @@ void win_lose_msg(){
 	
 	if (valid_cells_length>0){
 	if(player_O.is_turn){
-		
-		fprintf(player_O.output,"You win!!\n");
-          	fprintf(player_x.output,"You lose...\n");
-          	while(1){}
+		player_O.score = player_O.score + 1;
+		fprintf(player_O.output, "You win!!\n");
+		fprintf(player_x.output, "You lose...\n");
 		}
 	else{
-		
+			player_x.score = player_x.score + 1;
 			fprintf(player_x.output, "You win!!\n");
 			fprintf(player_O.output, "You lose...\n");
-			while(1){}
 		}
 	}else{
 		fprintf(player_O.output,"It's a draw!\n");
-          	fprintf(player_x.output,"It's a draw!\n");
-          	while(1){}
+        fprintf(player_x.output,"It's a draw!\n");
+	}
+	fprintf(player_O.output, "Do you want to play again? y/n \n");
+	fprintf(player_x.output, "Do you want to play again? y/n \n");
+	while (1)
+	{
+		char again_O = inbyte(player_O.port);
+		char again_x = inbyte(player_x.port);
+		if (again_O == 'y' && again_x == 'y')
+		{
+			v(0);
+			P(1);
+		}
+		else
+		{
+			fprintf(player_O.output, "Game is over \n");
+			fprintf(player_x.output, "Game is over \n");
+			fprintf(player_O.output, "Your score is %d", player_O.score);
+			fprintf(player_x.output, "Your score is %d", player_x.score);
+			while(1){}
+		}
 	}
 }
 void task_player_x() {
@@ -281,13 +299,13 @@ void task_player_x() {
 
 		if(check_win(player_x.output,cell-'0',player_x.mark)) {
 			display_board();//clears screen
-            		V(1);
+            V(1);
 			P(0);
+			break;
 		}else
 		{
 			valid = false;
 			V(0);
-			
 		}
                
 }
@@ -304,7 +322,7 @@ void task_player_x() {
 // 	}
 //}
 //draws the init Tic-Tac-Toe board for both players
-void init_board() {
+/*void init_board() {
 
 	fprintf(player_x.output,"\033[2J");
 	fprintf(player_x.output,"\033[2J");
@@ -334,7 +352,7 @@ void init_board() {
 
     fprintf(player_x.output, "\n");
     fprintf(player_O.output, "\n");
-}
+}*/
 
 
 
@@ -347,7 +365,7 @@ int main()
 	//init_board();
 	set_task(player_maru);
 	set_task(task_player_x);
-    	set_task(win_lose_msg);
+    set_task(win_lose_msg);
     	
 
     	begin_sch();
