@@ -1,415 +1,931 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 #include <stdbool.h>
 #include "mtk_c.h"
 
-extern char inbyte(int);
+extern char inbyte(int ch);
 
-// ========================================
-// GLOBAL VARIABLES
-// ========================================
-
-// structure
-typedef struct {
-    char a;
-    char b;
-    char c;
-    char d;
-} four_digit;
-
-typedef struct {
-    int X;
-    int Y;
-} two_digit;
-
-four_digit inputs[2];
-
-int phase = 0;			// shared resource 0
-bool setup_done[2];		// shared resource 1
-four_digit answers[2];		// shared resource 2
-four_digit guess;		// shared resource 3
-int win_flag = 0;		// shared resource 4
+// Bugs
+// Turn not ending
+// map updating after the cursor is moved onto its position
 
 
-// FILE descriptors for RS232C port
+// Global variabes
 FILE *com0in;
 FILE *com0out;
 FILE *com1in;
 FILE *com1out;
 
-// ========================================
-// USER-DEFINED FUNCTIONS
-// ========================================
+#define ROWS 10
+#define COLS 10
 
-void initPort() {
-	/*
-		Assign file descriptors for RS232C port.
-		args:
-			none
-		returns:
-			none
-	*/
-    com0in = fdopen(3, "r");
-    if(com0in == NULL) {
-        perror("com0in not open");
-        exit(1);
-    }
-    com0out = fdopen(3, "w");
-    if(com0out == NULL) {
-        perror("com0out not open");
-        exit(1);
-    }
-    com1in = fdopen(4, "r");
-    if(com1in == NULL) {
-        perror("com1in not open");
-        exit(1);
-    }
-    com1out = fdopen(4, "w");
-    if(com1out == NULL) {
-        perror("com1out not open");
-        exit(1);
-    }
+#define EMPTY 0
+#define SHIP 1
+#define HIT 2
+#define MISS 3
+#define MARKER 4
+
+//For clearing the screen
+#define ESC "\x1b"
+#define HOME ESC "[H"
+#define DELETESCREEN ESC "[2J"
+#define CURSORINVISIBLE ESC "[?25l"
+#define CURSORVISIBLE ESC "[?25h"
+
+#define SAVECURSORLOC ESC "7"
+#define RETCURSORLOC ESC "8"
+
+typedef struct {
+	int x;
+	int y;
+	int enterPressed;
+	int prevMarker[2]; //0 = map, 1 = opp_map
+	int hits;
+	
+	char map[ROWS][COLS];
+	char opp_map[ROWS][COLS]; //all empty in the beginning
+	char input;
+	
+	bool orientation; //true horizontal, false vertical
+	bool fired;
+} Player;
+
+typedef struct {
+	int screenX;
+	int screenY;
+} screenCoords;
+
+
+//shared?
+int stage = 0;
+int player1done = 0;
+int player2done = 0;
+Player players[2];
+int shipSizes[] = {5, 4, 3, 3, 2};
+
+screenCoords calcScreenCoords(int x, int y, int map) {
+	screenCoords calculated;
+	calculated.screenY = 3 + y * 2;
+	calculated.screenX = 3 + x * 4 + map * 61;
+	return calculated;
 }
 
-void drawWelcome() {
-    /*
-        Draw welcome message.
-        args:
-            none
-        returns:
-            none
-    */
-    fprintf(com0out, "Welcome to MASTERMIND GAME!\n");
-    fprintf(com1out, "Welcome to MASTERMIND GAME!\n");
-    fprintf(com0out, "Let's play! First is the initialization phase, please set a 4 digit (0-9) password!\n\n");
-    fprintf(com1out, "Let's play! First is the initialization phase, please set a 4 digit (0-9) password!\n\n");
-    
+
+char mapIcons(int key) {
+	char icons[5] = " SOXx"; //0: empty, 1: ship, 2: hit, 3: miss, 4: marker
+	return icons[key];
 }
 
-int isValidInput(char c) {
-	/*
-		Validate input. Check if each digit is between a and z
-		args:
-			c: input character
-		returns:
-			1 if valid, 0 otherwise
-	*/
-
-    if (c >= '0' && c <= '9') {
-        return 1; // Valid
-    }
-    return 0; // Invalid
+bool isValid(char c) {
+	if (stage == 0) {
+		return (c == 'r' || c == 'w' || c == 'a' || c == 's' || c == 'd' || c == 'f');
+	} else {
+		return (c == 'w' || c == 'a' || c == 's' || c == 'd' || c == 'f');
+	}
 }
 
-int inkey(int ch) {
-	/*
-		Judge if the specified key is pressed.
-		args:
-			ch: port number
-		returns:
-			1 if pressed, 0 otherwise
-	*/
-    char a = inbyte(ch);
-    if(isValidInput(a)) { // if valid
-        inputs[ch].a = a;
-    }
-    char b = inbyte(ch);
-    if(isValidInput(b)) { // if valid
-        inputs[ch].b = b;
-    }
-    char c = inbyte(ch);
-    if(isValidInput(c)) { // if valid
-        inputs[ch].c = c;
-    }
-    char d = inbyte(ch);
-    if(isValidInput(d)) { // if valid
-        inputs[ch].d = d;
-        return 1;
-    }
-    return 0;			 // otherwise
+bool getValidInput(int turn) {
+	char c = inbyte(turn);
+	if (isValid(c)) {
+		players[turn].input = c;
+		return true;
+	}
+	return false; //else
+	
 }
 
-two_digit judge(four_digit guess, four_digit answer) {
-    two_digit res = {0, 0};  // Initialize X and Y to 0
-
-    // Check for digits in the correct place (X)
-    if (guess.a == answer.a) res.X++;
-    else if (guess.a == answer.b || guess.a == answer.c || guess.a == answer.d) res.Y++;
-    if (guess.b == answer.b) res.X++;
-    else if (guess.b == answer.a || guess.b == answer.c || guess.b == answer.d) res.Y++;
-    if (guess.c == answer.c) res.X++;
-    else if (guess.c == answer.a || guess.c == answer.b || guess.c == answer.d) res.Y++;
-    if (guess.d == answer.d) res.X++;
-    else if (guess.d == answer.a || guess.d == answer.b || guess.d == answer.c) res.Y++;
-
-    return res;
-}
-
-int is_game_over(two_digit res) {
-	if (res.X == 4) return 1;
-	else return 0;
-}
-
-void player1() {
-//	P(5);
-	/*
-		Process task for player 1 ( = port 0).
-		args:
-			none
-		returns:
-			none
-	*/
+void printIntro() {
+	fprintf(com0out, "===========================================================\n");
+	fprintf(com0out, "              WELCOME TO BATTLESHIP, PLAYER 1              \n");
+	fprintf(com0out, "===========================================================\n");
+	
+	fprintf(com1out, "===========================================================\n");
+	fprintf(com1out, "              WELCOME TO BATTLESHIP, PLAYER 2              \n");
+	fprintf(com1out, "===========================================================\n");
+	
+	fprintf(com0out, "SET UP YOUR SHIPS!!! Press any key to continue... \n");
+	fprintf(com1out, "SET UP YOUR SHIPS!!! Press any key to continue... \n");
+	
+	char a, b;
+	
 	while(1) {
-		fprintf(com0out, "");
-		fflush(com0out);
-		int ch = 0;
-		if (phase == 0) {
-			if (setup_done[0] == false) {
-				fprintf(com0out, "Player 1 Initialization Phase!\n");
-				fflush(com0out);
-//				fprintf(com1out, "Please wait for player 1 to complete the initialization phase.\n");
-//				fflush(com1out);
-				if (inkey(ch)) {
-					
-					P(1);	// secure setup_done
-					P(2);	// secure answers
-					
-//					fprintf(com0out, "TASK 1 locked P(1), P(2)\n");
-//					fflush(com0out);
-					
-					four_digit input = inputs[ch];
-					answers[0] = input;
-					setup_done[0] = true;
-					fprintf(com0out, "P1 done setting up!\n Your password is %c %c %c %c\n", answers[0].a, answers[0].b, answers[0].c, answers[0].d);
-					fflush(com0out);
-					fprintf(com1out, "P1 done setting up!\n");
-					fflush(com1out);
-					
-					V(1);
-					V(2);
-//					fprintf(com0out, "TASK 1 unlocked P(1), P(2)\n");
-//					fflush(com0out);
+		a = fscanf(com0in, "%c", &a);
+		b = fscanf(com1in, "%c", &b);
+		
+		
+		fprintf(com0out, "Player 1: %c", a);
+		fprintf(com1out, "Player 2: %c", b);
+		
+		a = '1';
+		b = '2';
+		if (a && b) break;
+	}
+}
+
+bool checkMovable(int size, int turn, char in) {
+	// checks if ship is movable
+	// DONE
+	// check border (not efficient since we could've checked earlier, but who cares)
+	if (in == 'a' && players[turn].x - 1 < 0) return false;
+	if (in == 'w' && players[turn].y - 1 < 0) return false; 
+	if (in == 's' && players[turn].y + 1 >= ROWS) return false;
+	if (in == 'd' && players[turn].x + 1 >= COLS) return false;
+	
+	if (stage == 1) return true;
+	
+	// for cases where the end of the ship is touching the border
+	if (players[turn].orientation) {
+		// horizontal orientation, moving right
+		if (in == 'd' && players[turn].x > COLS - size - 1) return false;
+		if (in == 'a' && players[turn].map[players[turn].y][players[turn].x - 1] == SHIP) return false;
+		else{
+			// moving into another ship (going vertically)
+			for (int i = 0; i < size; i++) {
+				if (in == 'w') {
+					if (players[turn].map[players[turn].y - 1][players[turn].x + i] == SHIP) return false;
 				}
-//			V(7);
-//			P(5);
+				else if (in == 's') {
+					if (players[turn].map[players[turn].y + 1][players[turn].x + i] == SHIP) return false;
+				}
+			}
+			// moving into anoher ship (horizontally)
+			if (in == 'd' && players[turn].map[players[turn].y][players[turn].x + size] == SHIP) return false;
+		} 
+	} else {
+		// vertical orientation, moving down
+		if (in == 's' && players[turn].y > ROWS - size - 1) return false;
+		if (in == 'w' && players[turn].map[players[turn].y - 1][players[turn].x] == SHIP) return false;
+		else{
+			// moving into another ship (going horizontally)
+			for (int i = 0; i < size; i++) {
+				if (in == 'a') {
+					if (players[turn].map[players[turn].y + i][players[turn].x - 1] == SHIP) return false;
+				}
+				else if (in == 'd') {
+					if (players[turn].map[players[turn].y + i][players[turn].x + 1] == SHIP) return false;
+				}
+			}
+			if (in == 's' && players[turn].map[players[turn].y+ size][players[turn].x] == SHIP) return false;
+		}
+	}
+	return true;
+}
+
+bool checkRotatable(int size, int turn) {
+	// checks if ship is rotatable
+	// DONE
+	
+	if (players[turn].orientation) {
+		//horizontal orientation
+		if (players[turn].y > ROWS - size) return false; //rotation would exceed border
+		
+		//brute force check if another ship is in the way
+		for (int i = 1; i < size; i++){
+			if (players[turn].map[players[turn].y + i][players[turn].x] == SHIP) return false;
+		}
+		
+		
+	} else {
+		//vertical orientation
+		if (players[turn].x > COLS - size) return false; //rotation would exceed border
+		
+		//brute force check if another ship is in the way
+		for (int i = 1; i < size; i++){
+			if (players[turn].map[players[turn].y][players[turn].x + i] == SHIP) return false;
+		}
+	}
+	
+	return true; // else return true
+}
+
+void restorePrev(int turn) {
+	// restores prevMarker on previous position
+	// always a miss because we're changing the actual map to an x
+	
+	FILE* screen[2] = {com0out, com1out};
+	int opp = 1 - turn;
+	screenCoords coords;
+	
+	fprintf(screen[0], "%s", CURSORINVISIBLE);
+	fprintf(screen[1], "%s", CURSORINVISIBLE);
+	
+	// Print prevMarker on previous location
+	// Current player's opp_map
+	coords = calcScreenCoords(players[turn].x, players[turn].y, 1);
+	fprintf(screen[turn], "\033[%d;%dH", coords.screenY, coords.screenX);
+	fprintf(screen[turn], "%c", mapIcons(players[turn].prevMarker[1]));
+	
+	// Opp player's map
+	coords = calcScreenCoords(players[turn].x, players[turn].y, 0);
+	fprintf(screen[opp], "\033[%d;%dH", coords.screenY, coords.screenX);
+	fprintf(screen[opp], "%c", mapIcons(players[opp].prevMarker[0]));
+	
+	fprintf(screen[0], "\033[%d;%dH", 24, 1);
+	fprintf(screen[1], "\033[%d;%dH", 24, 1);
+	
+	fprintf(screen[0], "%s", CURSORVISIBLE);
+	fprintf(screen[1], "%s", CURSORVISIBLE);
+	
+	fflush(screen[0]);
+	fflush(screen[1]);
+	
+}
+
+
+void drawMarker(int turn) {
+	// draws new marker and set current as prev marker
+	// we want to draw on your opp_map and the opponent's map
+	// NOT DONE
+	
+	FILE* screen[2] = {com0out, com1out};
+	int opp = 1 - turn;
+	screenCoords coords;
+	
+	// Store prevMarker
+	players[turn].prevMarker[1] = players[turn].opp_map[players[turn].y][players[turn].x];
+	players[opp].prevMarker[0] = players[opp].map[players[turn].y][players[turn].x];
+	
+	// Print MARKER
+	fprintf(screen[0], "%s", CURSORINVISIBLE);
+	fprintf(screen[1], "%s", CURSORINVISIBLE);
+	
+	// Current player's opp_map
+	coords = calcScreenCoords(players[turn].x, players[turn].y, 1);
+	fprintf(screen[turn], "\033[%d;%dH", coords.screenY, coords.screenX);
+	fprintf(screen[turn], "x");
+	
+	// Opp player's map
+	coords = calcScreenCoords(players[turn].x, players[turn].y, 0);
+	fprintf(screen[opp], "\033[%d;%dH", coords.screenY, coords.screenX);
+	fprintf(screen[opp], "x");
+	
+	fprintf(screen[0], "\033[%d;%dH", 24, 1);
+	fprintf(screen[1], "\033[%d;%dH", 24, 1);
+	
+	fprintf(screen[0], "%s", CURSORVISIBLE);
+	fprintf(screen[1], "%s", CURSORVISIBLE);
+	
+	fflush(screen[0]);
+	fflush(screen[1]);
+	
+}
+
+
+void clearShip(int size, int turn) {
+	// clears the map of the current ship
+	// DONE
+	FILE* screen;
+	
+	if (turn == 0) screen = com0out; 
+	else screen = com1out; 
+	
+	// disable cursor while drawing
+	fprintf(com0out, "%s", CURSORINVISIBLE);
+	screenCoords coords;
+	
+	if (players[turn].orientation) {
+		// horizontal orientation
+		for (int i = 0; i < size; i++) {
+			//update player map
+			players[turn].map[players[turn].y][players[turn].x + i] = EMPTY;
+			
+			// move cursor to screencoords
+			coords = calcScreenCoords(players[turn].x + i, players[turn].y, 0);
+			fprintf(screen, "\033[%d;%dH", coords.screenY, coords.screenX);
+			fprintf(screen, " ");
+		}
+	} else {
+		// vertical orientation
+		for (int i = 0; i < size; i++) {
+			players[turn].map[players[turn].y + i][players[turn].x] = EMPTY;
+			
+			// move cursor to screencoords
+			coords = calcScreenCoords(players[turn].x, players[turn].y + i, 0);
+			fprintf(screen, "\033[%d;%dH", coords.screenY, coords.screenX);
+			fprintf(screen, " ");
+		}
+	}
+	
+	// enable cursor
+	fprintf(screen, "\033[%d;%dH", 24, 1);
+	fprintf(screen, "%s",CURSORVISIBLE);
+	
+	fflush(screen);
+}
+
+void moveShip(int size, int turn) {
+	// updates the player's map with new position of curren ship
+	// DONE
+	
+	FILE* screen;
+	
+	if (turn == 0) screen = com0out; 
+	else screen = com1out; 
+	
+	// disable cursor while drawing
+	fprintf(screen, "%s", CURSORINVISIBLE);
+	screenCoords coords;
+	
+	if (players[turn].orientation) {
+		// horizontal orientation
+		for (int i = 0; i < size; i++) {
+			//update player map
+			players[turn].map[players[turn].y][players[turn].x + i] = SHIP;
+			
+			// move cursor to screencoords
+			coords = calcScreenCoords(players[turn].x + i, players[turn].y, 0);
+			fprintf(screen, "\033[%d;%dH", coords.screenY, coords.screenX);
+			fprintf(screen, "S");
+		}
+	} else {
+		// vertical orientation
+		for (int i = 0; i < size; i++) {
+			//update player map
+			players[turn].map[players[turn].y + i][players[turn].x] = SHIP;
+			
+			// move cursor to screencoords
+			coords = calcScreenCoords(players[turn].x, players[turn].y + i, 0);
+			fprintf(screen, "\033[%d;%dH", coords.screenY, coords.screenX);
+			fprintf(screen, "S");
+		}
+	}
+	
+	// enable cursor
+	fprintf(screen, "\033[%d;%dH", 24, 1);
+	fprintf(screen, "%s", CURSORVISIBLE);
+	
+	fflush(screen);
+}
+
+void setupInputResponse(int turn, char in) {
+	//DONE
+	int size = shipSizes[players[turn].enterPressed];
+	switch(in){
+		case 'r':
+			if (checkRotatable(size, turn)) {
+				// clear previous space
+				clearShip(size, turn);
+				
+				players[turn].orientation = !players[turn].orientation;
+				
+				// put in new space
+				moveShip(size, turn);
+			}
+			break;
+		case 'w':
+			if (checkMovable(size, turn ,in)) {
+				// clear previous space
+				clearShip(size, turn);
+				
+				players[turn].y--;
+				
+				// put in new space
+				moveShip(size, turn);
+			}
+			break;
+		case 'a':
+			if (checkMovable(size, turn, in)) {
+				// clear previous space
+				clearShip(size, turn);
+				
+				players[turn].x--;
+				
+				// put in new space
+				moveShip(size, turn);
+			}
+			break;
+		case 's':
+			if (checkMovable(size, turn, in)) {
+				// clear previous space
+				clearShip(size, turn);
+				
+				players[turn].y++;
+				
+				// put in new space
+				moveShip(size, turn);
+			}
+			break;
+		case 'd':
+			if (checkMovable(size, turn, in)) {
+				// clear previous space
+				clearShip(size, turn);
+				
+				players[turn].x++;
+				
+				// put in new space
+				moveShip(size, turn);
+			}
+			break;
+		case 'f':
+			players[turn].enterPressed++;
+			players[turn].fired = true;
+			break;
+	}
+	players[turn].input = 0; //reset input?
+}
+
+void battleInputResponse(int turn, char in) {
+	//DONE?
+	switch(in){
+		case 'w':
+			if (checkMovable(1, turn ,in)) {
+				// need to update this
+				// restore previous space
+				restorePrev(turn);
+				
+				players[turn].y--;
+				
+				// put in new space
+				drawMarker(turn);
+			}
+			break;
+		case 'a':
+			if (checkMovable(1, turn, in)) {
+				// restore previous space
+				restorePrev(turn);
+				
+				players[turn].x--;
+				
+				// put in new space
+				drawMarker(turn);
+			}
+			break;
+		case 's':
+			if (checkMovable(1, turn, in)) {
+				// restore previous space
+				restorePrev(turn);
+				
+				players[turn].y++;
+				
+				// put in new space
+				drawMarker(turn);
+			}
+			break;
+		case 'd':
+			if (checkMovable(1, turn, in)) {
+				// restore previous space
+				restorePrev(turn);
+				
+				players[turn].x++;
+				
+				// put in new space
+				drawMarker(turn);
+			}
+			break;
+		case 'f':
+			// check player's opp_map with other player's map
+			int opposite_turn = 1 - turn;
+			FILE* screen[2] = {com0out, com1out};
+			 
+			screenCoords coords;
+			
+			if (players[opposite_turn].map[players[turn].y][players[turn].x] == SHIP) {
+				//hit! UPDATE MAP
+				players[turn].opp_map[players[turn].y][players[turn].x] = HIT;
+				players[opposite_turn].map[players[turn].y][players[turn].x] = HIT;
+				players[turn].hits++;
+				
+				// actually print that out on the map please
+				coords = calcScreenCoords(players[turn].x, players[turn].y, 1);
+				fprintf(screen[turn], "\033[%d;%dH", coords.screenY, coords.screenX);
+				fprintf(screen[turn], "O"); //your map
+				
+				coords = calcScreenCoords(players[turn].x, players[turn].y, 0);
+				fprintf(screen[opposite_turn], "\033[%d;%dH", coords.screenY, coords.screenX);
+				fprintf(screen[opposite_turn], "O"); //their map
+				
+				fprintf(screen[turn], "\033[%d;%dH", 24, 1);
+				fprintf(screen[turn], "Hit!!!!");
+				
+				fflush(com0out);
+				fflush(com1out);
+			} else if (players[opposite_turn].map[players[turn].y][players[turn].x] != MISS) {
+				//miss! UPDATE MAP
+				players[turn].opp_map[players[turn].y][players[turn].x] = MISS;
+				players[opposite_turn].map[players[turn].y][players[turn].x] = MISS;
+				
+				coords = calcScreenCoords(players[turn].x, players[turn].y, 1);
+				fprintf(screen[turn], "\033[%d;%dH", coords.screenY, coords.screenX);
+				fprintf(screen[turn], "X"); //your map
+				
+				coords = calcScreenCoords(players[turn].x, players[turn].y, 0);
+				fprintf(screen[opposite_turn], "\033[%d;%dH", coords.screenY, coords.screenX);
+				fprintf(screen[opposite_turn], "X"); //their map
+				
+				fprintf(screen[turn], "\033[%d;%dH", 24, 1);
+				fprintf(screen[turn], "Miss!!!!");
+				
+				fflush(com0out);
+				fflush(com1out);
+			} else {
+				fprintf(screen[turn], "\033[%d;%dH", 24, 1);
+				fprintf(screen[turn], "Miss!!!!");
+				
+				fflush(com0out);
+				fflush(com1out);
 			}
 			
-				
-//				P(0);	// secure phase
-//				if (setup_done[0] == true && setup_done[1] == true) {
-//					phase = 1;
-//					fprintf(com0out, "Setup phase over. NOW GUESS!\n");
-//					fflush(com0out);
-//					fprintf(com1out, "Setup phase over. NOW GUESS!\n");
-//					fflush(com1out);
-//				}
-//				V(0);
-				
-					
+			break;
+	}
+	players[turn].input = 0; //reset input?
+}
+
+void drawSetupScreen(int turn) {
+
+	// pick which screen to output to
+	if (turn == 0) {
+		// clear the screen
+		// fprintf(com0out, DELETESCREEN);
+	
+		// move cursor to (1, 1)
+		fprintf(com0out, "\033[1;1H");
+	
+		// disable cursor while drawing
+		fprintf(com0out, "%s", CURSORINVISIBLE);
+		
+		fprintf(com0out, "Player 1 Map\n");
+		
+		
+		fprintf(com0out, "-----------------------------------------\n");
+		for (int i = 0; i < COLS; i++) {
+			for (int j = 0; j < ROWS; j++) {
+				fprintf(com0out, "| %c ", mapIcons(players[turn].map[i][j]));
+			}
+			fprintf(com0out, "|\n-----------------------------------------\n");
 		}
-		else if (phase == 1 && win_flag != 1) {
-//			fprintf(com0out, "P1 Turn!\n");
-//			fflush(com0out);
-//			fprintf(com1out, "Wait for P1 Turn!\n");
-//			fflush(com1out);
-//			fprintf(com0out, "TASK 1 wait for INKEY\n");
-//			fflush(com0out);
-			if(inkey(ch)) {
-//				fprintf(com0out, "TASK 1 wait for INKEY success\n");
-//				fflush(com0out);
-				P(3);	// secure guess
-				P(4);	// secure win_flag
-				
-//				fprintf(com0out, "TASK 1 locked P(3), P(4)\n");
-//				fflush(com0out);
-				
-				four_digit input = inputs[ch];
-				guess = input;
-				
-				two_digit res = judge(guess, answers[1]);
-				fprintf(com0out, "You guessed: %c %c %c %c\n", guess.a, guess.b, guess.c, guess.d);
-				fflush(com0out);
-				if (is_game_over(res)) {
-					win_flag = 1;
-				}
-				else {
-					fprintf(com0out, "Correct: %d, Misplaced: %d \n\n", res.X, res.Y);
-					fflush(com0out);
-				}
-				V(3);
-				V(4);
+	
+		//print controls
+		fprintf(com0out, "R = Rotate, WASD = Up Left Down Right, F = Place Ship\n");
+		
+		// enable cursor
+		fprintf(com0out, "%s", CURSORVISIBLE);
+		
+		fflush(com0out);
+		
+	} else {
+		// clear the screen
+		// fprintf(com1out, DELETESCREEN);
+	
+		// move cursor to (1, 1)
+		fprintf(com1out, "\033[1;1H");
+	
+		// disable cursor while drawing
+		fprintf(com1out, "%s", CURSORINVISIBLE);
+		
+		fprintf(com1out, "Player 2 Map\n");
+		
+		fprintf(com1out, "-----------------------------------------\n");
+		for (int i = 0; i < COLS; i++) {
+			for (int j = 0; j < ROWS; j++) {
+				fprintf(com1out, "| %c ", mapIcons(players[turn].map[i][j]));
+			}
+			fprintf(com1out, "|\n-----------------------------------------\n");
+		}
+	
+		//print controls
+		fprintf(com1out, "R = Rotate, WASD = Up Left Down Right, F = Place Ship\n");
+		
+		fprintf(com1out, "%s", CURSORVISIBLE);
+		
+		fflush(com1out);
+	}	
+}
 
-//				fprintf(com0out, "TASK 1 unlocked P(3), P(4)\n");
-//				fflush(com0out);
+void drawBattleScreen(int turn) {
+	//Draws BOTH the maps
+	//NOT DONE
+	if (turn == 0) {
+		// clear screen 
+		fprintf(com0out, DELETESCREEN);
+		
+		fprintf(com0out, "\033[1;1H");
+		
+		fprintf(com0out, "Your map						     Opposing player's map \n");
+	
+		fprintf(com0out, "-----------------------------------------                    -----------------------------------------\n"); //20 spaces
+		for (int i = 0; i < COLS; i++) {
+			for (int j = 0; j < ROWS; j++) {
+				fprintf(com0out, "| %c ", mapIcons(players[turn].map[i][j]));
+			}
+			fprintf(com0out, "|                    ");
+			
+			for (int k = 0; k < ROWS; k++) {
+				fprintf(com0out, "| %c ", mapIcons(players[turn].opp_map[i][k]));
+			}
+			fprintf(com0out, "|\n-----------------------------------------                    -----------------------------------------\n");
+		}
+	
+		//print controls
+		fprintf(com0out, "WASD = Up Left Down Right, F = FIRE\n");
+		fflush(com0out);
+	
+	} else {
+		// clear screen 
+		fprintf(com1out, DELETESCREEN);
+		fprintf(com1out, HOME);
+		
+		fprintf(com1out, "Your map						     Opposing player's map \n");
+	
+		fprintf(com1out, "-----------------------------------------                    -----------------------------------------\n"); //20 spaces
+		for (int i = 0; i < COLS; i++) {
+			for (int j = 0; j < ROWS; j++) {
+				fprintf(com1out, "| %c ", mapIcons(players[turn].map[i][j]));
+			}
+			fprintf(com1out, "|                    ");
+			for (int k = 0; k < ROWS; k++) {
+				fprintf(com1out, "| %c ", mapIcons(players[turn].opp_map[i][k]));
+			}
+			fprintf(com1out, "|\n-----------------------------------------                    -----------------------------------------\n");
+		}
+	
+		//print controls
+		fprintf(com1out, "WASD = Up Left Down Right, F = FIRE\n");
+		fflush(com1out);
+	}
+	
+	
+}
 
-				if (win_flag) {
-					fprintf(com0out, "Congratulations! You win!\n");
-		    			fprintf(com1out, "You lost the game\n");
-		    			fflush(com0out);
-		    			fflush(com1out);
-		       		}
+
+void spawnShip(int turn) {
+	//find appropriate position for new ship, and puts ship there
+	//DONE
+	int curr_size = shipSizes[players[turn].enterPressed];
+	int count = 0;
+	
+	players[turn].orientation = true; //set orientation to horizontal
+	players[turn].fired = false;
+	
+	//brute for search left -> right
+	for (int empy = 0; empy < ROWS; empy++) {
+		for (int empx = 0; empx < COLS; empx++) {
+			if (players[turn].map[empy][empx] == EMPTY) count++;
+			else count = 0;
+			
+			if (count == curr_size) { 
+				players[turn].x = empx - curr_size + 1;
+				players[turn].y = empy;
+				
+				for(int i = 0; i < curr_size; i++) {
+					players[turn].map[empy][players[turn].x + i] = SHIP;
+				}
+				return;
 			}
 		}
-		else {
-//			fprintf(com0out, "UNMATCHED CONDITION.\n");
-//			fflush(com0out);
-//			P(5);
+		count = 0; //reset count on new line
+	}
+	
+	moveShip(curr_size, turn);
+	
+	
+}
+
+void battleSetup() {
+
+	P(3); //count = 0
+	P(3); //count = -1, sent to semaphore
+	
+	while (1) {
+		if (player1done == 1 && player2done == 1) {
+			fprintf(com0out, "Starting battle setup");
+			stage = 1; // set stage to battle stage
+			
+			//set both players' x & y
+			players[0].x = 0;
+			players[0].y = 0;
+			players[1].x = 0;
+			players[1].y = 0;
+			
+			//reset fired
+			players[0].fired = false;
+			players[1].fired = false;
+			
+			//draw both maps
+			drawBattleScreen(0);
+			drawBattleScreen(1);
+			
+			// retrieves other tasks from the shadow realm
+			V(0);
+			V(1);
+			
+			player1done = 0;
+			player2done = 0;
+			
+			// sends self to shadow realm
+			P(3);
+		} else {
+			P(3); //sent back to semaphore
 		}
+	}
+}
+
+
+void player1() {
+	P(0); //to setup sending self to the shadow realm
+	while(1) {
+		if (stage == 0 && player1done == 0) {
+			//setup stage, no turn
+			P(2);
+			drawSetupScreen(0);
+			V(2);
+			
+			while(players[0].enterPressed <= 4) {
+				//while not done setting up
+				P(2);				//prevents interrupt from other player
+				if (players[0].fired) spawnShip(0);			//spawn ship on empty space
+				V(2);
+				
+				if (getValidInput(0)){
+					P(2);			//prevents interrupt
+					setupInputResponse(0, players[0].input);	//input response
+					V(2);
+				}
+				
+			}
+			fprintf(com0out, "\033[%d;%dH", 24, 1);
+			fprintf(com0out, "Setup Done! Waiting for Player 2...........");
+			player1done = 1;
+			fprintf(com0out, "Flag set! player1done = %d", player1done);
+			fflush(com0out);
+		} else if (stage == 0 && player1done == 1) {
+			V(3);
+			P(0); //send self to the shadow realm
+		}
+		if (stage == 1){
+			//battle stage, turn based
+			P(2); //sends other to shadow realm if disturbed
+			
+			players[0].x = 0;
+			players[0].y = 0;
+			
+			while(!players[0].fired) { //while not fired
+				if (getValidInput(0)) {
+					battleInputResponse(0, players[0].input);
+					//when it's not your turn, you should be able to see their actions
+					if (players[0].input == 'f') break;
+				}
+			}
+			
+			//1 turn
+			players[0].fired = false; //reset fired condition
+			
+			//check win condition
+			if (players[0].hits >= 17) {
+				//player 1 wins!!
+				while (1) {
+					fprintf(com0out, "\033[%d;%dH", 24, 1);
+					fprintf(com0out, "\r------------------------------------------PLAYER 1 WINS!!!!------------------------------------------");
+					fprintf(com0out, "\r------------------------------------------PLAYER 1 WINS!!!!------------------------------------------");
+					
+					fprintf(com1out, "\033[%d;%dH", 24, 1);
+					fprintf(com1out, "\r------------------------------------------PLAYER 1 WINS!!!!------------------------------------------");
+					fprintf(com1out, "\r------------------------------------------PLAYER 1 WINS!!!!------------------------------------------");
+				}
+			}
+			
+			V(2);
+			 
+		}
+	
 	}
 }
 
 void player2() {
-	/*
-		Process task for player 2 ( = port 1).
-		args:
-			none
-		returns:
-			none
-	*/
-//	P(6);
+	P(1); //to setup sending self to the shadow realm
 	while(1) {
-		fprintf(com0out, "");
-		fflush(com0out);
-		int ch = 1;
-		if (phase == 0) {
-			if (setup_done[1] == false) {
-				fprintf(com1out, "Player 2 Initialization Phase!\n");
-				fflush(com1out);
-//				fprintf(com0out, "Please wait for player 2 to complete the initialization phase.\n");
-//				fflush(com0out);
-				if (inkey(ch)) {
-					P(1);	// secure setup_done
-					P(2);	// secure answers
-					
-//					fprintf(com0out, "TASK 2 locked P(1), P(2)\n");
-//					fflush(com0out);
-					
-					four_digit input = inputs[ch];
-					answers[1] = input;
-					setup_done[1] = true;
-					fprintf(com1out, "P2 done setting up!\n Your password is %c %c %c %c\n", answers[1].a, answers[1].b, answers[1].c, answers[1].d);
-					fflush(com1out);
-					fprintf(com0out, "P2 done setting up!\n");
-					fflush(com0out);
-					
-					
-					V(1);
+		if (stage == 0 && player2done == 0) {
+			//setup stage, no turn
+			P(2);
+			drawSetupScreen(1);
+			V(2);
+			
+			while(players[1].enterPressed <= 4) {
+				//while not done setting up
+				P(2);				//prevents interrupt from other player
+				if (players[1].fired) spawnShip(1);			//spawn ship on empty space
+				V(2);
+				
+				if (getValidInput(1)){
+					P(2);			//prevents interrupt
+					setupInputResponse(1, players[1].input);	//input response
 					V(2);
-					
-//					fprintf(com0out, "TASK 2 unlocked P(1), P(2)\n");
-//					fflush(com0out);
-						
-	//				P(0);	// secure phase
-	//				if (setup_done[0] == true && setup_done[1] == true) {
-	//					phase = 1;
-	//					fprintf(com0out, "Setup phase over. NOW GUESS!\n");
-	//					fflush(com0out);
-	//					fprintf(com1out, "Setup phase over. NOW GUESS!\n");
-	//					fflush(com1out);
-	//				}
-	//				V(0);
 				}
-//			V(7);
-//			P(6);
+				
 			}
+			fprintf(com1out, "\033[%d;%dH", 24, 1);
+			fprintf(com1out, "Setup Done! Waiting for Player 1...........");
+			player2done = 1;
+			fprintf(com1out, "Flag set! player2done = %d", player2done);
+			fflush(com1out);
+		} else if (stage == 0 && player2done == 1) {
+			V(3);
+			P(1); //send self to the shadow realm
 		}
 		
-		else if (phase == 1 && win_flag != 1) {
-//			fprintf(com0out, "Wait for P2 Turn!\n");
-//			fflush(com0out);
-//			fprintf(com1out, "P2 Turn!\n");
-//			fflush(com1out);
-//			fprintf(com0out, "TASK 2 wait for INKEY\n");
-//			fflush(com0out);
-			if(inkey(ch)) {
-//				fprintf(com0out, "TASK 2 wait for INKEY success\n");
-//				fflush(com0out);	
-				P(3);	// secure guess
-				P(4);	// secure win_flag
-				
-//				fprintf(com0out, "TASK 2 locked P(3), P(4)\n");
-//				fflush(com0out);
-				
-				four_digit input = inputs[ch];
-				guess = input;
-				
-				two_digit res = judge(guess, answers[0]);
-				
-				fprintf(com1out, "You guessed: %c %c %c %c\n", guess.a, guess.b, guess.c, guess.d);
-				fflush(com1out);
-				
-				if (is_game_over(res)) {
-					win_flag = 1;
+		if (stage == 1){
+			//battle stage, turn based
+			P(2); //sends other to shadow realm if disturbed
+			
+			players[1].x = 0;
+			players[1].y = 0;
+			
+			while(!players[1].fired) { //while not fired
+				if (getValidInput(1)) {
+					battleInputResponse(1, players[1].input);
 				}
-				else {
-					fprintf(com1out, "Correct: %d, Misplaced: %d \n\n", res.X, res.Y);
-					fflush(com1out);
-				}
-				V(3);
-				V(4);
-				
-//				fprintf(com0out, "TASK 2 unlocked P(3), P(4)\n");
-//				fflush(com0out);
-				
-				if (win_flag) {
-					fprintf(com1out, "Congratulations! You win!\n");
-		    			fprintf(com0out, "You lost the game\n");
-		    			fflush(com0out);
-		       			fflush(com1out);
-		       		}
+				if (players[1].input == 'f') break;
 			}
+			
+			//1 turn
+			players[1].fired = false; //reset fired condition
+			
+			//check win condition
+			if (players[1].hits >= 17) {
+				//player 2 wins!!
+				while (1) {
+					fprintf(com0out, "\033[%d;%dH", 24, 1);
+					fprintf(com0out, "\r------------------------------------------PLAYER 2 WINS!!!!------------------------------------------");
+					fprintf(com0out, "\r------------------------------------------PLAYER 2 WINS!!!!------------------------------------------");
+					
+					fprintf(com1out, "\033[%d;%dH", 24, 1);
+					fprintf(com1out, "\r------------------------------------------PLAYER 2 WINS!!!!------------------------------------------");
+					fprintf(com1out, "\r------------------------------------------PLAYER 2 WINS!!!!------------------------------------------");
+				}
+			}
+					
+			V(2);
+			 
 		}
-		else {
-//			fprintf(com1out, "UNMATCHED CONDITION.\n");
-//			fflush(com1out);
-//			P(6);
-		}
+	
 	}
 }
 
-void task3() {
-//	P(7);
-//	P(7);
-	while(1) {
-		fprintf(com0out, "");
-		fflush(com0out);
-//		fprintf(com1out, "TASK 3!\n");
-//		fflush(com1out);
-		if (setup_done[0] == true && setup_done[1] == true && phase != 1) {
-			P(0);
-			phase = 1;
-			fprintf(com0out, "Setup phase over. NOW GUESS!\n");
-			fflush(com0out);
-			fprintf(com1out, "Setup phase over. NOW GUESS!\n");
-			fflush(com1out);
-			V(0);
-//			P(7);
-		}
-		else {
-//			P(7);
-		}
-//		V(5);
-//		V(6);
-//		fprintf(com0out, "TASK 3 done\n");
-//		fflush(com0out);
+
+
+void init_ports() {
+	int success = 4;
+	while(success > 0){
+	
+		success = 4;
+	
+		com0in = fdopen(3, "r");
+		if (com0in != NULL) success--;
+	
+		com0out = fdopen(3, "w");
+		if (com0out != NULL) success--;
+	
+		com1in = fdopen(4, "r");
+		if (com1in != NULL) success--;
+	
+		com1out = fdopen(4, "w");
+		if (com1out != NULL) success--;
+		
 	}
+	
+	fprintf(com0out, "Ports Initialized! \n");
+	fprintf(com1out, "Ports Initialized! \n");
 }
-// ========================================
-// MAIN FUNCTIONS
-// ========================================
 
-int main() {
-    // inits
-    init_kernel();
-    initPort();
+void initPlayers() {
+	players[0].orientation = true; //true horizontal, false vertical
+	players[0].fired = false;
+	players[0].enterPressed = 0;
+	
+	players[1].orientation = true; //true horizontal, false vertical
+	players[1].fired = false;
+	players[1].enterPressed = 0;
+	
+	fprintf(com0out, "Player 1 Ready!");
+	fprintf(com1out, "Player 2 Ready!");
+	
+	
+}
 
-    drawWelcome();
+int main()
+{
+	// initialization
+	init_kernel();
+	init_ports();
+	
+	fprintf(com0out, DELETESCREEN);
+	fprintf(com1out, DELETESCREEN);
+	
+	printIntro();
+	initPlayers();
+	
+	fprintf(com0out, DELETESCREEN);
+	fprintf(com1out, DELETESCREEN);
+	
+	//setup stage, players traverse their own map
+    	set_task(player1);
+    	set_task(player2);
+	
+	//batte stage, player traverse their opponent's map
+    	set_task(battleSetup);
 
-// set tasks and start scheduling
-    set_task(player1);
-    set_task(player2);
-    set_task(task3);
-    
-    begin_sch();
-    return 0;
+    	begin_sch();
+    	
+    	return 0;
+	
 }
