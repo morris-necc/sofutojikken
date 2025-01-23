@@ -1,4 +1,4 @@
-68K GAS  /tmp/ccZSvXqd.s 			page 1
+68K GAS  /tmp/ccQCLt1S.s 			page 1
 
 
    1               	#NO_APP
@@ -58,7 +58,7 @@
   27               		.loc 1 27 3 is_stmt 1 discriminator 3 view .LVU8
   28               		.loc 1 27 24 is_stmt 0 discriminator 3 view .LVU9
   29 000c 42A8 0008 		clr.l 8(%a0)
-68K GAS  /tmp/ccZSvXqd.s 			page 2
+68K GAS  /tmp/ccQCLt1S.s 			page 2
 
 
   28:mtk_c.c       **** 		task_tab[i].status = UNDEFINED;
@@ -118,7 +118,7 @@
   64 0048 B1C0      		cmp.l %d0,%a0
   65 004a 66F2      		jne .L3
   39:mtk_c.c       ****     }
-68K GAS  /tmp/ccZSvXqd.s 			page 3
+68K GAS  /tmp/ccQCLt1S.s 			page 3
 
 
   40:mtk_c.c       **** }
@@ -178,7 +178,7 @@
   96               	.LVL6:
   60:mtk_c.c       ****         if((task_tab[i].status == UNDEFINED)||(task_tab[i].status == FINISHED)){
   97               		.loc 1 60 18 view .LVU37
-68K GAS  /tmp/ccZSvXqd.s 			page 4
+68K GAS  /tmp/ccQCLt1S.s 			page 4
 
 
   98               		.loc 1 61 9 view .LVU38
@@ -238,7 +238,7 @@
  131 008a 2042      		move.l %d2,%a0
  132 008c D1C2      		add.l %d2,%a0
  133 008e D1C8      		add.l %a0,%a0
-68K GAS  /tmp/ccZSvXqd.s 			page 5
+68K GAS  /tmp/ccQCLt1S.s 			page 5
 
 
  134 0090 D1C2      		add.l %d2,%a0
@@ -298,7 +298,7 @@
  162               		.loc 1 90 5 view .LVU61
  163               		.loc 1 90 20 is_stmt 0 view .LVU62
  164 00ba 426A FFFA 		clr.w -6(%a2)
-68K GAS  /tmp/ccZSvXqd.s 			page 6
+68K GAS  /tmp/ccQCLt1S.s 			page 6
 
 
   91:mtk_c.c       ****     int_ssp = (int*)short_ssp;
@@ -358,7 +358,7 @@
  188               		.loc 1 117 5 is_stmt 0 view .LVU73
  189 00d0 2239 0000 		move.l ready,%d1
  189      0000 
-68K GAS  /tmp/ccZSvXqd.s 			page 7
+68K GAS  /tmp/ccQCLt1S.s 			page 7
 
 
  190               		.loc 1 117 4 view .LVU74
@@ -418,7 +418,7 @@
  122:mtk_c.c       **** 			if((*task_ptr).next == NULLTASKID){		// その次のタスクが空だったら
  228               		.loc 1 122 3 view .LVU87
  123:mtk_c.c       **** 			if((*task_ptr).next == NULLTASKID){		// その次のタスクが空だったら
-68K GAS  /tmp/ccZSvXqd.s 			page 8
+68K GAS  /tmp/ccQCLt1S.s 			page 8
 
 
  229               		.loc 1 123 4 view .LVU88
@@ -478,7 +478,7 @@
  272 012c 6000 FF50 		jra .L9
  273               		.cfi_endproc
  274               	.LFE4:
-68K GAS  /tmp/ccZSvXqd.s 			page 9
+68K GAS  /tmp/ccQCLt1S.s 			page 9
 
 
  275               		.size	set_task, .-set_task
@@ -538,7 +538,7 @@
   92:mtk_c.c       ****     /*修正*/
  315               		.loc 1 92 5 view .LVU111
   94:mtk_c.c       **** 
-68K GAS  /tmp/ccZSvXqd.s 			page 10
+68K GAS  /tmp/ccQCLt1S.s 			page 10
 
 
  316               		.loc 1 94 5 view .LVU112
@@ -598,7 +598,7 @@
  137:mtk_c.c       **** 	if(r_id != NULLTASKID){							// キューの先頭が空でなければ
  352               		.loc 1 137 2 is_stmt 1 view .LVU122
  353               		.loc 1 137 4 is_stmt 0 view .LVU123
-68K GAS  /tmp/ccZSvXqd.s 			page 11
+68K GAS  /tmp/ccQCLt1S.s 			page 11
 
 
  354 0178 671A      		jeq .L23
@@ -658,7 +658,7 @@
  392               	.LVL37:
  113:mtk_c.c       **** 
  393               		.loc 1 113 1 is_stmt 0 view .LVU137
-68K GAS  /tmp/ccZSvXqd.s 			page 12
+68K GAS  /tmp/ccQCLt1S.s 			page 12
 
 
  394 01b2 588F      		addq.l #4,%sp
@@ -718,7 +718,7 @@
  435 01da 2028 0010 		move.l 16(%a0),%d0
  123:mtk_c.c       **** 				(*task_ptr).next = id;				// タスクを登録
  436               		.loc 1 123 6 view .LVU150
-68K GAS  /tmp/ccZSvXqd.s 			page 13
+68K GAS  /tmp/ccQCLt1S.s 			page 13
 
 
  437 01de 6726      		jeq .L33
@@ -778,7 +778,7 @@
  477               		.align	2
  478               		.globl	removeq
  479               		.type	removeq, @function
-68K GAS  /tmp/ccZSvXqd.s 			page 14
+68K GAS  /tmp/ccQCLt1S.s 			page 14
 
 
  480               	removeq:
@@ -838,7 +838,7 @@
  520               		.align	2
  521               		.globl	sched
  522               		.type	sched, @function
-68K GAS  /tmp/ccZSvXqd.s 			page 15
+68K GAS  /tmp/ccQCLt1S.s 			page 15
 
 
  523               	sched:
@@ -898,7 +898,7 @@
  558               		.loc 1 142 2 is_stmt 1 view .LVU190
  559               	.LVL50:
  142:mtk_c.c       **** }
-68K GAS  /tmp/ccZSvXqd.s 			page 16
+68K GAS  /tmp/ccQCLt1S.s 			page 16
 
 
  560               		.loc 1 142 2 is_stmt 0 view .LVU191
@@ -958,7 +958,7 @@
  162:mtk_c.c       **** 	if(semaphore[s_id].count < 0){
  163:mtk_c.c       **** 		sleep(s_id);
  164:mtk_c.c       **** 		}
-68K GAS  /tmp/ccZSvXqd.s 			page 17
+68K GAS  /tmp/ccQCLt1S.s 			page 17
 
 
  165:mtk_c.c       **** }
@@ -1018,7 +1018,7 @@
  147:mtk_c.c       **** 	if(next_task == NULLTASKID){
  629               		.loc 1 147 2 view .LVU215
  630               	.LBB56:
-68K GAS  /tmp/ccZSvXqd.s 			page 18
+68K GAS  /tmp/ccQCLt1S.s 			page 18
 
 
  631               	.LBI56:
@@ -1078,7 +1078,7 @@
  667               		.loc 1 148 2 is_stmt 1 view .LVU230
  668               	.LBE55:
  669               	.LBE54:
-68K GAS  /tmp/ccZSvXqd.s 			page 19
+68K GAS  /tmp/ccQCLt1S.s 			page 19
 
 
  170:mtk_c.c       **** 	swtch();						//タスクを切り替える
@@ -1138,7 +1138,7 @@
  707 02c8 D080      		add.l %d0,%d0
  708               	.LVL63:
  123:mtk_c.c       **** 				(*task_ptr).next = id;				// タスクを登録
-68K GAS  /tmp/ccZSvXqd.s 			page 20
+68K GAS  /tmp/ccQCLt1S.s 			page 20
 
 
  709               		.loc 1 123 18 view .LVU246
@@ -1198,7 +1198,7 @@
  137:mtk_c.c       **** 		TCB_TYPE* task_ptr = &task_tab[r_id]; 		// 先頭のタスクのポインタ設定
  749               		.loc 1 137 2 is_stmt 1 view .LVU259
  137:mtk_c.c       **** 		TCB_TYPE* task_ptr = &task_tab[r_id]; 		// 先頭のタスクのポインタ設定
-68K GAS  /tmp/ccZSvXqd.s 			page 21
+68K GAS  /tmp/ccQCLt1S.s 			page 21
 
 
  750               		.loc 1 137 4 is_stmt 0 view .LVU260
@@ -1258,7 +1258,7 @@
  791 0310 2180 1800 		move.l %d0,(%a0,%d1.l)
  162:mtk_c.c       **** 		sleep(s_id);
  792               		.loc 1 162 2 is_stmt 1 view .LVU273
-68K GAS  /tmp/ccZSvXqd.s 			page 22
+68K GAS  /tmp/ccQCLt1S.s 			page 22
 
 
  162:mtk_c.c       **** 		sleep(s_id);
@@ -1318,7 +1318,7 @@
  135:mtk_c.c       **** 	TASK_ID_TYPE r_id = *que_ptr; 					// 返り値(id)
  826               		.loc 1 135 14 view .LVU283
  827               	.LBB65:
-68K GAS  /tmp/ccZSvXqd.s 			page 23
+68K GAS  /tmp/ccQCLt1S.s 			page 23
 
 
  136:mtk_c.c       **** 	if(r_id != NULLTASKID){							// キューの先頭が空でなければ
@@ -1378,7 +1378,7 @@
  866               	.LBE64:
  188:mtk_c.c       **** 	addq(&ready,wakeup_id); //実行可能状態行列（ready）へつなぐ
  867               		.loc 1 188 2 is_stmt 1 view .LVU298
-68K GAS  /tmp/ccZSvXqd.s 			page 24
+68K GAS  /tmp/ccQCLt1S.s 			page 24
 
 
  868               	.LBB67:
@@ -1438,7 +1438,7 @@
  128:mtk_c.c       **** 			}
  907               		.loc 1 128 5 is_stmt 1 view .LVU311
  122:mtk_c.c       **** 			if((*task_ptr).next == NULLTASKID){		// その次のタスクが空だったら
-68K GAS  /tmp/ccZSvXqd.s 			page 25
+68K GAS  /tmp/ccQCLt1S.s 			page 25
 
 
  908               		.loc 1 122 8 view .LVU312
@@ -1498,7 +1498,7 @@
  952               	.LFB12:
  178:mtk_c.c       **** 	semaphore[s_id].count++; //セマフォの値を増やす
  953               		.loc 1 178 31 is_stmt 1 view -0
-68K GAS  /tmp/ccZSvXqd.s 			page 26
+68K GAS  /tmp/ccQCLt1S.s 			page 26
 
 
  954               		.cfi_startproc
@@ -1558,7 +1558,7 @@
  997               	next_task:
  998 0004 0000 0000 		.zero	4
  999               		.globl	new_task
-68K GAS  /tmp/ccZSvXqd.s 			page 27
+68K GAS  /tmp/ccQCLt1S.s 			page 27
 
 
  1000               		.align	2
@@ -1618,7 +1618,7 @@
  1042 0012 0000 0000 		.long	.LASF54
  1043 0016 0000 0000 		.long	.LASF55
  1044 001a 0000 0000 		.long	.Ltext0
-68K GAS  /tmp/ccZSvXqd.s 			page 28
+68K GAS  /tmp/ccQCLt1S.s 			page 28
 
 
  1045 001e 0000 03DA 		.long	.Letext0-.Ltext0
@@ -1678,7 +1678,7 @@
  1099 0081 14        		.byte	0x14
  1100 0082 0D        		.byte	0xd
  1101 0083 0000 006C 		.long	0x6c
-68K GAS  /tmp/ccZSvXqd.s 			page 29
+68K GAS  /tmp/ccQCLt1S.s 			page 29
 
 
  1102 0087 17        		.uleb128 0x17
@@ -1738,7 +1738,7 @@
  1156 00f0 0000 007C 		.long	0x7c
  1157 00f4 10        		.byte	0x10
  1158 00f5 00        		.byte	0
-68K GAS  /tmp/ccZSvXqd.s 			page 30
+68K GAS  /tmp/ccQCLt1S.s 			page 30
 
 
  1159 00f6 24        		.uleb128 0x24
@@ -1798,7 +1798,7 @@
  1213 0165 0000 014E 		.long	0x14e
  1214 0169 0E        		.uleb128 0xe
  1215 016a 0000 0102 		.long	0x102
-68K GAS  /tmp/ccZSvXqd.s 			page 31
+68K GAS  /tmp/ccQCLt1S.s 			page 31
 
 
  1216 016e 0000 0179 		.long	0x179
@@ -1858,7 +1858,7 @@
  1270 01e0 03        		.byte	0x3
  1271 01e1 0000 0000 		.long	task_tab
  1272 01e5 07        		.uleb128 0x7
-68K GAS  /tmp/ccZSvXqd.s 			page 32
+68K GAS  /tmp/ccQCLt1S.s 			page 32
 
 
  1273 01e6 0000 0194 		.long	0x194
@@ -1918,7 +1918,7 @@
  1327 0255 00        		.byte	0
  1328 0256 0F        		.uleb128 0xf
  1329 0257 0000 0000 		.long	.LASF34
-68K GAS  /tmp/ccZSvXqd.s 			page 33
+68K GAS  /tmp/ccQCLt1S.s 			page 33
 
 
  1330 025b 5B        		.byte	0x5b
@@ -1978,7 +1978,7 @@
  1384 02e7 00        		.byte	0
  1385 02e8 00        		.byte	0
  1386 02e9 10        		.uleb128 0x10
-68K GAS  /tmp/ccZSvXqd.s 			page 34
+68K GAS  /tmp/ccQCLt1S.s 			page 34
 
 
  1387 02ea 0000 04A1 		.long	0x4a1
@@ -2038,7 +2038,7 @@
  1441 036b 0000 042F 		.long	0x42f
  1442 036f 18        		.uleb128 0x18
  1443 0370 6368 00   		.string	"ch"
-68K GAS  /tmp/ccZSvXqd.s 			page 35
+68K GAS  /tmp/ccQCLt1S.s 			page 35
 
 
  1444 0373 A7        		.byte	0xa7
@@ -2098,7 +2098,7 @@
  1498 0403 0000 0000 		.long	.LVUS28
  1499 0407 04        		.uleb128 0x4
  1500 0408 0000 0489 		.long	0x489
-68K GAS  /tmp/ccZSvXqd.s 			page 36
+68K GAS  /tmp/ccQCLt1S.s 			page 36
 
 
  1501 040c 0000 0000 		.long	.LBB58
@@ -2158,7 +2158,7 @@
  1555 0484 0F        		.byte	0xf
  1556 0485 0000 007C 		.long	0x7c
  1557 0489 1D        		.uleb128 0x1d
-68K GAS  /tmp/ccZSvXqd.s 			page 37
+68K GAS  /tmp/ccQCLt1S.s 			page 37
 
 
  1558 048a 0C        		.uleb128 0xc
@@ -2218,7 +2218,7 @@
  1612 04fe 0000 0473 		.long	0x473
  1613 0502 0000 0000 		.long	.LLST11
  1614 0506 0000 0000 		.long	.LVUS11
-68K GAS  /tmp/ccZSvXqd.s 			page 38
+68K GAS  /tmp/ccQCLt1S.s 			page 38
 
 
  1615 050a 01        		.uleb128 0x1
@@ -2278,7 +2278,7 @@
  1669 0593 0000 00E2 		.long	.LFE4-.LFB4
  1670 0597 01        		.uleb128 0x1
  1671 0598 9C        		.byte	0x9c
-68K GAS  /tmp/ccZSvXqd.s 			page 39
+68K GAS  /tmp/ccQCLt1S.s 			page 39
 
 
  1672 0599 0000 0643 		.long	0x643
@@ -2338,7 +2338,7 @@
  1726 0627 0000 04C3 		.long	0x4c3
  1727 062b 0000 0000 		.long	.LBB26
  1728 062f 0000 0040 		.long	.LBE26-.LBB26
-68K GAS  /tmp/ccZSvXqd.s 			page 40
+68K GAS  /tmp/ccQCLt1S.s 			page 40
 
 
  1729 0633 01        		.uleb128 0x1
@@ -2398,7 +2398,7 @@
  1783 06b8 91        		.byte	0x91
  1784 06b9 00        		.sleb128 0
  1785 06ba 0B        		.uleb128 0xb
-68K GAS  /tmp/ccZSvXqd.s 			page 41
+68K GAS  /tmp/ccQCLt1S.s 			page 41
 
 
  1786 06bb 0000 04B9 		.long	0x4b9
@@ -2458,7 +2458,7 @@
  1840 0745 03        		.uleb128 0x3
  1841 0746 0000 0473 		.long	0x473
  1842 074a 0000 0000 		.long	.LLST18
-68K GAS  /tmp/ccZSvXqd.s 			page 42
+68K GAS  /tmp/ccQCLt1S.s 			page 42
 
 
  1843 074e 0000 0000 		.long	.LVUS18
@@ -2518,7 +2518,7 @@
  1897 001c 02        		.uleb128 0x2
  1898 001d 17        		.uleb128 0x17
  1899 001e B742      		.uleb128 0x2137
-68K GAS  /tmp/ccZSvXqd.s 			page 43
+68K GAS  /tmp/ccQCLt1S.s 			page 43
 
 
  1900 0020 17        		.uleb128 0x17
@@ -2578,7 +2578,7 @@
  1954 0056 00        		.byte	0
  1955 0057 47        		.uleb128 0x47
  1956 0058 13        		.uleb128 0x13
-68K GAS  /tmp/ccZSvXqd.s 			page 44
+68K GAS  /tmp/ccQCLt1S.s 			page 44
 
 
  1957 0059 3A        		.uleb128 0x3a
@@ -2638,7 +2638,7 @@
  2011 008f 00        		.byte	0
  2012 0090 0B        		.uleb128 0xb
  2013 0091 05        		.uleb128 0x5
-68K GAS  /tmp/ccZSvXqd.s 			page 45
+68K GAS  /tmp/ccQCLt1S.s 			page 45
 
 
  2014 0092 00        		.byte	0
@@ -2698,7 +2698,7 @@
  2068 00c8 0E        		.uleb128 0xe
  2069 00c9 3A        		.uleb128 0x3a
  2070 00ca 21        		.uleb128 0x21
-68K GAS  /tmp/ccZSvXqd.s 			page 46
+68K GAS  /tmp/ccQCLt1S.s 			page 46
 
 
  2071 00cb 02        		.sleb128 2
@@ -2758,7 +2758,7 @@
  2125 0102 49        		.uleb128 0x49
  2126 0103 13        		.uleb128 0x13
  2127 0104 2F        		.uleb128 0x2f
-68K GAS  /tmp/ccZSvXqd.s 			page 47
+68K GAS  /tmp/ccQCLt1S.s 			page 47
 
 
  2128 0105 0B        		.uleb128 0xb
@@ -2818,7 +2818,7 @@
  2182 013d 00        		.byte	0
  2183 013e 00        		.byte	0
  2184 013f 16        		.uleb128 0x16
-68K GAS  /tmp/ccZSvXqd.s 			page 48
+68K GAS  /tmp/ccQCLt1S.s 			page 48
 
 
  2185 0140 48        		.uleb128 0x48
@@ -2878,7 +2878,7 @@
  2239 0177 58        		.uleb128 0x58
  2240 0178 21        		.uleb128 0x21
  2241 0179 01        		.sleb128 1
-68K GAS  /tmp/ccZSvXqd.s 			page 49
+68K GAS  /tmp/ccQCLt1S.s 			page 49
 
 
  2242 017a 59        		.uleb128 0x59
@@ -2938,7 +2938,7 @@
  2296 01b0 13        		.uleb128 0x13
  2297 01b1 00        		.byte	0
  2298 01b2 00        		.byte	0
-68K GAS  /tmp/ccZSvXqd.s 			page 50
+68K GAS  /tmp/ccQCLt1S.s 			page 50
 
 
  2299 01b3 1D        		.uleb128 0x1d
@@ -2998,7 +2998,7 @@
  2353 01e9 21        		.uleb128 0x21
  2354 01ea 01        		.sleb128 1
  2355 01eb 3B        		.uleb128 0x3b
-68K GAS  /tmp/ccZSvXqd.s 			page 51
+68K GAS  /tmp/ccQCLt1S.s 			page 51
 
 
  2356 01ec 0B        		.uleb128 0xb
@@ -3058,7 +3058,7 @@
  2410 0223 00        		.byte	0
  2411 0224 25        		.uleb128 0x25
  2412 0225 13        		.uleb128 0x13
-68K GAS  /tmp/ccZSvXqd.s 			page 52
+68K GAS  /tmp/ccQCLt1S.s 			page 52
 
 
  2413 0226 01        		.byte	0x1
@@ -3118,7 +3118,7 @@
  2467 025c B742      		.uleb128 0x2137
  2468 025e 17        		.uleb128 0x17
  2469 025f 00        		.byte	0
-68K GAS  /tmp/ccZSvXqd.s 			page 53
+68K GAS  /tmp/ccQCLt1S.s 			page 53
 
 
  2470 0260 00        		.byte	0
@@ -3178,7 +3178,7 @@
  2524 0296 00        		.byte	0
  2525 0297 00        		.byte	0
  2526 0298 00        		.byte	0
-68K GAS  /tmp/ccZSvXqd.s 			page 54
+68K GAS  /tmp/ccQCLt1S.s 			page 54
 
 
  2527               		.section	.debug_loclists,"",@progbits
@@ -3238,7 +3238,7 @@
  2581 003e 01        		.uleb128 .LVU290
  2582 003f 00        		.uleb128 .LVU295
  2583               	.LLST33:
-68K GAS  /tmp/ccZSvXqd.s 			page 55
+68K GAS  /tmp/ccQCLt1S.s 			page 55
 
 
  2584 0040 04        		.byte	0x4
@@ -3298,7 +3298,7 @@
  2638 0083 03        		.byte	0x3
  2639 0084 0000 0000 		.long	task_tab
  2640 0088 22        		.byte	0x22
-68K GAS  /tmp/ccZSvXqd.s 			page 56
+68K GAS  /tmp/ccQCLt1S.s 			page 56
 
 
  2641 0089 9F        		.byte	0x9f
@@ -3358,7 +3358,7 @@
  2695               	.LLST23:
  2696 00ca 04        		.byte	0x4
  2697 00cb E204      		.uleb128 .LVL53-.Ltext0
-68K GAS  /tmp/ccZSvXqd.s 			page 57
+68K GAS  /tmp/ccQCLt1S.s 			page 57
 
 
  2698 00cd EE04      		.uleb128 .LVL54-.Ltext0
@@ -3418,7 +3418,7 @@
  2752 0112 71        		.byte	0x71
  2753 0113 00        		.sleb128 0
  2754 0114 44        		.byte	0x44
-68K GAS  /tmp/ccZSvXqd.s 			page 58
+68K GAS  /tmp/ccQCLt1S.s 			page 58
 
 
  2755 0115 1E        		.byte	0x1e
@@ -3478,7 +3478,7 @@
  2809               	.LLST27:
  2810 015f 04        		.byte	0x4
  2811 0160 FC04      		.uleb128 .LVL55-.Ltext0
-68K GAS  /tmp/ccZSvXqd.s 			page 59
+68K GAS  /tmp/ccQCLt1S.s 			page 59
 
 
  2812 0162 9C05      		.uleb128 .LVL58-.Ltext0
@@ -3538,7 +3538,7 @@
  2866 01a6 06        		.uleb128 0x6
  2867 01a7 03        		.byte	0x3
  2868 01a8 0000 0000 		.long	ready
-68K GAS  /tmp/ccZSvXqd.s 			page 60
+68K GAS  /tmp/ccQCLt1S.s 			page 60
 
 
  2869 01ac 9F        		.byte	0x9f
@@ -3598,7 +3598,7 @@
  2923 01e3 68        		.uleb128 .LVL7-.Ltext0
  2924 01e4 7C        		.uleb128 .LVL8-.Ltext0
  2925 01e5 02        		.uleb128 0x2
-68K GAS  /tmp/ccZSvXqd.s 			page 61
+68K GAS  /tmp/ccQCLt1S.s 			page 61
 
 
  2926 01e6 33        		.byte	0x33
@@ -3658,7 +3658,7 @@
  2980 0222 7A        		.sleb128 -6
  2981 0223 9F        		.byte	0x9f
  2982 0224 04        		.byte	0x4
-68K GAS  /tmp/ccZSvXqd.s 			page 62
+68K GAS  /tmp/ccQCLt1S.s 			page 62
 
 
  2983 0225 BE01      		.uleb128 .LVL13-.Ltext0
@@ -3718,7 +3718,7 @@
  3037 0268 04        		.sleb128 4
  3038 0269 06        		.byte	0x6
  3039 026a 23        		.byte	0x23
-68K GAS  /tmp/ccZSvXqd.s 			page 63
+68K GAS  /tmp/ccQCLt1S.s 			page 63
 
 
  3040 026b 40        		.uleb128 0x40
@@ -3778,7 +3778,7 @@
  3094 02ae 0000 0000 		.long	new_task
  3095 02b2 04        		.byte	0x4
  3096 02b3 E401      		.uleb128 .LVL19-.Ltext0
-68K GAS  /tmp/ccZSvXqd.s 			page 64
+68K GAS  /tmp/ccQCLt1S.s 			page 64
 
 
  3097 02b5 A602      		.uleb128 .LVL23-.Ltext0
@@ -3838,7 +3838,7 @@
  3151 02fc 0000 0000 		.long	task_tab
  3152 0300 22        		.byte	0x22
  3153 0301 9F        		.byte	0x9f
-68K GAS  /tmp/ccZSvXqd.s 			page 65
+68K GAS  /tmp/ccQCLt1S.s 			page 65
 
 
  3154 0302 04        		.byte	0x4
@@ -3898,7 +3898,7 @@
  3208 033f 00        		.uleb128 .LVU116
  3209 0340 00        		.uleb128 .LVU116
  3210 0341 00        		.uleb128 0
-68K GAS  /tmp/ccZSvXqd.s 			page 66
+68K GAS  /tmp/ccQCLt1S.s 			page 66
 
 
  3211               	.LLST9:
@@ -3958,7 +3958,7 @@
  3265 0385 DC02      		.uleb128 .LVL28-.Ltext0
  3266 0387 F202      		.uleb128 .LFE5-.Ltext0
  3267 0389 03        		.uleb128 0x3
-68K GAS  /tmp/ccZSvXqd.s 			page 67
+68K GAS  /tmp/ccQCLt1S.s 			page 67
 
 
  3268 038a 78        		.byte	0x78
@@ -4018,7 +4018,7 @@
  3322 03ce 8604      		.uleb128 .LVL42-.Ltext0
  3323 03d0 0B        		.uleb128 0xb
  3324 03d1 71        		.byte	0x71
-68K GAS  /tmp/ccZSvXqd.s 			page 68
+68K GAS  /tmp/ccQCLt1S.s 			page 68
 
 
  3325 03d2 00        		.sleb128 0
@@ -4078,7 +4078,7 @@
  3379 0416 9F        		.byte	0x9f
  3380 0417 00        		.byte	0
  3381               	.LVUS19:
-68K GAS  /tmp/ccZSvXqd.s 			page 69
+68K GAS  /tmp/ccQCLt1S.s 			page 69
 
 
  3382 0418 00        		.uleb128 .LVU182
@@ -4138,7 +4138,7 @@
  3436               	.LLRL5:
  3437 000c 04        		.byte	0x4
  3438 000d D001      		.uleb128 .LBB24-.Ltext0
-68K GAS  /tmp/ccZSvXqd.s 			page 70
+68K GAS  /tmp/ccQCLt1S.s 			page 70
 
 
  3439 000f DE01      		.uleb128 .LBE24-.Ltext0
@@ -4198,7 +4198,7 @@
  3489 0000 7374 6163 		.string	"stacks"
  3489      6B73 00
  3490               	.LASF19:
-68K GAS  /tmp/ccZSvXqd.s 			page 71
+68K GAS  /tmp/ccQCLt1S.s 			page 71
 
 
  3491 0007 6E65 7874 		.string	"next"
@@ -4258,7 +4258,7 @@
  3519      696C 7469 
  3519      6E5F 7075 
  3519      7473 00
-68K GAS  /tmp/ccZSvXqd.s 			page 72
+68K GAS  /tmp/ccQCLt1S.s 			page 72
 
 
  3520               	.LASF49:
@@ -4318,7 +4318,7 @@
  3545      7400 
  3546               	.LASF31:
  3547 0174 7377 7463 		.string	"swtch"
-68K GAS  /tmp/ccZSvXqd.s 			page 73
+68K GAS  /tmp/ccQCLt1S.s 			page 73
 
 
  3547      6800 
@@ -4378,7 +4378,7 @@
  3573      00
  3574               	.LASF42:
  3575 023d 7461 736B 		.string	"task_ptr"
-68K GAS  /tmp/ccZSvXqd.s 			page 74
+68K GAS  /tmp/ccQCLt1S.s 			page 74
 
 
  3575      5F70 7472 
@@ -4438,32 +4438,32 @@
  3605      5F74 6162 
  3605      00
  3606               		.ident	"GCC: (GNU) 11.4.0"
-68K GAS  /tmp/ccZSvXqd.s 			page 75
+68K GAS  /tmp/ccQCLt1S.s 			page 75
 
 
-68K GAS  /tmp/ccZSvXqd.s 			page 76
+68K GAS  /tmp/ccQCLt1S.s 			page 76
 
 
 DEFINED SYMBOLS
                             *ABS*:0000000000000000 mtk_c.c
-     /tmp/ccZSvXqd.s:9      .text:0000000000000000 init_kernel
-     /tmp/ccZSvXqd.s:1020   .bss:0000000000001810 task_tab
-     /tmp/ccZSvXqd.s:991    .bss:0000000000000000 ready
-     /tmp/ccZSvXqd.s:1026   .bss:0000000000001860 semaphore
-     /tmp/ccZSvXqd.s:74     .text:000000000000004e set_task
-     /tmp/ccZSvXqd.s:1003   .bss:0000000000000008 new_task
-     /tmp/ccZSvXqd.s:1014   .bss:0000000000000010 stacks
-     /tmp/ccZSvXqd.s:279    .text:0000000000000130 init_stack
-     /tmp/ccZSvXqd.s:338    .text:0000000000000172 begin_sch
-     /tmp/ccZSvXqd.s:1009   .bss:000000000000000c curr_task
-     /tmp/ccZSvXqd.s:403    .text:00000000000001b6 addq
-     /tmp/ccZSvXqd.s:480    .text:000000000000020e removeq
-     /tmp/ccZSvXqd.s:523    .text:000000000000022e sched
-     /tmp/ccZSvXqd.s:997    .bss:0000000000000004 next_task
-     /tmp/ccZSvXqd.s:589    .text:000000000000025a sleep
-     /tmp/ccZSvXqd.s:773    .text:00000000000002fa p_body
-     /tmp/ccZSvXqd.s:812    .text:0000000000000324 wakeup
-     /tmp/ccZSvXqd.s:950    .text:00000000000003b0 v_body
+     /tmp/ccQCLt1S.s:9      .text:0000000000000000 init_kernel
+     /tmp/ccQCLt1S.s:1020   .bss:0000000000001810 task_tab
+     /tmp/ccQCLt1S.s:991    .bss:0000000000000000 ready
+     /tmp/ccQCLt1S.s:1026   .bss:0000000000001860 semaphore
+     /tmp/ccQCLt1S.s:74     .text:000000000000004e set_task
+     /tmp/ccQCLt1S.s:1003   .bss:0000000000000008 new_task
+     /tmp/ccQCLt1S.s:1014   .bss:0000000000000010 stacks
+     /tmp/ccQCLt1S.s:279    .text:0000000000000130 init_stack
+     /tmp/ccQCLt1S.s:338    .text:0000000000000172 begin_sch
+     /tmp/ccQCLt1S.s:1009   .bss:000000000000000c curr_task
+     /tmp/ccQCLt1S.s:403    .text:00000000000001b6 addq
+     /tmp/ccQCLt1S.s:480    .text:000000000000020e removeq
+     /tmp/ccQCLt1S.s:523    .text:000000000000022e sched
+     /tmp/ccQCLt1S.s:997    .bss:0000000000000004 next_task
+     /tmp/ccQCLt1S.s:589    .text:000000000000025a sleep
+     /tmp/ccQCLt1S.s:773    .text:00000000000002fa p_body
+     /tmp/ccQCLt1S.s:812    .text:0000000000000324 wakeup
+     /tmp/ccQCLt1S.s:950    .text:00000000000003b0 v_body
 
 UNDEFINED SYMBOLS
 pv_handler
